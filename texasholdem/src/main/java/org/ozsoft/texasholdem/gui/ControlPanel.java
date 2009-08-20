@@ -1,46 +1,51 @@
 package org.ozsoft.texasholdem.gui;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+
+import org.ozsoft.texasholdem.Action;
+import org.ozsoft.texasholdem.Card;
+import org.ozsoft.texasholdem.PlayerClient;
 
 /**
  * Panel with buttons to let a human player select a poker action.
  * 
  * @author Oscar Stigter
  */
-public class ControlPanel extends JPanel implements ActionListener {
+public class ControlPanel extends JPanel implements PlayerClient, ActionListener {
     
+	/** Serial version UID. */
 	private static final long serialVersionUID = 1L;
 	
-	// The actions.
-	public static final int NONE             = 0;
-	public static final int CONTINUE         = 1;
-	public static final int CHECK            = 2;
-	public static final int CALL             = 3;
-	public static final int BET              = 4;
-	public static final int RAISE            = 5;
-	public static final int FOLD             = 6;
-	public static final int CHECK_BET_FOLD   = 7;
-	public static final int CALL_RAISE_FOLD  = 8;
-	public static final int CALL_FOLD        = 9;
-	public static final int CHECK_RAISE_FOLD = 10;
-    
-    private final Main main;
-    
-    private final JButton continueButton;
+	/** Polling interval while waiting for input. */
+	private static final long POLLING_INTERVAL = 100L;
+	
+	/** The Check button. */
     private final JButton checkButton;
+    
+	/** The Call button. */
     private final JButton callButton;
+    
+	/** The Bet button. */
     private final JButton betButton;
+    
+	/** The Raise button. */
     private final JButton raiseButton;
+    
+	/** The Fold button. */
     private final JButton foldButton;
     
+	/** The Continue button. */
+	private final JButton continueButton;
+
     /** The selected action. */
-    private int action;
+    private Action action;
     
 	/**
 	 * Constructor.
@@ -48,72 +53,65 @@ public class ControlPanel extends JPanel implements ActionListener {
 	 * @param main
 	 *            The main frame.
 	 */
-    public ControlPanel(Main main) {
-    	super();
-        this.main = main;
-        setBackground(new Color(0, 128, 0));
+    public ControlPanel() {
+        setBackground(UIConstants.TABLE_COLOR);
         setLayout(new FlowLayout());
-        continueButton = createButton("Continue", 'c');
-        checkButton = createButton("Check", 'c');
-        callButton = createButton("Call", 'c');
-        betButton = createButton("Bet", 'b');
-        raiseButton = createButton("Raise", 'r');
-        foldButton = createButton("Fold", 'f');
+        continueButton = createActionButton(Action.CONTINUE);
+        checkButton = createActionButton(Action.CHECK);
+        callButton = createActionButton(Action.CALL);
+        betButton = createActionButton(Action.BET);
+        raiseButton = createActionButton(Action.RAISE);
+        foldButton = createActionButton(Action.FOLD);
     }
     
-	/**
-	 * Sets the allowed actions.
-	 * 
-	 * @param actions
-	 *            The allowed actions.
-	 */
-    public void setActions(final int actions) {
-        removeAll();
-        switch (actions) {
-        	case NONE:
-        		// Hide all buttons.
-        		break;
-            case CONTINUE:
-            	// Continue button only.
-                add(continueButton);
-                break;
-            case CHECK_BET_FOLD:
-            	// Check, Bet or Fold.
-                add(checkButton);
-                add(betButton);
-                add(foldButton);
-                break;
-            case CALL_RAISE_FOLD:
-            	// Call, Raise or Fold.
-                add(callButton);
-                add(raiseButton);
-                add(foldButton);
-                break;
-            case CALL_FOLD:
-            	// Call or Fold.
-                add(callButton);
-                add(foldButton);
-                break;
-            case CHECK_RAISE_FOLD:
-            	// Check, Raise or Fold.
-                add(checkButton);
-                add(raiseButton);
-                add(foldButton);
-                break;
-            default:
-            	// Should never happen.
-                System.err.println("ERROR: Invalid selected action: " + actions);
+    /**
+     * Waits for the user to continue.
+     */
+    public void waitForUserInput() {
+    	add(continueButton);
+    	repaint();
+    	getUserInput();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.PlayerClient#act(java.util.Set, org.ozsoft.texasholdem.Card[], java.util.List, int, int)
+     */
+    @Override
+	public Action act(Set<Action> actions, Card[] holeCards, List<Card> boardCards, int minBet, int currentBet) {
+    	// Show the buttons for the allowed actions.
+        if (actions.contains(Action.CHECK)) {
+        	add(checkButton);
         }
+        if (actions.contains(Action.CALL)) {
+        	add(callButton);
+        }
+        if (actions.contains(Action.BET)) {
+        	add(betButton);
+        }
+        if (actions.contains(Action.RAISE)) {
+        	add(raiseButton);
+        }
+        if (actions.contains(Action.FOLD)) {
+        	add(foldButton);
+        }
+        invalidate();
         repaint();
-    }
+        getUserInput();
+        return action;
+	}
     
-	/**
-	 * Returns the selected action.
-	 * 
-	 * @return The selected action.
-	 */
-    public int getAction() {
-    	return action;
+    private void getUserInput() {
+        action = null;
+        while (action == null) {
+        	try {
+        		Thread.sleep(POLLING_INTERVAL);
+        	} catch (InterruptedException e) {
+        		// Ignore.
+        	}
+        }
+        removeAll();
+        repaint();
     }
     
     /*
@@ -124,36 +122,35 @@ public class ControlPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
     	Object source = e.getSource();
     	if (source == continueButton) {
-    		action = CONTINUE;
+    		action = Action.CONTINUE;
     	} else if (source == checkButton) {
-    		action = CHECK;
+    		action = Action.CHECK;
     	} else if (source == callButton) {
-    		action = CALL;
+    		action = Action.CALL;
     	} else if (source == betButton) {
-    		action = BET;
+    		action = Action.BET;
     	} else if (source == raiseButton) {
-    		action = RAISE;
+    		action = Action.RAISE;
     	} else {
-    		action = FOLD;
+    		action = Action.FOLD;
     	}
 	}
     
 	/**
-	 * Creates a button.
+	 * Creates an action button.
 	 * 
-	 * @param label
-	 *            The label text.
-	 * @param mnemonic
-	 *            The mnemonic character.
+	 * @param action
+	 *            The action.
 	 * 
 	 * @return The button.
 	 */
-    private JButton createButton(String label, char mnemonic) {
+    private JButton createActionButton(Action action) {
+    	String label = action.getName();
     	JButton button = new JButton(label);
-    	button.setMnemonic(mnemonic);
+    	button.setMnemonic(label.charAt(0));
     	button.setSize(100, 30);
     	button.addActionListener(this);
     	return button;
     }
-    
+
 }

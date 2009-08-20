@@ -98,7 +98,7 @@ public class GameEngine {
     /**
      * Main game loop.
      */
-    public void run() {
+    public void start() {
 		resetGame();
 		while (!gameOver) {
 			playHand();
@@ -110,7 +110,7 @@ public class GameEngine {
      * Resets the game.
      */
     private void resetGame() {
-		notifyMessage("New game.");
+//		notifyMessage("New game.");
 		hand = 0;
     	dealerPosition = -1;
     	actorPosition = -1;
@@ -155,7 +155,7 @@ public class GameEngine {
 	 */
     private void resetHand() {
 		hand++;
-		notifyMessage("New hand.");
+//		notifyMessage("New hand.");
 		board.clear();
 		for (Player player : players) {
 			player.resetHand();
@@ -167,7 +167,7 @@ public class GameEngine {
 			}
 		}
 		rotateDealer();
-		notifyMessage("%s shuffles the deck.", dealer);
+//		notifyMessage("%s shuffles the deck.", dealer);
 		deck.shuffle();
 		actorPosition = dealerPosition;
 		minBet = bigBlind;
@@ -179,7 +179,7 @@ public class GameEngine {
     private void rotateDealer() {
         dealerPosition = (dealerPosition + 1) % players.size();
         dealer = players.get(dealerPosition);
-        notifyMessage("%s is the dealer.", dealer);
+//        notifyMessage("%s is the dealer.", dealer);
     }
 
     /**
@@ -202,10 +202,11 @@ public class GameEngine {
      */
     private void postSmallBlind() {
         rotateActor();
-        notifyMessage("%s posts the small blind.", actor);
+//        notifyMessage("%s posts the small blind.", actor);
 		int smallBlind = bigBlind / 2;
         actor.postSmallBlind(smallBlind);
         pot += smallBlind;
+        notifyPlayerActed(actor);
 	}
 	
     /**
@@ -213,9 +214,10 @@ public class GameEngine {
      */
     private void postBigBlind() {
         rotateActor();
-        notifyMessage("%s posts the big blind.", actor);
+//        notifyMessage("%s posts the big blind.", actor);
         actor.postBigBlind(bigBlind);
         pot += bigBlind;
+        notifyPlayerActed(actor);
 	}
 	
     /**
@@ -260,7 +262,7 @@ public class GameEngine {
 			bet = 0;
 		}
 		while (playersToAct > 0) {
-        	notifyMessage("Hand: %d, MinBet: %d, Bet: %d, Pot: %d", hand, minBet, bet, pot);
+//        	notifyMessage("Hand: %d, MinBet: %d, Bet: %d, Pot: %d", hand, minBet, bet, pot);
         	rotateActor();
         	notifyMessage("It's %s's turn to act.", actor);
         	int smallBlind = bigBlind / 2;

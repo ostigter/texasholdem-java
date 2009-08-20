@@ -82,7 +82,7 @@ public class Player {
     	if (cards != null) {
     		if (cards.size() == 2) {
     	        hand.addCards(cards);
-    	        System.out.format("%s's cards: %s\n", name, hand);
+//    	        System.out.format("%s's cards: %s\n", name, hand);
     		} else {
     			throw new IllegalArgumentException("Invalid number of cards");
     		}

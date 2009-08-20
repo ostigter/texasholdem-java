@@ -79,9 +79,9 @@ public class PlayerPanel extends JPanel {
         cashLabel = new MyLabel();
         actionLabel = new MyLabel();
         betLabel = new MyLabel();
-        card1Label = new JLabel();
-        card2Label = new JLabel();
-        dealerButton = new JLabel();
+        card1Label = new JLabel(CARD_PLACEHOLDER_ICON);
+        card2Label = new JLabel(CARD_PLACEHOLDER_ICON);
+        dealerButton = new JLabel(BUTTON_ABSENT_ICON);
         
         gc.gridx = 0;
         gc.gridy = 0;
@@ -159,6 +159,7 @@ public class PlayerPanel extends JPanel {
 	 *            The player's information.
 	 */
     public void update(PlayerInfo playerInfo) {
+    	nameLabel.setText(playerInfo.getName());
         int cash = playerInfo.getCash();
         if (cash == 0) {
             cashLabel.setText("BROKE!");
@@ -178,7 +179,7 @@ public class PlayerPanel extends JPanel {
             actionLabel.setText(" ");
         }
         Card[] cards = playerInfo.getCards();
-        if (cards.length == 2) {
+        if (cards != null && cards.length == 2) {
         	if (cards[0] != null) {
 	            card1Label.setIcon(ResourceManager.getCardImage(cards[0]));
         	} else {
@@ -236,6 +237,7 @@ public class PlayerPanel extends JPanel {
             setBorder(UIConstants.LABEL_BORDER);
             setForeground(UIConstants.TEXT_COLOR);
             setHorizontalAlignment(JLabel.HORIZONTAL);
+            setText(" ");
         }
 		
     } // MyLabel
