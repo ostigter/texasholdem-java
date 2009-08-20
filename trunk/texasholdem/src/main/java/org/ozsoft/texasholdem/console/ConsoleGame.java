@@ -36,7 +36,7 @@ public class ConsoleGame implements GameListener {
 		// Play the game.
 		GameEngine engine = new GameEngine(BIG_BLIND, players);
 		engine.addListener(this);
-		engine.run();
+		engine.start();
 	}
 
 	/**

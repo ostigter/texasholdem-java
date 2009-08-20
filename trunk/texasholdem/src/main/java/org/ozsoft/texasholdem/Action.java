@@ -28,6 +28,9 @@ public enum Action {
 	/** Folding. */
 	FOLD("Fold", "folds"),
 	
+	/** Continuing the game. */
+	CONTINUE("Continue", "continues"),
+	
 	;
 	
 	/** The name. */

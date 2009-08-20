@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -19,6 +20,9 @@ public class BoardPanel extends JPanel {
     
 	/** The serial version UID. */
 	private static final long serialVersionUID = 1L;
+	
+	/** The maximum number of community cards. */
+	private static final int NO_OF_CARDS = 5;
 	
 	/** Label with the hand number. */
 	private final JLabel handLabel;
@@ -135,7 +139,7 @@ public class BoardPanel extends JPanel {
         add(potLabel, gc);
 
         // The five card positions.
-        cardLabels = new JLabel[5];
+        cardLabels = new JLabel[NO_OF_CARDS];
         for (int i = 0; i < 5; i++) {
             cardLabels[i] = new JLabel(ResourceManager.getIcon("/images/card_placeholder.png"));
             gc.gridx = i;
@@ -166,7 +170,7 @@ public class BoardPanel extends JPanel {
         add(messageLabel, gc);
         
         // Control panel.
-        controlPanel = new ControlPanel(mainFrame);
+        controlPanel = new ControlPanel();
         gc.gridx = 0;
         gc.gridy = 4;
         gc.gridwidth = 5;
@@ -178,22 +182,21 @@ public class BoardPanel extends JPanel {
         gc.fill = GridBagConstraints.BOTH;
         add(controlPanel, gc);
         
-        update(1, 0, 0);
-        setMessage("");
+        update(1, null, 0, 0);
     }
     
 	/**
 	 * Updates the current hand status.
 	 * 
-	 * @param handNumber
+	 * @param hand
 	 *            The hand number.
 	 * @param bet
 	 *            The bet.
 	 * @param pot
 	 *            The pot.
 	 */
-    public void update(int handNumber, int bet, int pot) {
-        handLabel.setText(String.valueOf(handNumber));
+    public void update(int hand, List<Card> cards, int bet, int pot) {
+        handLabel.setText(String.valueOf(hand));
     	if (bet == 0) {
             betLabel.setText(" ");
     	} else {
@@ -204,18 +207,10 @@ public class BoardPanel extends JPanel {
     	} else {
             potLabel.setText("$ " + pot);
     	}
-    }
-    
-	/**
-	 * Sets the community cards.
-	 * 
-	 * @param cards
-	 *            The community cards.
-	 */
-    public void setCards(Card[] cards, int noOfBoardCards) {
-    	for (int i = 0; i < cards.length; i++) {
-    		if (i < noOfBoardCards) {
-    			cardLabels[i].setIcon(ResourceManager.getCardImage(cards[i]));
+    	int noOfCards = (cards == null) ? 0 : cards.size();
+    	for (int i = 0; i < NO_OF_CARDS; i++) {
+    		if (i < noOfCards) {
+    			cardLabels[i].setIcon(ResourceManager.getCardImage(cards.get(i)));
     		} else {
     			cardLabels[i].setIcon(ResourceManager.getIcon("/images/card_placeholder.png"));
     		}
@@ -236,23 +231,11 @@ public class BoardPanel extends JPanel {
         }
     }
     
-	/**
-	 * Sets the allowed actions for the control panel.
-	 * 
-	 * @param actions
-	 *            The allowed actions.
-	 */
-    public void setActions(final int actions) {
-    	controlPanel.setActions(actions);
-    }
-    
-	/**
-	 * Returns the selected action from the control panel.
-	 * 
-	 * @return The selected action.
-	 */
-    public int getAction() {
-    	return controlPanel.getAction();
+    /**
+     * Waits for the user to continue.
+     */
+    public void waitForUserInput() {
+    	controlPanel.waitForUserInput();
     }
     
 }

@@ -3,30 +3,41 @@ package org.ozsoft.texasholdem.gui;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JFrame;
+
+import org.ozsoft.texasholdem.Card;
+import org.ozsoft.texasholdem.GameEngine;
+import org.ozsoft.texasholdem.GameListener;
+import org.ozsoft.texasholdem.Player;
+import org.ozsoft.texasholdem.PlayerInfo;
+import org.ozsoft.texasholdem.bots.DummyBot;
 
 /**
  * The game's main frame.
  * 
  * @author Oscar Stigter
  */
-public class Main extends JFrame {
+public class Main extends JFrame implements GameListener {
     
 	/** Serial version UID. */
 	private static final long serialVersionUID = 1L;
 	
-	/** The number of players at the table. */
-	private static final int NO_OF_PLAYERS = 4;
+//	/** The number of players at the table. */
+//	private static final int NO_OF_PLAYERS = 4;
 	
-//    /** The starting cash per player. */
-//    private static final int STARTING_CASH = 100;
-//    
-//    /** The size of the big blind. */
-//    private static final int BIG_BLIND = 2;
-//    
-//    /** The polling delay in ms when waiting for a player to act. */
-//    private static final long POLLING_DELAY = 100L;
+    /** The starting cash per player. */
+    private static final int STARTING_CASH = 100;
+    
+    /** The size of the big blind. */
+    private static final int BIG_BLIND = 2;
+    
+    /** The players at the table. */
+    private final List<Player> players;
     
     /** The GridBagConstraints. */
     private GridBagConstraints gc;
@@ -35,7 +46,7 @@ public class Main extends JFrame {
     private BoardPanel boardPanel;
     
     /** The player panels. */
-    private PlayerPanel[] playerPanels;
+    private Map<String, PlayerPanel> playerPanels;
 
     /**
      * Constructor.
@@ -43,14 +54,17 @@ public class Main extends JFrame {
     public Main() {
         super("Limit Texas Hold'em poker");
         
+        players = new ArrayList<Player>();
+        players.add(new Player("Player", new ControlPanel(), STARTING_CASH));
+        players.add(new Player("Joe",    new DummyBot(),     STARTING_CASH));
+        players.add(new Player("Mike",   new DummyBot(),     STARTING_CASH));
+        players.add(new Player("Eddie",  new DummyBot(),     STARTING_CASH));
+        
         createUI();
         
-//        Player[] players = new Player[] {
-//            new Player("Player", new GUIClient(), STARTING_CASH),
-//            new Player("Joe",    new DummyBot(),  STARTING_CASH),
-//            new Player("Mike",   new DummyBot(),  STARTING_CASH),
-//            new Player("Eddy",   new DummyBot(),  STARTING_CASH),
-//        };
+        GameEngine gameEngine = new GameEngine(BIG_BLIND, players);
+        gameEngine.addListener(this);
+        gameEngine.start();
      }
     
 	/**
@@ -63,6 +77,43 @@ public class Main extends JFrame {
 		new Main();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#boardUpdated(int, java.util.List, int, int)
+	 */
+	@Override
+	public void boardUpdated(int hand, List<Card> cards, int bet, int pot) {
+		boardPanel.update(hand, cards, bet, pot);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#messageReceived(java.lang.String)
+	 */
+	@Override
+	public void messageReceived(String message) {
+		boardPanel.setMessage(message);
+		boardPanel.waitForUserInput();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#playerActed(org.ozsoft.texasholdem.PlayerInfo)
+	 */
+	@Override
+	public void playerActed(PlayerInfo playerInfo) {
+		String name = playerInfo.getName();
+		PlayerPanel playerPanel = playerPanels.get(name);
+		if (playerPanel != null) {
+			playerPanel.update(playerInfo);
+			boardPanel.setMessage(String.format("%s %s.", name, playerInfo.getAction().getVerb()));
+			boardPanel.waitForUserInput();
+		} else {
+			throw new IllegalStateException(
+					String.format("No PlayerPanel found for player '%s'", name));
+		}
+	}
+    
 	/**
 	 * Creates the UI.
 	 */
@@ -74,18 +125,29 @@ public class Main extends JFrame {
         gc = new GridBagConstraints();
         
         boardPanel = new BoardPanel(this);        
+        addComponent(boardPanel, 1, 1, 1, 1);
         
-        playerPanels = new PlayerPanel[NO_OF_PLAYERS];
-        for (int i = 0; i < NO_OF_PLAYERS; i++) {
-            playerPanels[i] = new PlayerPanel();
+        playerPanels = new HashMap<String, PlayerPanel>();
+        for (int i = 0; i < players.size(); i++) {
+        	PlayerPanel panel = new PlayerPanel();
+        	playerPanels.put(players.get(i).getName(), panel);
+        	switch (i) {
+        		case 0:
+        			addComponent(panel, 1, 0, 1, 1);
+        			break;
+        		case 1:
+        			addComponent(panel, 2, 1, 1, 1);
+        			break;
+        		case 2:
+        			addComponent(panel, 1, 2, 1, 1);
+        			break;
+        		case 3:
+        			addComponent(panel, 0, 1, 1, 1);
+        			break;
+        		default:
+        			// Do nothing.
+        	}
         }
-        
-        // 4 player table.
-        addComponent(boardPanel,      1, 1, 1, 1);
-        addComponent(playerPanels[0], 1, 0, 1, 1);
-        addComponent(playerPanels[1], 2, 1, 1, 1);
-        addComponent(playerPanels[2], 1, 2, 1, 1);
-        addComponent(playerPanels[3], 0, 1, 1, 1);
         
 //        // 10 player table.
 //        addComponent(boardPanel,      1, 1, 3, 3);
@@ -133,26 +195,5 @@ public class Main extends JFrame {
         gc.fill = GridBagConstraints.NONE;
         getContentPane().add(component, gc);
     }
-    
-//	/**
-//	 * Asks the human player to select an action, and returns the action.
-//	 * 
-//	 * @param actions
-//	 *            The allowed actions.
-//	 * 
-//	 * @return The selected action.
-//	 */
-//    private int getInput(final int actions) {
-//        boardPanel.setActions(actions);
-//        waitingForPlayer = true;
-//        try {
-//            while (waitingForPlayer) {
-//                Thread.sleep(POLLING_DELAY);
-//            }
-//        } catch (InterruptedException e) {
-//            // Ignore.
-//        }
-//        return boardPanel.getAction();
-//    }
-    
+
 }
