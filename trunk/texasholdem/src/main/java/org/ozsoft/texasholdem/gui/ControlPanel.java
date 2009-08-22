@@ -1,5 +1,6 @@
 package org.ozsoft.texasholdem.gui;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,7 @@ import java.util.Set;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
@@ -54,7 +56,8 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 	 *            The main frame.
 	 */
     public ControlPanel() {
-        setBackground(UIConstants.TABLE_COLOR);
+//        setBackground(UIConstants.TABLE_COLOR);
+        setBackground(Color.WHITE);
         setLayout(new FlowLayout());
         continueButton = createActionButton(Action.CONTINUE);
         checkButton = createActionButton(Action.CHECK);
@@ -68,8 +71,13 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
      * Waits for the user to continue.
      */
     public void waitForUserInput() {
-    	add(continueButton);
-    	repaint();
+    	SwingUtilities.invokeLater(new Runnable() {
+    		@Override
+    		public void run() {
+		    	add(continueButton);
+		    	validate();
+		    	repaint();}
+    	});
     	getUserInput();
     }
     
@@ -78,30 +86,41 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
      * @see org.ozsoft.texasholdem.PlayerClient#act(java.util.Set, org.ozsoft.texasholdem.Card[], java.util.List, int, int)
      */
     @Override
-	public Action act(Set<Action> actions, Card[] holeCards, List<Card> boardCards, int minBet, int currentBet) {
-    	// Show the buttons for the allowed actions.
-        if (actions.contains(Action.CHECK)) {
-        	add(checkButton);
-        }
-        if (actions.contains(Action.CALL)) {
-        	add(callButton);
-        }
-        if (actions.contains(Action.BET)) {
-        	add(betButton);
-        }
-        if (actions.contains(Action.RAISE)) {
-        	add(raiseButton);
-        }
-        if (actions.contains(Action.FOLD)) {
-        	add(foldButton);
-        }
-        invalidate();
-        repaint();
+	public Action act(final Set<Action> actions, Card[] holeCards, List<Card> boardCards, int minBet, int currentBet) {
+    	SwingUtilities.invokeLater(new Runnable() {
+    		@Override
+    		public void run() {
+		    	// Show the buttons for the allowed actions.
+    			System.out.println("*** START Show buttons");
+		        removeAll();
+		        if (actions.contains(Action.CHECK)) {
+		        	add(checkButton);
+		        }
+		        if (actions.contains(Action.CALL)) {
+		        	add(callButton);
+		        }
+		        if (actions.contains(Action.BET)) {
+		        	add(betButton);
+		        }
+		        if (actions.contains(Action.RAISE)) {
+		        	add(raiseButton);
+		        }
+		        if (actions.contains(Action.FOLD)) {
+		        	add(foldButton);
+		        }
+		        validate();
+		        repaint();
+    			System.out.println("*** END Show buttons");
+    		}
+    	});
         getUserInput();
         return action;
 	}
     
     private void getUserInput() {
+    	invalidate();
+    	validate();
+    	repaint();
         action = null;
         while (action == null) {
         	try {
@@ -110,8 +129,6 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
         		// Ignore.
         	}
         }
-        removeAll();
-        repaint();
     }
     
     /*

@@ -115,6 +115,9 @@ public class GameEngine {
     	dealerPosition = -1;
     	actorPosition = -1;
 		gameOver = false;
+		for (Player player : players) {
+			notifyPlayerActed(player);
+		}
 	}
 	
     /**
@@ -202,7 +205,6 @@ public class GameEngine {
      */
     private void postSmallBlind() {
         rotateActor();
-//        notifyMessage("%s posts the small blind.", actor);
 		int smallBlind = bigBlind / 2;
         actor.postSmallBlind(smallBlind);
         pot += smallBlind;
@@ -214,7 +216,6 @@ public class GameEngine {
      */
     private void postBigBlind() {
         rotateActor();
-//        notifyMessage("%s posts the big blind.", actor);
         actor.postBigBlind(bigBlind);
         pot += bigBlind;
         notifyPlayerActed(actor);
@@ -224,7 +225,7 @@ public class GameEngine {
      * Deals the Hole Cards.
      */
     private void dealHoleCards() {
-        notifyMessage("%s deals the Hole Cards.", dealer);
+//        notifyMessage("%s deals the Hole Cards.", dealer);
         for (Player player : players) {
             player.setCards(deck.deal(2));
         }
@@ -239,11 +240,11 @@ public class GameEngine {
 	 *            The number of cards to deal.
 	 */
     private void dealCommunityCards(String name, int noOfCards) {
-        notifyMessage("%s deals the %s.", dealer, name);
+//        notifyMessage("%s deals the %s.", dealer, name);
         for (int i = 0; i < noOfCards; i++) {
         	board.add(deck.deal());
         }
-        notifyMessage("Board: %s", board);
+//        notifyMessage("Board: %s", board);
 	}
 	
     /**
@@ -357,8 +358,8 @@ public class GameEngine {
      * Performs the Showdown.
      */
     private void doShowdown() {
-		notifyMessage("Showdown!");
-		notifyMessage("The board: %s", new Hand(board));
+//		notifyMessage("Showdown!");
+//		notifyMessage("The board: %s", new Hand(board));
 		notifyBoardUpdated();
 		int highestValue = 0;
 		List<Player> winners = new ArrayList<Player>();
