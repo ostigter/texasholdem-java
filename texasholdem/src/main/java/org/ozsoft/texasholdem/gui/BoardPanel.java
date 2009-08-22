@@ -236,6 +236,8 @@ public class BoardPanel extends JPanel {
      */
     public void waitForUserInput() {
     	controlPanel.waitForUserInput();
+    	validate();
+    	repaint();
     }
     
 }

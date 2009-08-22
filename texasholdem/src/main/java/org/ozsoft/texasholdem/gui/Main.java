@@ -10,6 +10,7 @@ import java.util.Map;
 
 import javax.swing.JFrame;
 
+import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
 import org.ozsoft.texasholdem.GameEngine;
 import org.ozsoft.texasholdem.GameListener;
@@ -26,9 +27,6 @@ public class Main extends JFrame implements GameListener {
     
 	/** Serial version UID. */
 	private static final long serialVersionUID = 1L;
-	
-//	/** The number of players at the table. */
-//	private static final int NO_OF_PLAYERS = 4;
 	
     /** The starting cash per player. */
     private static final int STARTING_CASH = 100;
@@ -62,9 +60,15 @@ public class Main extends JFrame implements GameListener {
         
         createUI();
         
-        GameEngine gameEngine = new GameEngine(BIG_BLIND, players);
+        final GameEngine gameEngine = new GameEngine(BIG_BLIND, players);
         gameEngine.addListener(this);
-        gameEngine.start();
+        Thread gameThread = new Thread(new Runnable() {
+        	@Override
+        	public void run() {
+                gameEngine.start();
+        	}
+        });
+        gameThread.start();
      }
     
 	/**
@@ -103,11 +107,14 @@ public class Main extends JFrame implements GameListener {
 	@Override
 	public void playerActed(PlayerInfo playerInfo) {
 		String name = playerInfo.getName();
+		Action action = playerInfo.getAction();
 		PlayerPanel playerPanel = playerPanels.get(name);
 		if (playerPanel != null) {
 			playerPanel.update(playerInfo);
-			boardPanel.setMessage(String.format("%s %s.", name, playerInfo.getAction().getVerb()));
-			boardPanel.waitForUserInput();
+			if (action != null) {
+				boardPanel.setMessage(String.format("%s %s.", name, action.getVerb()));
+				boardPanel.waitForUserInput();
+			}
 		} else {
 			throw new IllegalStateException(
 					String.format("No PlayerPanel found for player '%s'", name));
