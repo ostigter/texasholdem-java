@@ -24,6 +24,9 @@ public class BoardPanel extends JPanel {
 	/** The maximum number of community cards. */
 	private static final int NO_OF_CARDS = 5;
 	
+    /** The control panel. */
+    private final ControlPanel controlPanel;
+    
 	/** Label with the hand number. */
 	private final JLabel handLabel;
 
@@ -39,16 +42,15 @@ public class BoardPanel extends JPanel {
     /** Label with a custom message. */
     private final JLabel messageLabel;
     
-    /** The control panel. */
-    private final ControlPanel controlPanel;
-    
 	/**
 	 * Constructor.
 	 * 
 	 * @param mainFrame
 	 *            The main frame.
 	 */
-    public BoardPanel(Main mainFrame) {
+    public BoardPanel(ControlPanel controlPanel) {
+    	this.controlPanel = controlPanel;
+    	
         setBorder(UIConstants.PANEL_BORDER);
         setBackground(UIConstants.TABLE_COLOR);
         setLayout(new GridBagLayout());
@@ -170,7 +172,6 @@ public class BoardPanel extends JPanel {
         add(messageLabel, gc);
         
         // Control panel.
-        controlPanel = new ControlPanel();
         gc.gridx = 0;
         gc.gridy = 4;
         gc.gridwidth = 5;
@@ -236,8 +237,6 @@ public class BoardPanel extends JPanel {
      */
     public void waitForUserInput() {
     	controlPanel.waitForUserInput();
-    	validate();
-    	repaint();
     }
     
 }

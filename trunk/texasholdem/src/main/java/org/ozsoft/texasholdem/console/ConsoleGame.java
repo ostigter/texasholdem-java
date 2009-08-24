@@ -51,11 +51,47 @@ public class ConsoleGame implements GameListener {
 	
 	/*
 	 * (non-Javadoc)
+	 * @see th.GameListener#messageReceived(java.lang.String)
+	 */
+	@Override
+	public void messageReceived(String message) {
+		System.out.println(message);
+	}
+
+	/*
+	 * (non-Javadoc)
 	 * @see th.GameListener#boardUpdated(int, java.util.List, int, int)
 	 */
 	@Override
 	public void boardUpdated(int hand, List<Card> cards, int bet, int pot) {
 		//TODO: Broadcast board update
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#playerUpdated(org.ozsoft.texasholdem.PlayerInfo)
+	 */
+	@Override
+	public void playerUpdated(PlayerInfo playerInfo) {
+		//TODO: Handle player update.
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#dealerRotated(java.lang.String)
+	 */
+	@Override
+	public void dealerRotated(String name) {
+		System.out.format("%s is the dealer.\n", name);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#actorRotated(java.lang.String)
+	 */
+	@Override
+	public void actorRotated(String name) {
+		System.out.format("It's %s's turn to act.\n", name);
 	}
 
 	/*
@@ -67,15 +103,6 @@ public class ConsoleGame implements GameListener {
 		String name = playerInfo.getName();
 		String actionVerb = playerInfo.getAction().getVerb();
 		System.out.format("%s %s.\n", name, actionVerb);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see th.GameListener#messageReceived(java.lang.String)
-	 */
-	@Override
-	public void messageReceived(String message) {
-		System.out.println(message);
 	}
 
 }

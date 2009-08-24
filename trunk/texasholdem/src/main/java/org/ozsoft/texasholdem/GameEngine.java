@@ -182,7 +182,10 @@ public class GameEngine {
     private void rotateDealer() {
         dealerPosition = (dealerPosition + 1) % players.size();
         dealer = players.get(dealerPosition);
-//        notifyMessage("%s is the dealer.", dealer);
+    	for (GameListener listener : listeners) {
+    		listener.dealerRotated(dealer.getName());
+    	}
+    	notifyMessage("%s is the dealer.", dealer);
     }
 
     /**
@@ -194,6 +197,9 @@ public class GameEngine {
         		actorPosition = (actorPosition + 1) % players.size();
         		actor = players.get(actorPosition);
         	} while (!activePlayers.contains(actor));
+        	for (GameListener listener : listeners) {
+        		listener.actorRotated(actor.getName());
+        	}
     	} else {
     		// Should never happen.
     		throw new IllegalStateException("No active players left");
@@ -225,10 +231,11 @@ public class GameEngine {
      * Deals the Hole Cards.
      */
     private void dealHoleCards() {
-//        notifyMessage("%s deals the Hole Cards.", dealer);
         for (Player player : players) {
             player.setCards(deck.deal(2));
+            notifyPlayerUpdated(player, true);
         }
+        notifyMessage("%s deals the Hole Cards.", dealer);
 	}
 	
 	/**
@@ -240,7 +247,7 @@ public class GameEngine {
 	 *            The number of cards to deal.
 	 */
     private void dealCommunityCards(String name, int noOfCards) {
-//        notifyMessage("%s deals the %s.", dealer, name);
+        notifyMessage("%s deals the %s.", dealer, name);
         for (int i = 0; i < noOfCards; i++) {
         	board.add(deck.deal());
         }
@@ -358,7 +365,7 @@ public class GameEngine {
      * Performs the Showdown.
      */
     private void doShowdown() {
-//		notifyMessage("Showdown!");
+		notifyMessage("Showdown!");
 //		notifyMessage("The board: %s", new Hand(board));
 		notifyBoardUpdated();
 		int highestValue = 0;
@@ -370,8 +377,8 @@ public class GameEngine {
 			// Evaluate the combined hand.
 			HandEvaluator evaluator = new HandEvaluator(playerHand);
 			int value = evaluator.getValue();
-			String description = evaluator.getType().getDescription();
-			notifyMessage("%s's cards:  %s\t(%s, %d)", player, player.getHand(), description, value);
+//			String description = evaluator.getType().getDescription();
+//			notifyMessage("%s's cards:  %s\t(%s, %d)", player, player.getHand(), description, value);
 			// Look for one or more winners.
 			if (value > highestValue) {
 				// New winner.
@@ -408,27 +415,6 @@ public class GameEngine {
 	}
 	
 	/**
-	 * Notifies listeners that a player has acted.
-	 * 
-	 * @param player
-	 *            The player that has acted.
-	 */
-    private void notifyPlayerActed(Player player) {
-    	for (GameListener listener : listeners) {
-    		listener.playerActed(new PlayerInfo(player, false));
-    	}
-    }
-    
-    /**
-     * Notifies listeners that the board has been updated.
-     */
-    private void notifyBoardUpdated() {
-    	for (GameListener listener : listeners) {
-    		listener.boardUpdated(hand, board, bet, pot);
-    	}
-    }
-
-	/**
 	 * Notifies listeners with a custom game message.
 	 * 
 	 * @param message
@@ -440,6 +426,33 @@ public class GameEngine {
     	message = String.format(message, args);
     	for (GameListener listener : listeners) {
     		listener.messageReceived(message);
+    	}
+    }
+    
+    /**
+     * Notifies listeners that the board has been updated.
+     */
+    private void notifyBoardUpdated() {
+    	for (GameListener listener : listeners) {
+    		listener.boardUpdated(hand, board, bet, pot);
+    	}
+    }
+    
+    private void notifyPlayerUpdated(Player player, boolean showCards) {
+    	for (GameListener listener : listeners) {
+    		listener.playerActed(new PlayerInfo(player, showCards));
+    	}
+    }
+
+	/**
+	 * Notifies listeners that a player has acted.
+	 * 
+	 * @param player
+	 *            The player that has acted.
+	 */
+    private void notifyPlayerActed(Player player) {
+    	for (GameListener listener : listeners) {
+    		listener.playerActed(new PlayerInfo(player, false));
     	}
     }
     

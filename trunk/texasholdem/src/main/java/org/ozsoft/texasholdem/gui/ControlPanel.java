@@ -1,6 +1,5 @@
 package org.ozsoft.texasholdem.gui;
 
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,9 +24,9 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 	/** Serial version UID. */
 	private static final long serialVersionUID = 1L;
 	
-	/** Polling interval while waiting for input. */
-	private static final long POLLING_INTERVAL = 100L;
-	
+	/** Monitor while waiting for user input. */
+	private final Object monitor = new Object();
+    
 	/** The Check button. */
     private final JButton checkButton;
     
@@ -56,8 +55,7 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 	 *            The main frame.
 	 */
     public ControlPanel() {
-//        setBackground(UIConstants.TABLE_COLOR);
-        setBackground(Color.WHITE);
+        setBackground(UIConstants.TABLE_COLOR);
         setLayout(new FlowLayout());
         continueButton = createActionButton(Action.CONTINUE);
         checkButton = createActionButton(Action.CHECK);
@@ -65,6 +63,12 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
         betButton = createActionButton(Action.BET);
         raiseButton = createActionButton(Action.RAISE);
         foldButton = createActionButton(Action.FOLD);
+//        add(continueButton);
+//        add(checkButton);
+//        add(callButton);
+//        add(betButton);
+//        add(raiseButton);
+//        add(foldButton);
     }
     
     /**
@@ -74,6 +78,7 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
     	SwingUtilities.invokeLater(new Runnable() {
     		@Override
     		public void run() {
+    			removeAll();
 		    	add(continueButton);
 		    	validate();
 		    	repaint();}
@@ -91,7 +96,6 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
     		@Override
     		public void run() {
 		    	// Show the buttons for the allowed actions.
-    			System.out.println("*** START Show buttons");
 		        removeAll();
 		        if (actions.contains(Action.CHECK)) {
 		        	add(checkButton);
@@ -110,7 +114,6 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 		        }
 		        validate();
 		        repaint();
-    			System.out.println("*** END Show buttons");
     		}
     	});
         getUserInput();
@@ -118,16 +121,12 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 	}
     
     private void getUserInput() {
-    	invalidate();
-    	validate();
-    	repaint();
-        action = null;
-        while (action == null) {
-        	try {
-        		Thread.sleep(POLLING_INTERVAL);
-        	} catch (InterruptedException e) {
-        		// Ignore.
-        	}
+        synchronized (monitor) {
+	        try {
+	        	monitor.wait();
+	        } catch (InterruptedException e) {
+	        	// Ignore.
+	        }
         }
     }
     
@@ -151,6 +150,9 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
     	} else {
     		action = Action.FOLD;
     	}
+        synchronized (monitor) {
+        	monitor.notifyAll();
+        }
 	}
     
 	/**
