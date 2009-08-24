@@ -38,13 +38,22 @@ public class Main extends JFrame implements GameListener {
     private final List<Player> players;
     
     /** The GridBagConstraints. */
-    private GridBagConstraints gc;
+    private final GridBagConstraints gc;
     
     /** The board panel. */
-    private BoardPanel boardPanel;
+    private final BoardPanel boardPanel;
+    
+    /** The control panel. */
+    private final ControlPanel controlPanel;
     
     /** The player panels. */
-    private Map<String, PlayerPanel> playerPanels;
+    private final Map<String, PlayerPanel> playerPanels;
+    
+    /** The current dealer's name. */
+    private String dealerName; 
+
+    /** The current actor's name. */
+    private String actorName; 
 
     /**
      * Constructor.
@@ -52,14 +61,50 @@ public class Main extends JFrame implements GameListener {
     public Main() {
         super("Limit Texas Hold'em poker");
         
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        getContentPane().setBackground(UIConstants.TABLE_COLOR);
+        setLayout(new GridBagLayout());
+
+        gc = new GridBagConstraints();
+        
+        controlPanel = new ControlPanel();
+        
+        boardPanel = new BoardPanel(controlPanel);        
+        addComponent(boardPanel, 1, 1, 1, 1);
+        
         players = new ArrayList<Player>();
-        players.add(new Player("Player", new ControlPanel(), STARTING_CASH));
-        players.add(new Player("Joe",    new DummyBot(),     STARTING_CASH));
-        players.add(new Player("Mike",   new DummyBot(),     STARTING_CASH));
-        players.add(new Player("Eddie",  new DummyBot(),     STARTING_CASH));
+        players.add(new Player("Player", controlPanel,   STARTING_CASH));
+        players.add(new Player("Joe",    new DummyBot(), STARTING_CASH));
+        players.add(new Player("Mike",   new DummyBot(), STARTING_CASH));
+        players.add(new Player("Eddie",  new DummyBot(), STARTING_CASH));
         
-        createUI();
+        playerPanels = new HashMap<String, PlayerPanel>();
+        for (int i = 0; i < players.size(); i++) {
+        	PlayerPanel panel = new PlayerPanel();
+        	playerPanels.put(players.get(i).getName(), panel);
+        	switch (i) {
+        		case 0:
+        			addComponent(panel, 1, 0, 1, 1);
+        			break;
+        		case 1:
+        			addComponent(panel, 2, 1, 1, 1);
+        			break;
+        		case 2:
+        			addComponent(panel, 1, 2, 1, 1);
+        			break;
+        		case 3:
+        			addComponent(panel, 0, 1, 1, 1);
+        			break;
+        		default:
+        			// Do nothing.
+        	}
+        }
         
+        pack();
+		setResizable(false);
+		setLocationRelativeTo(null);
+		setVisible(true);
+
         final GameEngine gameEngine = new GameEngine(BIG_BLIND, players);
         gameEngine.addListener(this);
         Thread gameThread = new Thread(new Runnable() {
@@ -69,7 +114,7 @@ public class Main extends JFrame implements GameListener {
         	}
         });
         gameThread.start();
-     }
+    }
     
 	/**
 	 * The application's entry point.
@@ -100,6 +145,41 @@ public class Main extends JFrame implements GameListener {
 		boardPanel.waitForUserInput();
 	}
 
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.GameListener#playerUpdated(org.ozsoft.texasholdem.PlayerInfo)
+     */
+    @Override
+	public void playerUpdated(PlayerInfo playerInfo) {
+    	String name = playerInfo.getName();
+    	PlayerPanel playerPanel = playerPanels.get(name);
+    	if (playerPanel != null) {
+    		playerPanel.update(playerInfo);
+    	}
+	}
+
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.GameListener#dealerRotated(java.lang.String)
+     */
+    @Override
+	public void dealerRotated(String name) {
+		setDealer(false);
+		dealerName = name;
+		setDealer(true);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.GameListener#actorRotated(java.lang.String)
+	 */
+	@Override
+	public void actorRotated(String name) {
+		setActorInTurn(false);
+		actorName = name;
+		setActorInTurn(true);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.ozsoft.texasholdem.GameListener#playerActed(org.ozsoft.texasholdem.PlayerInfo)
@@ -107,75 +187,22 @@ public class Main extends JFrame implements GameListener {
 	@Override
 	public void playerActed(PlayerInfo playerInfo) {
 		String name = playerInfo.getName();
-		Action action = playerInfo.getAction();
 		PlayerPanel playerPanel = playerPanels.get(name);
 		if (playerPanel != null) {
 			playerPanel.update(playerInfo);
+			Action action = playerInfo.getAction();
 			if (action != null) {
 				boardPanel.setMessage(String.format("%s %s.", name, action.getVerb()));
-				boardPanel.waitForUserInput();
+				//FIXME: Determine actor is the human player.
+				if (!name.equals("Player")) {
+					boardPanel.waitForUserInput();
+				}
 			}
 		} else {
 			throw new IllegalStateException(
 					String.format("No PlayerPanel found for player '%s'", name));
 		}
 	}
-    
-	/**
-	 * Creates the UI.
-	 */
-	private void createUI() {
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getContentPane().setBackground(UIConstants.TABLE_COLOR);
-        setLayout(new GridBagLayout());
-
-        gc = new GridBagConstraints();
-        
-        boardPanel = new BoardPanel(this);        
-        addComponent(boardPanel, 1, 1, 1, 1);
-        
-        playerPanels = new HashMap<String, PlayerPanel>();
-        for (int i = 0; i < players.size(); i++) {
-        	PlayerPanel panel = new PlayerPanel();
-        	playerPanels.put(players.get(i).getName(), panel);
-        	switch (i) {
-        		case 0:
-        			addComponent(panel, 1, 0, 1, 1);
-        			break;
-        		case 1:
-        			addComponent(panel, 2, 1, 1, 1);
-        			break;
-        		case 2:
-        			addComponent(panel, 1, 2, 1, 1);
-        			break;
-        		case 3:
-        			addComponent(panel, 0, 1, 1, 1);
-        			break;
-        		default:
-        			// Do nothing.
-        	}
-        }
-        
-//        // 10 player table.
-//        addComponent(boardPanel,      1, 1, 3, 3);
-//        addComponent(playerPanels[0], 1, 0, 1, 1);
-//        addComponent(playerPanels[1], 2, 0, 1, 1);
-//        addComponent(playerPanels[2], 3, 0, 1, 1);
-//        addComponent(playerPanels[3], 4, 1, 1, 1);
-//        addComponent(playerPanels[4], 4, 3, 1, 1);
-//        addComponent(playerPanels[5], 3, 4, 1, 1);
-//        addComponent(playerPanels[6], 2, 4, 1, 1);
-//        addComponent(playerPanels[7], 1, 4, 1, 1);
-//        addComponent(playerPanels[8], 0, 3, 1, 1);
-//        addComponent(playerPanels[9], 0, 1, 1, 1);
-
-//      Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-//      setSize(dimension.width, dimension.height - 30);
-		pack();
-		setResizable(false);
-		setLocationRelativeTo(null);
-		setVisible(true);
-   }
     
 	/**
 	 * Adds an UI component.
@@ -202,5 +229,35 @@ public class Main extends JFrame implements GameListener {
         gc.fill = GridBagConstraints.NONE;
         getContentPane().add(component, gc);
     }
+
+	/**
+	 * Sets whether the actor  is in turn.
+	 * 
+	 * @param isInTurn
+	 *            Whether the actor is in turn.
+	 */
+	private void setActorInTurn(boolean isInTurn) {
+		if (actorName != null) {
+			PlayerPanel playerPanel = playerPanels.get(actorName);
+			if (playerPanel != null) {
+				playerPanel.setInTurn(isInTurn);
+			}
+		}
+	}
+
+	/**
+	 * Sets the dealer.
+	 * 
+	 * @param isDealer
+	 *            Whether the player is the dealer.
+	 */
+	private void setDealer(boolean isDealer) {
+		if (dealerName != null) {
+			PlayerPanel playerPanel = playerPanels.get(dealerName);
+			if (playerPanel != null) {
+				playerPanel.setDealer(isDealer);
+			}
+		}
+	}
 
 }

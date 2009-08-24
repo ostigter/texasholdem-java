@@ -32,6 +32,30 @@ public interface GameListener {
 	void boardUpdated(int hand, List<Card> cards, int bet, int pot);
 	
 	/**
+	 * Handles an update of a player.
+	 * 
+	 * @param playerInfo
+	 *            The player's information.
+	 */
+	void playerUpdated(PlayerInfo playerInfo);
+	
+	/**
+	 * Handles the rotation of the dealer.
+	 * 
+	 * @param name
+	 *            The dealer's name.
+	 */
+	void dealerRotated(String name);
+	
+	/**
+	 * Handles the rotation of the actor (player in turn).
+	 * 
+	 * @param name
+	 *            The player's name.
+	 */
+	void actorRotated(String name);
+	
+	/**
 	 * Handles the event of a player acting.
 	 * 
 	 * @param playerInfo

@@ -8,10 +8,10 @@ package org.ozsoft.texasholdem;
 public enum Action {
 	
 	/** Posting the small blind. */
-	SMALL_BLIND("Small blind", "posts the small blind"),
+	SMALL_BLIND("Small Blind", "posts the small blind"),
 
 	/** Posting the big blind. */
-	BIG_BLIND("Big blind", "posts the big blind"),
+	BIG_BLIND("Big Blind", "posts the big blind"),
 	
 	/** Checking. */
 	CHECK("Check", "checks"),
