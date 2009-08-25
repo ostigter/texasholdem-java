@@ -13,7 +13,7 @@ import javax.swing.border.EmptyBorder;
 
 import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
-import org.ozsoft.texasholdem.PlayerInfo;
+import org.ozsoft.texasholdem.Player;
 
 /**
  * Panel representing a player at the table.
@@ -153,32 +153,32 @@ public class PlayerPanel extends JPanel {
     }
     
 	/**
-	 * Updates the panel with the player's status.
+	 * Updates the panel.
 	 * 
-	 * @param playerInfo
-	 *            The player's information.
+	 * @param player
+	 *            The player.
 	 */
-    public void update(PlayerInfo playerInfo) {
-    	nameLabel.setText(playerInfo.getName());
-        int cash = playerInfo.getCash();
+    public void update(Player player) {
+    	nameLabel.setText(player.getName());
+        int cash = player.getCash();
         if (cash == 0) {
             cashLabel.setText("BROKE!");
         } else {
             cashLabel.setText("$ " + cash);
         }
-        int bet = playerInfo.getBet();
+        int bet = player.getBet();
         if (bet == 0) {
             betLabel.setText(" ");
         } else {
             betLabel.setText("$ " + bet);
         }
-        Action action = playerInfo.getAction();
+        Action action = player.getAction();
         if (action != null) {
             actionLabel.setText(action.getName());
         } else {
             actionLabel.setText(" ");
         }
-        Card[] cards = playerInfo.getCards();
+        Card[] cards = player.getCards();
         if (cards != null && cards.length == 2) {
         	if (cards[0] != null) {
 	            card1Label.setIcon(ResourceManager.getCardImage(cards[0]));

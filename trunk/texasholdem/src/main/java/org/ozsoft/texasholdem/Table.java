@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Limit Texas Hold'em poker engine, responsible for the game flow.
+ * Limit Texas Hold'em poker engine, controlling the game flow.
  * 
  * @author Oscar Stigter
  */
-public class GameEngine {
+public class Table {
 	
     /** The maximum number of bets or raises in a single hand per player. */
     private static final int MAX_RAISES = 4;
@@ -29,12 +29,6 @@ public class GameEngine {
 	
 	/** The community cards on the board. */
     private final List<Card> board;
-	
-    /** The listeners to this game. */
-    private final Set<GameListener> listeners;
-	
-	/** The number of hands played. */
-    private int hand;
 	
     /** The current dealer position. */
     private int dealerPosition;
@@ -60,39 +54,28 @@ public class GameEngine {
     /** Whether the game is over. */
     private boolean gameOver;
 	
-    /**
-     * Constructor.
-     * 
-     * @param bigBlind The size of the big blind.
-     * @param players The players at the table.
-     */
-    public GameEngine(int bigBlind, List<Player> players) {
+	/**
+	 * Constructor.
+	 * 
+	 * @param bigBlind
+	 *            The size of the big blind.
+	 */
+    public Table(int bigBlind) {
 		this.bigBlind = bigBlind;
-		this.players = players;
+		players = new ArrayList<Player>();
 		activePlayers = new ArrayList<Player>();
 		deck = new Deck();
 		board = new ArrayList<Card>();
-		listeners = new HashSet<GameListener>();
 	}
 	
 	/**
-	 * Adds a game listener.
+	 * Adds a player.
 	 * 
-	 * @param listener
-	 *            The game listener.
+	 * @param player
+	 *            The player.
 	 */
-    public void addListener(GameListener listener) {
-		listeners.add(listener);
-	}
-	
-	/**
-	 * Removes a game listener.
-	 * 
-	 * @param listener
-	 *            The game listener.
-	 */
-    public void removeListener(GameListener listener) {
-		listeners.remove(listener);
+    public void addPlayer(Player player) {
+		players.add(player);
 	}
 	
     /**
@@ -110,13 +93,11 @@ public class GameEngine {
      * Resets the game.
      */
     private void resetGame() {
-//		notifyMessage("New game.");
-		hand = 0;
     	dealerPosition = -1;
     	actorPosition = -1;
 		gameOver = false;
 		for (Player player : players) {
-			notifyPlayerActed(player);
+			player.getClient().joinedTable(bigBlind, players);
 		}
 	}
 	
@@ -125,7 +106,9 @@ public class GameEngine {
      */
     private void playHand() {
 		resetHand();
+        rotateActor();
 		postSmallBlind();
+        rotateActor();
 		postBigBlind();
         bet = bigBlind;
 		// The Pre-Flop.
@@ -157,36 +140,26 @@ public class GameEngine {
 	 * Resets the game for a new hand.
 	 */
     private void resetHand() {
-		hand++;
-//		notifyMessage("New hand.");
 		board.clear();
-		for (Player player : players) {
-			player.resetHand();
-		}
+		notifyBoardUpdated();
+//		resetBets();
 		activePlayers.clear();
 		for (Player player : players) {
+			player.resetHand();
 			if (!player.isBroke()) {
 				activePlayers.add(player);
 			}
 		}
-		rotateDealer();
-//		notifyMessage("%s shuffles the deck.", dealer);
+        dealerPosition = (dealerPosition + 1) % players.size();
+        dealer = players.get(dealerPosition);
 		deck.shuffle();
 		actorPosition = dealerPosition;
 		minBet = bigBlind;
+        for (Player player : players) {
+        	player.getClient().handStarted(dealer);
+        }
+        notifyMessage("New hand. %s is the dealer.", dealer);
 	}
-
-    /**
-     * Rotates the dealer position.
-     */
-    private void rotateDealer() {
-        dealerPosition = (dealerPosition + 1) % players.size();
-        dealer = players.get(dealerPosition);
-    	for (GameListener listener : listeners) {
-    		listener.dealerRotated(dealer.getName());
-    	}
-    	notifyMessage("%s is the dealer.", dealer);
-    }
 
     /**
      * Rotates the position of the player in turn (the actor).
@@ -197,8 +170,8 @@ public class GameEngine {
         		actorPosition = (actorPosition + 1) % players.size();
         		actor = players.get(actorPosition);
         	} while (!activePlayers.contains(actor));
-        	for (GameListener listener : listeners) {
-        		listener.actorRotated(actor.getName());
+        	for (Player player : players) {
+        		player.getClient().actorRotated(actor);
         	}
     	} else {
     		// Should never happen.
@@ -210,21 +183,19 @@ public class GameEngine {
      * Posts the small blind.
      */
     private void postSmallBlind() {
-        rotateActor();
 		int smallBlind = bigBlind / 2;
         actor.postSmallBlind(smallBlind);
         pot += smallBlind;
-        notifyPlayerActed(actor);
+        notifyPlayerActed();
 	}
 	
     /**
      * Posts the big blind.
      */
     private void postBigBlind() {
-        rotateActor();
         actor.postBigBlind(bigBlind);
         pot += bigBlind;
-        notifyPlayerActed(actor);
+        notifyPlayerActed();
 	}
 	
     /**
@@ -233,25 +204,25 @@ public class GameEngine {
     private void dealHoleCards() {
         for (Player player : players) {
             player.setCards(deck.deal(2));
-            notifyPlayerUpdated(player, true);
+            player.getClient().playerUpdated(player);
         }
-        notifyMessage("%s deals the Hole Cards.", dealer);
+        notifyMessage("%s deals the hole cards.", dealer);
 	}
 	
 	/**
 	 * Deals a number of community cards.
 	 * 
-	 * @param name
+	 * @param phaseName
 	 *            The name of the phase.
 	 * @param noOfCards
 	 *            The number of cards to deal.
 	 */
-    private void dealCommunityCards(String name, int noOfCards) {
-        notifyMessage("%s deals the %s.", dealer, name);
+    private void dealCommunityCards(String phaseName, int noOfCards) {
         for (int i = 0; i < noOfCards; i++) {
         	board.add(deck.deal());
         }
-//        notifyMessage("Board: %s", board);
+        notifyBoardUpdated();
+        notifyMessage("%s deals the %s.", dealer, phaseName);
 	}
 	
     /**
@@ -269,14 +240,14 @@ public class GameEngine {
 			actorPosition = dealerPosition;
 			bet = 0;
 		}
+		notifyBoardUpdated();
+//		resetBets();
 		while (playersToAct > 0) {
-//        	notifyMessage("Hand: %d, MinBet: %d, Bet: %d, Pot: %d", hand, minBet, bet, pot);
         	rotateActor();
-        	notifyMessage("It's %s's turn to act.", actor);
         	int smallBlind = bigBlind / 2;
         	boolean isSmallBlindPosition = (actor.getBet() == smallBlind);
         	Set<Action> allowedActions = getAllowedActions(actor);
-        	Action action = actor.act(allowedActions, actor.getCards(), board, minBet, bet);
+        	Action action = actor.act(allowedActions, minBet, bet);
         	if (!allowedActions.contains(action)) {
         		String msg = String.format("Illegal action (%s) from player %s!", action, actor);
         		throw new IllegalStateException(msg);
@@ -289,9 +260,10 @@ public class GameEngine {
         		case CALL:
         			if (isSmallBlindPosition) {
             			// Correct bet for small blind.
-        				bet -= smallBlind;
+        				pot += bet - smallBlind;
+        			} else {
+        				pot += bet;
         			}
-    				pot += bet;
         			break;
         		case BET:
         			bet = minBet;
@@ -321,13 +293,14 @@ public class GameEngine {
         		default:
         			throw new IllegalStateException("Invalid action: " + action);
         	}
-    		notifyPlayerActed(actor);
+    		notifyPlayerActed();
 		}
 		for (Player player : players) {
 			player.resetBet();
+			notifyPlayerUpdated(player);
 		}
 	}
-	
+    
 	/**
 	 * Returns the allowed actions of a specific player.
 	 * 
@@ -366,7 +339,6 @@ public class GameEngine {
      */
     private void doShowdown() {
 		notifyMessage("Showdown!");
-//		notifyMessage("The board: %s", new Hand(board));
 		notifyBoardUpdated();
 		int highestValue = 0;
 		List<Player> winners = new ArrayList<Player>();
@@ -409,9 +381,10 @@ public class GameEngine {
 	 *            The winning player.
 	 */
     private void playerWins(Player player) {
-		notifyMessage("%s wins.", player);
 		player.win(pot);
 		pot = 0;
+//		notifyBoardUpdated();
+		notifyMessage("%s wins.", player);
 	}
 	
 	/**
@@ -424,35 +397,39 @@ public class GameEngine {
 	 */
     private void notifyMessage(String message, Object... args) {
     	message = String.format(message, args);
-    	for (GameListener listener : listeners) {
-    		listener.messageReceived(message);
+    	for (Player p : players) {
+    		p.getClient().messageReceived(message);
     	}
     }
     
     /**
-     * Notifies listeners that the board has been updated.
+     * Notifies clients that the board has been updated.
      */
     private void notifyBoardUpdated() {
-    	for (GameListener listener : listeners) {
-    		listener.boardUpdated(hand, board, bet, pot);
-    	}
-    }
-    
-    private void notifyPlayerUpdated(Player player, boolean showCards) {
-    	for (GameListener listener : listeners) {
-    		listener.playerActed(new PlayerInfo(player, showCards));
+    	for (Player player : players) {
+    		player.getClient().boardUpdated(board, bet, pot);
     	}
     }
 
 	/**
-	 * Notifies listeners that a player has acted.
+	 * Notifies a client that the player has been updated.
+	 * 
+	 * @param player
+	 *            The player.
+	 */
+    private void notifyPlayerUpdated(Player player) {
+		player.getClient().playerUpdated(player);
+    }
+    
+	/**
+	 * Notifies clients that a player has acted.
 	 * 
 	 * @param player
 	 *            The player that has acted.
 	 */
-    private void notifyPlayerActed(Player player) {
-    	for (GameListener listener : listeners) {
-    		listener.playerActed(new PlayerInfo(player, false));
+    private void notifyPlayerActed() {
+    	for (Player player : players) {
+    		player.getClient().playerActed(actor);
     	}
     }
     
