@@ -1,0 +1,146 @@
+Design
+======
+
+
+Hand phases
+-----------
+
+- Rotate the dealer position.
+- Post the Small Blind and Big Blind.
+- Deal the 2 Hole cards per player.
+- Pre-Flop betting round.
+- Deal the 3 Flop cards on the board.
+- Flop betting round.
+- Deal the Turn card on the board.
+- Turn betting round.
+- Deal the River card on the board.
+- River betting round.
+- Showdown.
+
+
+Action types
+------------
+
+enum Action {
+	CHECK
+	CALL
+	BET
+	RAISE
+	FOLD
+}
+
+
+Action conditions
+-----------------
+
+Check:  bet == 0
+Bet:    bet == 0
+Call:   (bet > 0) AND (myBet < bet)
+Raise:  bet > 0
+Fold:   Anytime
+
+
+Classes
+-------
+
+class Deck {
+	-cards : Card[]
+	+shuffle()
+	+deal() : Card
+	+deal(int noOfCards) : Card[]
+	+deal(int rank, int suit) : Card
+	+reset()
+}
+
+class Card {
+    -rank : int
+    -suit : int
+    +Card(int rank, int suit)
+    +Card(String s)
+    +getRank() : int
+    +getSuit() : int
+}
+
+class Hand {
+    -cards : Card[]
+    -noOfCards : int
+    +Hand()
+    +getNoOfCards() : int
+    +addCard(Card card)
+    +addCards(Card[] cards)
+    +addCards(Collection<Card> cards)
+    +clear()
+}
+
+class Server {
+    -tables : List<Table>
+    +Server(noOfTables : int)
+    +start()
+    +stop()
+}
+
+class Table {
+    -bigBlind : int
+    -players : Map<String, Player>
+    -activePlayers : Map<String, Player>
+    -deck : Deck
+    -board : List<Card>
+    -bet : int
+    -pot : int
+    +Table(bigBlind : int)
+    +start()
+    +stop()
+    +addPlayer(Player player)
+    +removePlayer(Player player)
+}
+
+class Player {
+    -name : String
+    -position : int
+    -cash : int
+    -client : Client
+    -isDealer : boolean
+    -isActor : boolean
+    -cards : Card[]  // Confidential, only set when appropriate!
+    -bet : int
+    -action : Action
+    -raises : int
+    +Player(String name, int cash, Client client)
+}
+
+interface Client {
+    +joinedTable(List<Player> players)
+    +leftTable()
+    +playerJoined(Player player)
+    +playerLeft(Player player)
+    +dealerRotated(Player dealer)
+    +actorRotated(Player actor)
+    +holeCardsUpdated(Card[] cards)
+    +boardUpdated(List<Card> cards, int bet, int pot)
+    +playerActed(Player player)
+    +act(Set<Action> allowedActions) : Action
+}
+
+
+Bot algorithm
+-------------
+
+Factors:
+- hole cards (Chen formula)
+- community cards
+  - potential duplicates (more than One Pair)
+  - potential straight
+  - potential flush
+- number of players
+- table position
+- bet
+- pot
+- cash
+- actions from earlier table positions
+- bluffing
+- opponent behavior
+  - bet
+  - cash
+  - tightness (loose/tight)
+  - aggression (passive/aggressive)
+  - bluffing
