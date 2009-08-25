@@ -3,7 +3,7 @@ package org.ozsoft.texasholdem.gui;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.swing.JButton;
@@ -11,15 +11,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import org.ozsoft.texasholdem.Action;
-import org.ozsoft.texasholdem.Card;
-import org.ozsoft.texasholdem.PlayerClient;
 
 /**
  * Panel with buttons to let a human player select a poker action.
  * 
  * @author Oscar Stigter
  */
-public class ControlPanel extends JPanel implements PlayerClient, ActionListener {
+public class ControlPanel extends JPanel implements ActionListener {
     
 	/** Serial version UID. */
 	private static final long serialVersionUID = 1L;
@@ -63,16 +61,10 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
         betButton = createActionButton(Action.BET);
         raiseButton = createActionButton(Action.RAISE);
         foldButton = createActionButton(Action.FOLD);
-//        add(continueButton);
-//        add(checkButton);
-//        add(callButton);
-//        add(betButton);
-//        add(raiseButton);
-//        add(foldButton);
     }
     
     /**
-     * Waits for the user to continue.
+     * Waits for the user to click the Continue button.
      */
     public void waitForUserInput() {
     	SwingUtilities.invokeLater(new Runnable() {
@@ -83,44 +75,49 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 		    	validate();
 		    	repaint();}
     	});
-    	getUserInput();
+    	Set<Action> allowedActions = new HashSet<Action>();
+    	allowedActions.add(Action.CONTINUE);
+    	getUserInput(allowedActions);
     }
     
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.PlayerClient#act(java.util.Set, org.ozsoft.texasholdem.Card[], java.util.List, int, int)
-     */
-    @Override
-	public Action act(final Set<Action> actions, Card[] holeCards, List<Card> boardCards, int minBet, int currentBet) {
+	/**
+	 * Waits for the user to click an action button and returns the selected
+	 * action.
+	 * 
+	 * @param allowedActions
+	 *            The allowed actions.
+	 * 
+	 * @return The selected action.
+	 */
+    public Action getUserInput(final Set<Action> allowedActions) {
     	SwingUtilities.invokeLater(new Runnable() {
     		@Override
     		public void run() {
 		    	// Show the buttons for the allowed actions.
 		        removeAll();
-		        if (actions.contains(Action.CHECK)) {
-		        	add(checkButton);
-		        }
-		        if (actions.contains(Action.CALL)) {
-		        	add(callButton);
-		        }
-		        if (actions.contains(Action.BET)) {
-		        	add(betButton);
-		        }
-		        if (actions.contains(Action.RAISE)) {
-		        	add(raiseButton);
-		        }
-		        if (actions.contains(Action.FOLD)) {
-		        	add(foldButton);
+		        if (allowedActions.contains(Action.CONTINUE)) {
+		        	add(continueButton);
+		        } else {
+		        	if (allowedActions.contains(Action.CHECK)) {
+			        	add(checkButton);
+			        }
+			        if (allowedActions.contains(Action.CALL)) {
+			        	add(callButton);
+			        }
+			        if (allowedActions.contains(Action.BET)) {
+			        	add(betButton);
+			        }
+			        if (allowedActions.contains(Action.RAISE)) {
+			        	add(raiseButton);
+			        }
+			        if (allowedActions.contains(Action.FOLD)) {
+			        	add(foldButton);
+			        }
 		        }
 		        validate();
 		        repaint();
     		}
     	});
-        getUserInput();
-        return action;
-	}
-    
-    private void getUserInput() {
         synchronized (monitor) {
 	        try {
 	        	monitor.wait();
@@ -128,7 +125,8 @@ public class ControlPanel extends JPanel implements PlayerClient, ActionListener
 	        	// Ignore.
 	        }
         }
-    }
+        return action;
+	}
     
     /*
      * (non-Javadoc)

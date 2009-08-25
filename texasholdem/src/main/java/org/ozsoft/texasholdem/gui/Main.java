@@ -3,19 +3,19 @@ package org.ozsoft.texasholdem.gui;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.JFrame;
 
 import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
-import org.ozsoft.texasholdem.GameEngine;
-import org.ozsoft.texasholdem.GameListener;
+import org.ozsoft.texasholdem.Client;
 import org.ozsoft.texasholdem.Player;
-import org.ozsoft.texasholdem.PlayerInfo;
+import org.ozsoft.texasholdem.Table;
 import org.ozsoft.texasholdem.bots.DummyBot;
 
 /**
@@ -23,7 +23,7 @@ import org.ozsoft.texasholdem.bots.DummyBot;
  * 
  * @author Oscar Stigter
  */
-public class Main extends JFrame implements GameListener {
+public class Main extends JFrame implements Client {
     
 	/** Serial version UID. */
 	private static final long serialVersionUID = 1L;
@@ -34,8 +34,11 @@ public class Main extends JFrame implements GameListener {
     /** The size of the big blind. */
     private static final int BIG_BLIND = 2;
     
+    /** The table. */
+    private final Table table;
+    
     /** The players at the table. */
-    private final List<Player> players;
+    private final Map<String, Player> players;
     
     /** The GridBagConstraints. */
     private final GridBagConstraints gc;
@@ -72,48 +75,58 @@ public class Main extends JFrame implements GameListener {
         boardPanel = new BoardPanel(controlPanel);        
         addComponent(boardPanel, 1, 1, 1, 1);
         
-        players = new ArrayList<Player>();
-        players.add(new Player("Player", controlPanel,   STARTING_CASH));
-        players.add(new Player("Joe",    new DummyBot(), STARTING_CASH));
-        players.add(new Player("Mike",   new DummyBot(), STARTING_CASH));
-        players.add(new Player("Eddie",  new DummyBot(), STARTING_CASH));
-        
-        playerPanels = new HashMap<String, PlayerPanel>();
-        for (int i = 0; i < players.size(); i++) {
-        	PlayerPanel panel = new PlayerPanel();
-        	playerPanels.put(players.get(i).getName(), panel);
-        	switch (i) {
-        		case 0:
-        			addComponent(panel, 1, 0, 1, 1);
-        			break;
-        		case 1:
-        			addComponent(panel, 2, 1, 1, 1);
-        			break;
-        		case 2:
-        			addComponent(panel, 1, 2, 1, 1);
-        			break;
-        		case 3:
-        			addComponent(panel, 0, 1, 1, 1);
-        			break;
-        		default:
-        			// Do nothing.
-        	}
+        players = new LinkedHashMap<String, Player>();
+        players.put("Player", new Player("Player", STARTING_CASH, this));
+        players.put("Joe",    new Player("Joe",    STARTING_CASH, new DummyBot()));
+        players.put("Mike",   new Player("Mike",   STARTING_CASH, new DummyBot()));
+        players.put("Eddie",  new Player("Eddie",  STARTING_CASH, new DummyBot()));
+
+        table = new Table(BIG_BLIND);
+        for (Player player : players.values()) {
+        	table.addPlayer(player);
         }
         
+        playerPanels = new HashMap<String, PlayerPanel>();
+        int i = 0;
+        for (Player player : players.values()) {
+        	PlayerPanel panel = new PlayerPanel();
+        	playerPanels.put(player.getName(), panel);
+        	switch (i++) {
+	    		case 0:
+	    			// North position.
+	    			addComponent(panel, 1, 0, 1, 1);
+	    			break;
+	    		case 1:
+	    			// East position.
+	    			addComponent(panel, 2, 1, 1, 1);
+	    			break;
+	    		case 2:
+	    			// South position.
+	    			addComponent(panel, 1, 2, 1, 1);
+	    			break;
+	    		case 3:
+	    			// West position.
+	    			addComponent(panel, 0, 1, 1, 1);
+	    			break;
+	    		default:
+	    			// Do nothing.
+        	}
+    	}
+        
+        // Show the frame.
         pack();
 		setResizable(false);
 		setLocationRelativeTo(null);
 		setVisible(true);
 
-        final GameEngine gameEngine = new GameEngine(BIG_BLIND, players);
-        gameEngine.addListener(this);
-        Thread gameThread = new Thread(new Runnable() {
-        	@Override
-        	public void run() {
-                gameEngine.start();
-        	}
-        });
-        gameThread.start();
+		// Start the game.
+//		new Thread(new Runnable() {
+//        	@Override
+//        	public void run() {
+//                table.start();
+//        	}
+//        }).start();
+		table.start();
     }
     
 	/**
@@ -128,16 +141,21 @@ public class Main extends JFrame implements GameListener {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.GameListener#boardUpdated(int, java.util.List, int, int)
+	 * @see org.ozsoft.texasholdem.Client#joinedTable(int, java.util.List)
 	 */
 	@Override
-	public void boardUpdated(int hand, List<Card> cards, int bet, int pot) {
-		boardPanel.update(hand, cards, bet, pot);
+	public void joinedTable(int bigBlind, List<Player> players) {
+		for (Player player : players) {
+	    	PlayerPanel playerPanel = playerPanels.get(player.getName());
+	    	if (playerPanel != null) {
+	    		playerPanel.update(player);
+	    	}
+		}
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.GameListener#messageReceived(java.lang.String)
+	 * @see org.ozsoft.texasholdem.Client#messageReceived(java.lang.String)
 	 */
 	@Override
 	public void messageReceived(String message) {
@@ -145,52 +163,60 @@ public class Main extends JFrame implements GameListener {
 		boardPanel.waitForUserInput();
 	}
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.GameListener#playerUpdated(org.ozsoft.texasholdem.PlayerInfo)
-     */
-    @Override
-	public void playerUpdated(PlayerInfo playerInfo) {
-    	String name = playerInfo.getName();
-    	PlayerPanel playerPanel = playerPanels.get(name);
-    	if (playerPanel != null) {
-    		playerPanel.update(playerInfo);
-    	}
-	}
-
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.GameListener#dealerRotated(java.lang.String)
-     */
-    @Override
-	public void dealerRotated(String name) {
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.Client#handStarted(org.ozsoft.texasholdem.Player)
+	 */
+	@Override
+	public void handStarted(Player dealer) {
 		setDealer(false);
-		dealerName = name;
+		dealerName = dealer.getName();
 		setDealer(true);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.GameListener#actorRotated(java.lang.String)
+	 * @see org.ozsoft.texasholdem.Client#actorRotated(org.ozsoft.texasholdem.Player)
 	 */
 	@Override
-	public void actorRotated(String name) {
+	public void actorRotated(Player actor) {
 		setActorInTurn(false);
-		actorName = name;
+		actorName = actor.getName();
 		setActorInTurn(true);
 	}
-	
+
 	/*
 	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.GameListener#playerActed(org.ozsoft.texasholdem.PlayerInfo)
+	 * @see org.ozsoft.texasholdem.Client#boardUpdated(java.util.List, int, int)
 	 */
 	@Override
-	public void playerActed(PlayerInfo playerInfo) {
-		String name = playerInfo.getName();
+	public void boardUpdated(List<Card> cards, int bet, int pot) {
+		boardPanel.update(cards, bet, pot);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.Client#playerUpdated(org.ozsoft.texasholdem.Player)
+	 */
+	@Override
+	public void playerUpdated(Player player) {
+		PlayerPanel playerPanel = playerPanels.get(player.getName());
+		if (playerPanel != null) {
+			playerPanel.update(player);
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.Client#playerActed(org.ozsoft.texasholdem.Player)
+	 */
+	@Override
+	public void playerActed(Player player) {
+		String name = player.getName();
 		PlayerPanel playerPanel = playerPanels.get(name);
 		if (playerPanel != null) {
-			playerPanel.update(playerInfo);
-			Action action = playerInfo.getAction();
+			playerPanel.update(player);
+			Action action = player.getAction();
 			if (action != null) {
 				boardPanel.setMessage(String.format("%s %s.", name, action.getVerb()));
 				//FIXME: Determine actor is the human player.
@@ -203,7 +229,17 @@ public class Main extends JFrame implements GameListener {
 					String.format("No PlayerPanel found for player '%s'", name));
 		}
 	}
-    
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.ozsoft.texasholdem.Client#act(java.util.Set)
+	 */
+	@Override
+	public Action act(Set<Action> allowedActions) {
+		boardPanel.setMessage("Please select an action.");
+		return controlPanel.getUserInput(allowedActions);
+	}
+
 	/**
 	 * Adds an UI component.
 	 * 
