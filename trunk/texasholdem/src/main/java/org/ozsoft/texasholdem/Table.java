@@ -6,7 +6,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Limit Texas Hold'em poker engine, controlling the game flow.
+ * Limit Texas Hold'em poker table.
+ * 
+ * Controls the game flow.
  * 
  * @author Oscar Stigter
  */
