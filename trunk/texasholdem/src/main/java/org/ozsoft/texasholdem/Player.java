@@ -21,10 +21,13 @@ public class Player {
 	
     /** The hand of cards. */
     private final Hand hand;
-
+    
 	/** Current amount of cash. */
     private int cash;
     
+    /** Whether the player has hole cards. */
+    private boolean hasCards;
+
     /** The current bet. */
     private int bet;
     
@@ -68,6 +71,7 @@ public class Player {
      */
     public void resetHand() {
     	hand.removeAllCards();
+    	hasCards = false;
     	resetBet();
     }
     
@@ -82,14 +86,21 @@ public class Player {
      */
     public void setCards(List<Card> cards) {
         hand.removeAllCards();
-    	if (cards != null) {
+    	if (cards == null) {
+    		hasCards = false;
+    	} else {
     		if (cards.size() == 2) {
     	        hand.addCards(cards);
-    	        System.out.format("*** %s's cards: %s\n", name, hand);
+    	        hasCards = true;
+    	        System.out.format("[CHEAT] %s's cards:\t%s\n", name, hand);
     		} else {
     			throw new IllegalArgumentException("Invalid number of cards");
     		}
     	}
+    }
+    
+    public boolean hasCards() {
+    	return hasCards;
     }
     
     /**
@@ -238,6 +249,19 @@ public class Player {
 	 */
     public void win(int pot) {
         cash += pot;
+    }
+    
+	/**
+	 * Returns a clone of this player with only public information.
+	 * 
+	 * @return The cloned player.
+	 */
+    public Player publicClone() {
+    	Player clone = new Player(name, cash, null);
+    	clone.bet = bet;
+    	clone.raises = raises;
+    	clone.action = action;
+    	return clone;
     }
     
     /*

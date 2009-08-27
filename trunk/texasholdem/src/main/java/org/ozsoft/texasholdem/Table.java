@@ -243,7 +243,6 @@ public class Table {
 			bet = 0;
 		}
 		notifyBoardUpdated();
-//		resetBets();
 		while (playersToAct > 0) {
         	rotateActor();
         	int smallBlind = bigBlind / 2;
@@ -296,10 +295,6 @@ public class Table {
         			throw new IllegalStateException("Invalid action: " + action);
         	}
     		notifyPlayerActed();
-		}
-		for (Player player : players) {
-			player.resetBet();
-			notifyPlayerUpdated(player);
 		}
 	}
     
@@ -414,24 +409,15 @@ public class Table {
     }
 
 	/**
-	 * Notifies a client that the player has been updated.
-	 * 
-	 * @param player
-	 *            The player.
-	 */
-    private void notifyPlayerUpdated(Player player) {
-		player.getClient().playerUpdated(player);
-    }
-    
-	/**
 	 * Notifies clients that a player has acted.
 	 * 
 	 * @param player
 	 *            The player that has acted.
 	 */
     private void notifyPlayerActed() {
-    	for (Player player : players) {
-    		player.getClient().playerActed(actor);
+    	Player publicClone = actor.publicClone();
+    	for (Player p : players) {
+    		p.getClient().playerActed(publicClone);
     	}
     }
     
