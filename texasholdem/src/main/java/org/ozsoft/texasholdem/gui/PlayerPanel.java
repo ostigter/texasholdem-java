@@ -22,25 +22,25 @@ import org.ozsoft.texasholdem.Player;
  */
 public class PlayerPanel extends JPanel {
     
-	/** The serial version UID. */
-	private static final long serialVersionUID = 1L;
+    /** The serial version UID. */
+    private static final long serialVersionUID = 1L;
 
-	/** Filled dealer button image when player is dealer. */
-	private static final Icon BUTTON_PRESENT_ICON =
-			ResourceManager.getIcon("/images/button_present.png");
+    /** Filled dealer button image when player is dealer. */
+    private static final Icon BUTTON_PRESENT_ICON =
+            ResourceManager.getIcon("/images/button_present.png");
     
     /** Empty dealer button image when player is not dealer. */
-	private static final Icon BUTTON_ABSENT_ICON =
+    private static final Icon BUTTON_ABSENT_ICON =
             ResourceManager.getIcon("/images/button_absent.png");
-	
-	private static final Icon CARD_PLACEHOLDER_ICON =
-		ResourceManager.getIcon("/images/card_placeholder.png");
-
-	private static final Icon CARD_BACK_ICON =
-			ResourceManager.getIcon("/images/card_back.png");
     
-	/** The border. */
-	private static final Border BORDER = new EmptyBorder(10, 10, 10, 10);
+    private static final Icon CARD_PLACEHOLDER_ICON =
+        ResourceManager.getIcon("/images/card_placeholder.png");
+
+    private static final Icon CARD_BACK_ICON =
+            ResourceManager.getIcon("/images/card_back.png");
+    
+    /** The border. */
+    private static final Border BORDER = new EmptyBorder(10, 10, 10, 10);
     
     /** The label with the player's name. */
     private JLabel nameLabel;
@@ -63,12 +63,12 @@ public class PlayerPanel extends JPanel {
     /** The label for the dealer button image. */
     private JLabel dealerButton;
     
-	/**
-	 * Constructor.
-	 * 
-	 * @param player
-	 *            The player.
-	 */
+    /**
+     * Constructor.
+     * 
+     * @param player
+     *            The player.
+     */
     public PlayerPanel() {
         setBorder(BORDER);
         setBackground(UIConstants.TABLE_COLOR);
@@ -152,14 +152,14 @@ public class PlayerPanel extends JPanel {
         setDealer(false);
     }
     
-	/**
-	 * Updates the panel.
-	 * 
-	 * @param player
-	 *            The player.
-	 */
+    /**
+     * Updates the panel.
+     * 
+     * @param player
+     *            The player.
+     */
     public void update(Player player) {
-    	nameLabel.setText(player.getName());
+        nameLabel.setText(player.getName());
         int cash = player.getCash();
         if (cash == 0) {
             cashLabel.setText("BROKE!");
@@ -182,10 +182,10 @@ public class PlayerPanel extends JPanel {
             Card[] cards = player.getCards();
             if (cards != null) {
                 if (cards.length == 2) {
-    	            card1Label.setIcon(ResourceManager.getCardImage(cards[0]));
-    	            card2Label.setIcon(ResourceManager.getCardImage(cards[1]));
+                    card1Label.setIcon(ResourceManager.getCardImage(cards[0]));
+                    card2Label.setIcon(ResourceManager.getCardImage(cards[1]));
                 } else {
-                	throw new IllegalArgumentException("Invalid number of cards");
+                    throw new IllegalArgumentException("Invalid number of cards");
                 }
             } else {
                 card1Label.setIcon(CARD_BACK_ICON);
@@ -197,12 +197,12 @@ public class PlayerPanel extends JPanel {
         }
     }
     
-	/**
-	 * Sets whether the player is the dealer.
-	 * 
-	 * @param isDealer
-	 *            True if the dealer, otherwise false.
-	 */
+    /**
+     * Sets whether the player is the dealer.
+     * 
+     * @param isDealer
+     *            True if the dealer, otherwise false.
+     */
     public void setDealer(boolean isDealer) {
         if (isDealer) {
             dealerButton.setIcon(BUTTON_PRESENT_ICON);
@@ -211,12 +211,12 @@ public class PlayerPanel extends JPanel {
         }
     }
     
-	/**
-	 * Sets whether it's this player's turn to act.
-	 * 
-	 * @param inTurn
-	 *            True if it's the player's turn, otherwise false.
-	 */
+    /**
+     * Sets whether it's this player's turn to act.
+     * 
+     * @param inTurn
+     *            True if it's the player's turn, otherwise false.
+     */
     public void setInTurn(boolean inTurn) {
         if (inTurn) {
             nameLabel.setForeground(Color.YELLOW);
@@ -232,15 +232,15 @@ public class PlayerPanel extends JPanel {
      */
     private static class MyLabel extends JLabel {
 
-		private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-		public MyLabel() {
+        public MyLabel() {
             setBorder(UIConstants.LABEL_BORDER);
             setForeground(UIConstants.TEXT_COLOR);
             setHorizontalAlignment(JLabel.HORIZONTAL);
             setText(" ");
         }
-		
+        
     } // MyLabel
     
 }

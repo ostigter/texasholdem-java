@@ -19,39 +19,39 @@ import org.ozsoft.texasholdem.Action;
  */
 public class ControlPanel extends JPanel implements ActionListener {
     
-	/** Serial version UID. */
-	private static final long serialVersionUID = 1L;
-	
-	/** Monitor while waiting for user input. */
-	private final Object monitor = new Object();
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
     
-	/** The Check button. */
+    /** Monitor while waiting for user input. */
+    private final Object monitor = new Object();
+    
+    /** The Check button. */
     private final JButton checkButton;
     
-	/** The Call button. */
+    /** The Call button. */
     private final JButton callButton;
     
-	/** The Bet button. */
+    /** The Bet button. */
     private final JButton betButton;
     
-	/** The Raise button. */
+    /** The Raise button. */
     private final JButton raiseButton;
     
-	/** The Fold button. */
+    /** The Fold button. */
     private final JButton foldButton;
     
-	/** The Continue button. */
-	private final JButton continueButton;
+    /** The Continue button. */
+    private final JButton continueButton;
 
     /** The selected action. */
     private Action action;
     
-	/**
-	 * Constructor.
-	 * 
-	 * @param main
-	 *            The main frame.
-	 */
+    /**
+     * Constructor.
+     * 
+     * @param main
+     *            The main frame.
+     */
     public ControlPanel() {
         setBackground(UIConstants.TABLE_COLOR);
         setLayout(new FlowLayout());
@@ -67,107 +67,107 @@ public class ControlPanel extends JPanel implements ActionListener {
      * Waits for the user to click the Continue button.
      */
     public void waitForUserInput() {
-    	SwingUtilities.invokeLater(new Runnable() {
-    		@Override
-    		public void run() {
-    			removeAll();
-		    	add(continueButton);
-		    	validate();
-		    	repaint();}
-    	});
-    	Set<Action> allowedActions = new HashSet<Action>();
-    	allowedActions.add(Action.CONTINUE);
-    	getUserInput(allowedActions);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                removeAll();
+                add(continueButton);
+                validate();
+                repaint();}
+        });
+        Set<Action> allowedActions = new HashSet<Action>();
+        allowedActions.add(Action.CONTINUE);
+        getUserInput(allowedActions);
     }
     
-	/**
-	 * Waits for the user to click an action button and returns the selected
-	 * action.
-	 * 
-	 * @param allowedActions
-	 *            The allowed actions.
-	 * 
-	 * @return The selected action.
-	 */
+    /**
+     * Waits for the user to click an action button and returns the selected
+     * action.
+     * 
+     * @param allowedActions
+     *            The allowed actions.
+     * 
+     * @return The selected action.
+     */
     public Action getUserInput(final Set<Action> allowedActions) {
-    	SwingUtilities.invokeLater(new Runnable() {
-    		@Override
-    		public void run() {
-		    	// Show the buttons for the allowed actions.
-		        removeAll();
-		        if (allowedActions.contains(Action.CONTINUE)) {
-		        	add(continueButton);
-		        } else {
-		        	if (allowedActions.contains(Action.CHECK)) {
-			        	add(checkButton);
-			        }
-			        if (allowedActions.contains(Action.CALL)) {
-			        	add(callButton);
-			        }
-			        if (allowedActions.contains(Action.BET)) {
-			        	add(betButton);
-			        }
-			        if (allowedActions.contains(Action.RAISE)) {
-			        	add(raiseButton);
-			        }
-			        if (allowedActions.contains(Action.FOLD)) {
-			        	add(foldButton);
-			        }
-		        }
-		        validate();
-		        repaint();
-    		}
-    	});
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                // Show the buttons for the allowed actions.
+                removeAll();
+                if (allowedActions.contains(Action.CONTINUE)) {
+                    add(continueButton);
+                } else {
+                    if (allowedActions.contains(Action.CHECK)) {
+                        add(checkButton);
+                    }
+                    if (allowedActions.contains(Action.CALL)) {
+                        add(callButton);
+                    }
+                    if (allowedActions.contains(Action.BET)) {
+                        add(betButton);
+                    }
+                    if (allowedActions.contains(Action.RAISE)) {
+                        add(raiseButton);
+                    }
+                    if (allowedActions.contains(Action.FOLD)) {
+                        add(foldButton);
+                    }
+                }
+                validate();
+                repaint();
+            }
+        });
         synchronized (monitor) {
-	        try {
-	        	monitor.wait();
-	        } catch (InterruptedException e) {
-	        	// Ignore.
-	        }
+            try {
+                monitor.wait();
+            } catch (InterruptedException e) {
+                // Ignore.
+            }
         }
         return action;
-	}
+    }
     
     /*
      * (non-Javadoc)
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     @Override
-	public void actionPerformed(ActionEvent e) {
-    	Object source = e.getSource();
-    	if (source == continueButton) {
-    		action = Action.CONTINUE;
-    	} else if (source == checkButton) {
-    		action = Action.CHECK;
-    	} else if (source == callButton) {
-    		action = Action.CALL;
-    	} else if (source == betButton) {
-    		action = Action.BET;
-    	} else if (source == raiseButton) {
-    		action = Action.RAISE;
-    	} else {
-    		action = Action.FOLD;
-    	}
-        synchronized (monitor) {
-        	monitor.notifyAll();
+    public void actionPerformed(ActionEvent e) {
+        Object source = e.getSource();
+        if (source == continueButton) {
+            action = Action.CONTINUE;
+        } else if (source == checkButton) {
+            action = Action.CHECK;
+        } else if (source == callButton) {
+            action = Action.CALL;
+        } else if (source == betButton) {
+            action = Action.BET;
+        } else if (source == raiseButton) {
+            action = Action.RAISE;
+        } else {
+            action = Action.FOLD;
         }
-	}
+        synchronized (monitor) {
+            monitor.notifyAll();
+        }
+    }
     
-	/**
-	 * Creates an action button.
-	 * 
-	 * @param action
-	 *            The action.
-	 * 
-	 * @return The button.
-	 */
+    /**
+     * Creates an action button.
+     * 
+     * @param action
+     *            The action.
+     * 
+     * @return The button.
+     */
     private JButton createActionButton(Action action) {
-    	String label = action.getName();
-    	JButton button = new JButton(label);
-    	button.setMnemonic(label.charAt(0));
-    	button.setSize(100, 30);
-    	button.addActionListener(this);
-    	return button;
+        String label = action.getName();
+        JButton button = new JButton(label);
+        button.setMnemonic(label.charAt(0));
+        button.setSize(100, 30);
+        button.addActionListener(this);
+        return button;
     }
 
 }

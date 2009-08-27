@@ -18,36 +18,36 @@ import org.ozsoft.texasholdem.Card;
  */
 public class BoardPanel extends JPanel {
     
-	/** The serial version UID. */
-	private static final long serialVersionUID = 1L;
-	
-	/** The maximum number of community cards. */
-	private static final int NO_OF_CARDS = 5;
-	
+    /** The serial version UID. */
+    private static final long serialVersionUID = 1L;
+    
+    /** The maximum number of community cards. */
+    private static final int NO_OF_CARDS = 5;
+    
     /** The control panel. */
     private final ControlPanel controlPanel;
     
-	/** Label with the bet. */
-	private final JLabel betLabel;
+    /** Label with the bet. */
+    private final JLabel betLabel;
 
-	/** Label with the pot. */
-	private final JLabel potLabel;
+    /** Label with the pot. */
+    private final JLabel potLabel;
 
-	/** Labels with the community cards. */
+    /** Labels with the community cards. */
     private final JLabel[] cardLabels;
     
     /** Label with a custom message. */
     private final JLabel messageLabel;
     
-	/**
-	 * Constructor.
-	 * 
-	 * @param mainFrame
-	 *            The main frame.
-	 */
+    /**
+     * Constructor.
+     * 
+     * @param mainFrame
+     *            The main frame.
+     */
     public BoardPanel(ControlPanel controlPanel) {
-    	this.controlPanel = controlPanel;
-    	
+        this.controlPanel = controlPanel;
+        
         setBorder(UIConstants.PANEL_BORDER);
         setBackground(UIConstants.TABLE_COLOR);
         setLayout(new GridBagLayout());
@@ -155,41 +155,41 @@ public class BoardPanel extends JPanel {
         update(null, 0, 0);
     }
     
-	/**
-	 * Updates the current hand status.
-	 * 
-	 * @param bet
-	 *            The bet.
-	 * @param pot
-	 *            The pot.
-	 */
+    /**
+     * Updates the current hand status.
+     * 
+     * @param bet
+     *            The bet.
+     * @param pot
+     *            The pot.
+     */
     public void update(List<Card> cards, int bet, int pot) {
-    	if (bet == 0) {
+        if (bet == 0) {
             betLabel.setText(" ");
-    	} else {
+        } else {
             betLabel.setText("$ " + bet);
-    	}
-    	if (pot == 0) {
+        }
+        if (pot == 0) {
             potLabel.setText(" ");
-    	} else {
+        } else {
             potLabel.setText("$ " + pot);
-    	}
-    	int noOfCards = (cards == null) ? 0 : cards.size();
-    	for (int i = 0; i < NO_OF_CARDS; i++) {
-    		if (i < noOfCards) {
-    			cardLabels[i].setIcon(ResourceManager.getCardImage(cards.get(i)));
-    		} else {
-    			cardLabels[i].setIcon(ResourceManager.getIcon("/images/card_placeholder.png"));
-    		}
-    	}
+        }
+        int noOfCards = (cards == null) ? 0 : cards.size();
+        for (int i = 0; i < NO_OF_CARDS; i++) {
+            if (i < noOfCards) {
+                cardLabels[i].setIcon(ResourceManager.getCardImage(cards.get(i)));
+            } else {
+                cardLabels[i].setIcon(ResourceManager.getIcon("/images/card_placeholder.png"));
+            }
+        }
     }
     
-	/**
-	 * Sets a custom message.
-	 * 
-	 * @param message
-	 *            The message.
-	 */
+    /**
+     * Sets a custom message.
+     * 
+     * @param message
+     *            The message.
+     */
     public void setMessage(String message) {
         if (message.length() == 0) {
             messageLabel.setText(" ");
@@ -202,7 +202,7 @@ public class BoardPanel extends JPanel {
      * Waits for the user to continue.
      */
     public void waitForUserInput() {
-    	controlPanel.waitForUserInput();
+        controlPanel.waitForUserInput();
     }
     
 }

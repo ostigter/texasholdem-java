@@ -25,9 +25,9 @@ import org.ozsoft.texasholdem.bots.DummyBot;
  */
 public class Main extends JFrame implements Client {
     
-	/** Serial version UID. */
-	private static final long serialVersionUID = 1L;
-	
+    /** Serial version UID. */
+    private static final long serialVersionUID = 1L;
+    
     /** The starting cash per player. */
     private static final int STARTING_CASH = 100;
     
@@ -83,177 +83,177 @@ public class Main extends JFrame implements Client {
 
         table = new Table(BIG_BLIND);
         for (Player player : players.values()) {
-        	table.addPlayer(player);
+            table.addPlayer(player);
         }
         
         playerPanels = new HashMap<String, PlayerPanel>();
         int i = 0;
         for (Player player : players.values()) {
-        	PlayerPanel panel = new PlayerPanel();
-        	playerPanels.put(player.getName(), panel);
-        	switch (i++) {
-	    		case 0:
-	    			// North position.
-	    			addComponent(panel, 1, 0, 1, 1);
-	    			break;
-	    		case 1:
-	    			// East position.
-	    			addComponent(panel, 2, 1, 1, 1);
-	    			break;
-	    		case 2:
-	    			// South position.
-	    			addComponent(panel, 1, 2, 1, 1);
-	    			break;
-	    		case 3:
-	    			// West position.
-	    			addComponent(panel, 0, 1, 1, 1);
-	    			break;
-	    		default:
-	    			// Do nothing.
-        	}
-    	}
+            PlayerPanel panel = new PlayerPanel();
+            playerPanels.put(player.getName(), panel);
+            switch (i++) {
+                case 0:
+                    // North position.
+                    addComponent(panel, 1, 0, 1, 1);
+                    break;
+                case 1:
+                    // East position.
+                    addComponent(panel, 2, 1, 1, 1);
+                    break;
+                case 2:
+                    // South position.
+                    addComponent(panel, 1, 2, 1, 1);
+                    break;
+                case 3:
+                    // West position.
+                    addComponent(panel, 0, 1, 1, 1);
+                    break;
+                default:
+                    // Do nothing.
+            }
+        }
         
         // Show the frame.
         pack();
-		setResizable(false);
-		setLocationRelativeTo(null);
-		setVisible(true);
+        setResizable(false);
+        setLocationRelativeTo(null);
+        setVisible(true);
 
-		// Start the game.
+        // Start the game.
 //		new Thread(new Runnable() {
 //        	@Override
 //        	public void run() {
 //                table.start();
 //        	}
 //        }).start();
-		table.start();
+        table.start();
     }
     
-	/**
-	 * The application's entry point.
-	 * 
-	 * @param args
-	 *            The command line arguments.
-	 */
-	public static void main(String[] args) {
-		new Main();
-	}
+    /**
+     * The application's entry point.
+     * 
+     * @param args
+     *            The command line arguments.
+     */
+    public static void main(String[] args) {
+        new Main();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#joinedTable(int, java.util.List)
-	 */
-	@Override
-	public void joinedTable(int bigBlind, List<Player> players) {
-		for (Player player : players) {
-	    	PlayerPanel playerPanel = playerPanels.get(player.getName());
-	    	if (playerPanel != null) {
-	    		playerPanel.update(player);
-	    	}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#joinedTable(int, java.util.List)
+     */
+    @Override
+    public void joinedTable(int bigBlind, List<Player> players) {
+        for (Player player : players) {
+            PlayerPanel playerPanel = playerPanels.get(player.getName());
+            if (playerPanel != null) {
+                playerPanel.update(player);
+            }
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#messageReceived(java.lang.String)
-	 */
-	@Override
-	public void messageReceived(String message) {
-		boardPanel.setMessage(message);
-		boardPanel.waitForUserInput();
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#messageReceived(java.lang.String)
+     */
+    @Override
+    public void messageReceived(String message) {
+        boardPanel.setMessage(message);
+        boardPanel.waitForUserInput();
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#handStarted(org.ozsoft.texasholdem.Player)
-	 */
-	@Override
-	public void handStarted(Player dealer) {
-		setDealer(false);
-		dealerName = dealer.getName();
-		setDealer(true);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#handStarted(org.ozsoft.texasholdem.Player)
+     */
+    @Override
+    public void handStarted(Player dealer) {
+        setDealer(false);
+        dealerName = dealer.getName();
+        setDealer(true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#actorRotated(org.ozsoft.texasholdem.Player)
-	 */
-	@Override
-	public void actorRotated(Player actor) {
-		setActorInTurn(false);
-		actorName = actor.getName();
-		setActorInTurn(true);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#actorRotated(org.ozsoft.texasholdem.Player)
+     */
+    @Override
+    public void actorRotated(Player actor) {
+        setActorInTurn(false);
+        actorName = actor.getName();
+        setActorInTurn(true);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#boardUpdated(java.util.List, int, int)
-	 */
-	@Override
-	public void boardUpdated(List<Card> cards, int bet, int pot) {
-		boardPanel.update(cards, bet, pot);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#boardUpdated(java.util.List, int, int)
+     */
+    @Override
+    public void boardUpdated(List<Card> cards, int bet, int pot) {
+        boardPanel.update(cards, bet, pot);
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#playerUpdated(org.ozsoft.texasholdem.Player)
-	 */
-	@Override
-	public void playerUpdated(Player player) {
-		PlayerPanel playerPanel = playerPanels.get(player.getName());
-		if (playerPanel != null) {
-			playerPanel.update(player);
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#playerUpdated(org.ozsoft.texasholdem.Player)
+     */
+    @Override
+    public void playerUpdated(Player player) {
+        PlayerPanel playerPanel = playerPanels.get(player.getName());
+        if (playerPanel != null) {
+            playerPanel.update(player);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#playerActed(org.ozsoft.texasholdem.Player)
-	 */
-	@Override
-	public void playerActed(Player player) {
-		String name = player.getName();
-		PlayerPanel playerPanel = playerPanels.get(name);
-		if (playerPanel != null) {
-			playerPanel.update(player);
-			Action action = player.getAction();
-			if (action != null) {
-				boardPanel.setMessage(String.format("%s %s.", name, action.getVerb()));
-				//FIXME: Determine actor is the human player.
-				if (!name.equals("Player")) {
-					boardPanel.waitForUserInput();
-				}
-			}
-		} else {
-			throw new IllegalStateException(
-					String.format("No PlayerPanel found for player '%s'", name));
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#playerActed(org.ozsoft.texasholdem.Player)
+     */
+    @Override
+    public void playerActed(Player player) {
+        String name = player.getName();
+        PlayerPanel playerPanel = playerPanels.get(name);
+        if (playerPanel != null) {
+            playerPanel.update(player);
+            Action action = player.getAction();
+            if (action != null) {
+                boardPanel.setMessage(String.format("%s %s.", name, action.getVerb()));
+                //FIXME: Determine actor is the human player.
+                if (!name.equals("Player")) {
+                    boardPanel.waitForUserInput();
+                }
+            }
+        } else {
+            throw new IllegalStateException(
+                    String.format("No PlayerPanel found for player '%s'", name));
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * @see org.ozsoft.texasholdem.Client#act(java.util.Set)
-	 */
-	@Override
-	public Action act(Set<Action> allowedActions) {
-		boardPanel.setMessage("Please select an action.");
-		return controlPanel.getUserInput(allowedActions);
-	}
+    /*
+     * (non-Javadoc)
+     * @see org.ozsoft.texasholdem.Client#act(java.util.Set)
+     */
+    @Override
+    public Action act(Set<Action> allowedActions) {
+        boardPanel.setMessage("Please select an action.");
+        return controlPanel.getUserInput(allowedActions);
+    }
 
-	/**
-	 * Adds an UI component.
-	 * 
-	 * @param component
-	 *            The component.
-	 * @param x
-	 *            The column.
-	 * @param y
-	 *            The row.
-	 * @param width
-	 *            The number of columns to span.
-	 * @param height
-	 *            The number of rows to span.
-	 */
+    /**
+     * Adds an UI component.
+     * 
+     * @param component
+     *            The component.
+     * @param x
+     *            The column.
+     * @param y
+     *            The row.
+     * @param width
+     *            The number of columns to span.
+     * @param height
+     *            The number of rows to span.
+     */
     private void addComponent(Component component, int x, int y, int width, int height) {
         gc.gridx = x;
         gc.gridy = y;
@@ -266,34 +266,34 @@ public class Main extends JFrame implements Client {
         getContentPane().add(component, gc);
     }
 
-	/**
-	 * Sets whether the actor  is in turn.
-	 * 
-	 * @param isInTurn
-	 *            Whether the actor is in turn.
-	 */
-	private void setActorInTurn(boolean isInTurn) {
-		if (actorName != null) {
-			PlayerPanel playerPanel = playerPanels.get(actorName);
-			if (playerPanel != null) {
-				playerPanel.setInTurn(isInTurn);
-			}
-		}
-	}
+    /**
+     * Sets whether the actor  is in turn.
+     * 
+     * @param isInTurn
+     *            Whether the actor is in turn.
+     */
+    private void setActorInTurn(boolean isInTurn) {
+        if (actorName != null) {
+            PlayerPanel playerPanel = playerPanels.get(actorName);
+            if (playerPanel != null) {
+                playerPanel.setInTurn(isInTurn);
+            }
+        }
+    }
 
-	/**
-	 * Sets the dealer.
-	 * 
-	 * @param isDealer
-	 *            Whether the player is the dealer.
-	 */
-	private void setDealer(boolean isDealer) {
-		if (dealerName != null) {
-			PlayerPanel playerPanel = playerPanels.get(dealerName);
-			if (playerPanel != null) {
-				playerPanel.setDealer(isDealer);
-			}
-		}
-	}
+    /**
+     * Sets the dealer.
+     * 
+     * @param isDealer
+     *            Whether the player is the dealer.
+     */
+    private void setDealer(boolean isDealer) {
+        if (dealerName != null) {
+            PlayerPanel playerPanel = playerPanels.get(dealerName);
+            if (playerPanel != null) {
+                playerPanel.setDealer(isDealer);
+            }
+        }
+    }
 
 }

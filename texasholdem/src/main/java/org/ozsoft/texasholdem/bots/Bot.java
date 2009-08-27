@@ -8,7 +8,7 @@ import org.ozsoft.texasholdem.Client;
  * @author Oscar Stigter
  */
 public abstract class Bot implements Client {
-	
-	// Empty class; should be implemented by an actual bot.
+    
+    // Empty class; should be implemented by an actual bot.
 
 }

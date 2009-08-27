@@ -7,10 +7,10 @@ package org.ozsoft.texasholdem;
  */
 public class Card implements Comparable<Card> {
     
-	/** The number of ranks in a deck. */
-	public static final int NO_OF_RANKS = 13;
-	
-	/** The number of suits in a deck. */
+    /** The number of ranks in a deck. */
+    public static final int NO_OF_RANKS = 13;
+    
+    /** The number of suits in a deck. */
     public static final int NO_OF_SUITS = 4;
     
     // The ranks.
@@ -54,16 +54,16 @@ public class Card implements Comparable<Card> {
     }
     
     /**
-	 * Returns the card represented by the specified string.
-	 * 
-	 * @param s
-	 *            The string representation of the card, e.g. "As", "Td", "7h".
-	 * 
-	 * @return The card.
-	 * 
-	 * @throws IllegalArgumentException
-	 *             If the card string could not be parsed.
-	 */
+     * Returns the card represented by the specified string.
+     * 
+     * @param s
+     *            The string representation of the card, e.g. "As", "Td", "7h".
+     * 
+     * @return The card.
+     * 
+     * @throws IllegalArgumentException
+     *             If the card string could not be parsed.
+     */
     public Card(String s) {
         if ((s != null) && (s.length() == 2)) {
             int length = s.length();
@@ -106,10 +106,10 @@ public class Card implements Comparable<Card> {
     }
     
     /**
-	 * Returns the rank.
-	 * 
-	 * @return The rank.
-	 */
+     * Returns the rank.
+     * 
+     * @return The rank.
+     */
     public int getRank() {
         return rank;
     }
@@ -130,7 +130,7 @@ public class Card implements Comparable<Card> {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Card) {
-        	return ((Card) obj).hashCode() == hashCode();
+            return ((Card) obj).hashCode() == hashCode();
         } else {
             return false;
         }
