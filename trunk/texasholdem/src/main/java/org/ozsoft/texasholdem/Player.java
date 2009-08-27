@@ -13,16 +13,16 @@ import java.util.Set;
  */
 public class Player {
     
-	/** The name. */
-	private final String name;
-	
-	/** The client responsible for the actual behavior. */
-	private final Client client;
-	
+    /** The name. */
+    private final String name;
+    
+    /** The client responsible for the actual behavior. */
+    private final Client client;
+    
     /** The hand of cards. */
     private final Hand hand;
     
-	/** Current amount of cash. */
+    /** Current amount of cash. */
     private int cash;
     
     /** Whether the player has hole cards. */
@@ -37,16 +37,16 @@ public class Player {
     /** The last action performed. */
     private Action action;
 
-	/**
-	 * Constructs a player.
-	 * 
-	 * @param name
-	 *            The player's name.
-	 * @param cash
-	 *            The player's starting amount of cash.
-	 * @param client
-	 *            The client interface.
-	 */
+    /**
+     * Constructs a player.
+     * 
+     * @param name
+     *            The player's name.
+     * @param cash
+     *            The player's starting amount of cash.
+     * @param client
+     *            The client interface.
+     */
     public Player(String name, int cash, Client client) {
         this.name = name;
         this.cash = cash;
@@ -57,22 +57,22 @@ public class Player {
         resetHand();
     }
     
-	/**
-	 * Returns the client.
-	 * 
-	 * @return The client.
-	 */
+    /**
+     * Returns the client.
+     * 
+     * @return The client.
+     */
     public Client getClient() {
-    	return client;
+        return client;
     }
     
     /**
      * Prepares the player for another hand.
      */
     public void resetHand() {
-    	hand.removeAllCards();
-    	hasCards = false;
-    	resetBet();
+        hand.removeAllCards();
+        hasCards = false;
+        resetBet();
     }
     
     public void resetBet() {
@@ -86,21 +86,21 @@ public class Player {
      */
     public void setCards(List<Card> cards) {
         hand.removeAllCards();
-    	if (cards == null) {
-    		hasCards = false;
-    	} else {
-    		if (cards.size() == 2) {
-    	        hand.addCards(cards);
-    	        hasCards = true;
-    	        System.out.format("[CHEAT] %s's cards:\t%s\n", name, hand);
-    		} else {
-    			throw new IllegalArgumentException("Invalid number of cards");
-    		}
-    	}
+        if (cards == null) {
+            hasCards = false;
+        } else {
+            if (cards.size() == 2) {
+                hand.addCards(cards);
+                hasCards = true;
+                System.out.format("[CHEAT] %s's cards:\t%s\n", name, hand);
+            } else {
+                throw new IllegalArgumentException("Invalid number of cards");
+            }
+        }
     }
     
     public boolean hasCards() {
-    	return hasCards;
+        return hasCards;
     }
     
     /**
@@ -140,12 +140,12 @@ public class Player {
     }
     
     /**
-	 * Returns the number of raises the player has done in this betting round.
-	 * 
-	 * @return The number of raises.
-	 */
+     * Returns the number of raises the player has done in this betting round.
+     * 
+     * @return The number of raises.
+     */
     public int getRaises() {
-    	return raises;
+        return raises;
     }
     
     /**
@@ -175,93 +175,93 @@ public class Player {
         return hand.getCards();
     }
     
-	/**
-	 * Posts the small blind.
-	 * 
-	 * @param blind
-	 *            The small blind.
-	 */
+    /**
+     * Posts the small blind.
+     * 
+     * @param blind
+     *            The small blind.
+     */
     public void postSmallBlind(int blind) {
         action = Action.SMALL_BLIND;
         cash -= blind;
         bet += blind;
     }
     
-	/**
-	 * Posts the big blinds.
-	 * 
-	 * @param blind
-	 *            The big blind.
-	 */
+    /**
+     * Posts the big blinds.
+     * 
+     * @param blind
+     *            The big blind.
+     */
     public void postBigBlind(int blind) {
         action = Action.BIG_BLIND;
         cash -= blind;
         bet += blind;
     }
     
-	/**
-	 * Asks the player to act and returns the selected action.
-	 * 
-	 * @param actions
-	 *            The allowed actions.
-	 * @param minBet
-	 *            The minimum bet.
-	 * @param currentBet
-	 *            The current bet.
-	 * 
-	 * @return The selected action.
-	 */
+    /**
+     * Asks the player to act and returns the selected action.
+     * 
+     * @param actions
+     *            The allowed actions.
+     * @param minBet
+     *            The minimum bet.
+     * @param currentBet
+     *            The current bet.
+     * 
+     * @return The selected action.
+     */
     public Action act(Set<Action> actions, int minBet, int currentBet) {
-    	action = client.act(actions);
-    	switch (action) {
-        	case CHECK:
-        		break;
-        	case CALL:
+        action = client.act(actions);
+        switch (action) {
+            case CHECK:
+                break;
+            case CALL:
                 cash -= currentBet - bet;
                 bet += currentBet - bet;
-        		break;
-        	case BET:
+                break;
+            case BET:
                 if (minBet >= cash) {
                     minBet = cash;
                 }
                 cash -= minBet;
                 bet += minBet;
                 raises++;
-        		break;
-        	case RAISE:
+                break;
+            case RAISE:
                 currentBet += minBet;
                 cash -= currentBet - bet;
                 bet += currentBet - bet;
                 raises++;
-        		break;
-        	case FOLD:
+                break;
+            case FOLD:
                 hand.removeAllCards();
-        		break;
-    	}
-    	return action;
+                break;
+        }
+        return action;
     }
     
-	/**
-	 * Wins the pot.
-	 * 
-	 * @param pot
-	 *            The pot.
-	 */
+    /**
+     * Wins the pot.
+     * 
+     * @param pot
+     *            The pot.
+     */
     public void win(int pot) {
         cash += pot;
     }
     
-	/**
-	 * Returns a clone of this player with only public information.
-	 * 
-	 * @return The cloned player.
-	 */
+    /**
+     * Returns a clone of this player with only public information.
+     * 
+     * @return The cloned player.
+     */
     public Player publicClone() {
-    	Player clone = new Player(name, cash, null);
-    	clone.bet = bet;
-    	clone.raises = raises;
-    	clone.action = action;
-    	return clone;
+        Player clone = new Player(name, cash, null);
+        clone.bet = bet;
+        clone.raises = raises;
+        clone.action = action;
+        return clone;
     }
     
     /*
@@ -270,7 +270,7 @@ public class Player {
      */
     @Override
     public String toString() {
-    	return name;
+        return name;
     }
     
 }

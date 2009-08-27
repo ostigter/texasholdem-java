@@ -3,9 +3,9 @@ package org.ozsoft.texasholdem;
 import org.junit.Test;
 
 public class BasicBotTest {
-	
-	@Test
-	public void test() {
+    
+    @Test
+    public void test() {
 //		BasicBot bot = new BasicBot();
 //		int value1, value2;
 //		
@@ -42,6 +42,6 @@ public class BasicBotTest {
 //		value1 = bot.evaluateHoleCards(new Card[]{new Card("2d"), new Card("2c")});
 //		value2 = bot.evaluateHoleCards(new Card[]{new Card("3d"), new Card("2s")});
 //		Assert.assertTrue(value1 > value2);
-	}
+    }
 
 }

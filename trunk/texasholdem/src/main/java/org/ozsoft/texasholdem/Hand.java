@@ -50,16 +50,16 @@ public class Hand {
     }
     
     /**
-	 * Parses a string as a hand of cards.
-	 * 
-	 * @param s
-	 *            The string to parse.
-	 * 
-	 * @return The hand of cards.
-	 * 
-	 * @throws IllegalArgumentException
-	 *             If the string could not be parsed.
-	 */
+     * Parses a string as a hand of cards.
+     * 
+     * @param s
+     *            The string to parse.
+     * 
+     * @return The hand of cards.
+     * 
+     * @throws IllegalArgumentException
+     *             If the string could not be parsed.
+     */
     public static Hand parseHand(String s) {
         if (s == null || s.length() == 0) {
             throw new IllegalArgumentException("Null or empty string");
@@ -74,23 +74,23 @@ public class Hand {
     }
     
     /**
-	 * Returns the number of cards.
-	 * 
-	 * @return The number of cards.
-	 */
+     * Returns the number of cards.
+     * 
+     * @return The number of cards.
+     */
     public int size() {
         return noOfCards;
     }
     
     /**
-	 * Adds a single card.
-	 * 
-	 * The card is inserted at such a position that the hand remains sorted
-	 * (highest ranking cards first).
-	 * 
-	 * @param card
-	 *            The card to add.
-	 */
+     * Adds a single card.
+     * 
+     * The card is inserted at such a position that the hand remains sorted
+     * (highest ranking cards first).
+     * 
+     * @param card
+     *            The card to add.
+     */
     public void addCard(Card card) {
         int insertIndex = -1;
         for (int i = 0; i < noOfCards; i++) {
@@ -100,7 +100,7 @@ public class Hand {
             }
         }
         if (insertIndex == -1) {
-        	// Could not insert anywhere, so append at the end.
+            // Could not insert anywhere, so append at the end.
             cards[noOfCards++] = card;
         } else {
             for (int i = noOfCards; i > insertIndex; i--) {
@@ -112,14 +112,14 @@ public class Hand {
     }
     
     /**
-	 * Adds multiple cards.
-	 * 
-	 * The cards are inserted at such a position that the hand remains sorted
-	 * (highest ranking cards first).
-	 * 
-	 * @param addedCards
-	 *            The cards to add.
-	 */
+     * Adds multiple cards.
+     * 
+     * The cards are inserted at such a position that the hand remains sorted
+     * (highest ranking cards first).
+     * 
+     * @param addedCards
+     *            The cards to add.
+     */
     public void addCards(Collection<Card> addedCards) {
         for (Card card : addedCards) {
             addCard(card);
@@ -127,14 +127,14 @@ public class Hand {
     }
     
     /**
-	 * Adds multiple cards.
-	 * 
-	 * The cards are inserted at such a position that the hand remains sorted
-	 * (highest ranking cards first).
-	 * 
-	 * @param addedCards
-	 *            The cards to add.
-	 */
+     * Adds multiple cards.
+     * 
+     * The cards are inserted at such a position that the hand remains sorted
+     * (highest ranking cards first).
+     * 
+     * @param addedCards
+     *            The cards to add.
+     */
     public void addCards(Card[] addedCards) {
         for (Card card : addedCards) {
             addCard(card);

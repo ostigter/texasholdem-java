@@ -5,10 +5,10 @@ package org.ozsoft.texasholdem;
  */
 public enum HandValueType {
     
-	/** Royal flush (Ace-high Straight Flush). */
-	ROYAL_FLUSH("Royal Flush", 9),
-	
-	/** Straight Flush (a Straight and a Flush, less than Ace-high). */
+    /** Royal flush (Ace-high Straight Flush). */
+    ROYAL_FLUSH("Royal Flush", 9),
+    
+    /** Straight Flush (a Straight and a Flush, less than Ace-high). */
     STRAIGHT_FLUSH("Straight Flush", 8),
 
     /** Four of a Kind (four cards of the same rank). */ 
@@ -43,14 +43,14 @@ public enum HandValueType {
     /** The hand value. */
     private int value;
     
-	/**
-	 * Constructor.
-	 * 
-	 * @param description
-	 *            The description.
-	 * @param value
-	 *            The hand value.
-	 */
+    /**
+     * Constructor.
+     * 
+     * @param description
+     *            The description.
+     * @param value
+     *            The hand value.
+     */
     HandValueType(String description, int value) {
         this.description = description;
         this.value = value;

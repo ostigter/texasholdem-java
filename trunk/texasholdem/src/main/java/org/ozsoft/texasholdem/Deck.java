@@ -72,25 +72,25 @@ public class Deck {
         return cards[nextCardIndex++];
     }
     
-	/**
-	 * Returns the specified number of dealt cards.
-	 * 
-	 * @param noOfCards
-	 *            the number of cards to deal
-	 * 
-	 * @return The cards.
-	 * 
-	 * @throws IllegalArgumentException
-	 *             If the number of cards is invalid.
-	 * @throws IllegalStateException
-	 *             If there are no cards left in the deck.
-	 */
+    /**
+     * Returns the specified number of dealt cards.
+     * 
+     * @param noOfCards
+     *            the number of cards to deal
+     * 
+     * @return The cards.
+     * 
+     * @throws IllegalArgumentException
+     *             If the number of cards is invalid.
+     * @throws IllegalStateException
+     *             If there are no cards left in the deck.
+     */
     public List<Card> deal(int noOfCards) {
         if (noOfCards < 1) {
             throw new IllegalArgumentException("noOfCards < 1");
         }
         if (nextCardIndex + noOfCards >= NO_OF_CARDS) {
-        	throw new IllegalStateException("No cards left in deck");
+            throw new IllegalStateException("No cards left in deck");
         }
         List<Card> dealtCards = new ArrayList<Card>();
         for (int i = 0; i < noOfCards; i++) {
@@ -99,19 +99,19 @@ public class Deck {
         return dealtCards;
     }
     
-	/**
-	 * Deals a specific card.
-	 * 
-	 * @param rank
-	 *            The card's rank.
-	 * @param suit
-	 *            The card's suit.
-	 * 
-	 * @return The card if available, otherwise null.
-	 * 
-	 * @throws IllegalStateException
-	 *             If there are no cards left in the deck.
-	 */
+    /**
+     * Deals a specific card.
+     * 
+     * @param rank
+     *            The card's rank.
+     * @param suit
+     *            The card's suit.
+     * 
+     * @return The card if available, otherwise null.
+     * 
+     * @throws IllegalStateException
+     *             If there are no cards left in the deck.
+     */
     public Card deal(int rank, int suit) {
         if (nextCardIndex + 1 >= NO_OF_CARDS) {
             throw new IllegalStateException("No cards left in deck");
