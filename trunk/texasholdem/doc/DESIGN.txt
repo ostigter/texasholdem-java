@@ -1,6 +1,42 @@
 Design
 ======
 
+Limit Texas Hold'em
+
+Big blind:   Any even size
+Small blind: Half of big blind
+
+Fixed bets/raises:
+- Pre-Flop and Flop: 1x big blind
+- Turn/River:        2x big blind
+
+Phases:
+- Pre-Flop: Hole cards (2 per player), betting round
+- Flop:     3 cards on the board),     betting round
+- Turn:     1 extra card on the board, betting round
+- River:    1 extra card on the board, betting round
+- Showdown
+
+Actions:
+- bet == 0: Check, Bet,   Fold
+- bet > 0:  Call,  Raise, Fold
+- all-in:   Call
+
+Bet/Raise: All other players must act again (Call, Raise, Fold), bet/raised player has the final option (Call, Raise, Fold)
+
+Max. raises per betting round: 3, except when only 2 players left (Heads Up)
+
+All-in:
+- If a player uses all of his remaining cash to call (partially or full), he goes all-in.
+- All-in player must stay in hand until showdown, without acting.
+- Non-all-in players contribute to main pot.
+- Per all-in player, a side pot is created.
+- The main pot is the total pot minus the side pots.
+
+Showdown:
+- First, all non-all-in players compete for the main pot (total pot minus all side pots).
+- Secondly, per all-in player, all players compete for that player's side pot.
+
 
 Hand phases
 -----------
@@ -30,16 +66,6 @@ enum Action {
 }
 
 
-Action conditions
------------------
-
-Check:  bet == 0
-Bet:    bet == 0
-Call:   (bet > 0) AND (myBet < bet)
-Raise:  bet > 0
-Fold:   Anytime
-
-
 Classes
 -------
 
@@ -66,9 +92,9 @@ class Hand {
     -noOfCards : int
     +Hand()
     +getNoOfCards() : int
-    +addCard(Card card)
-    +addCards(Card[] cards)
-    +addCards(Collection<Card> cards)
+    +addCard(card : Card)
+    +addCards(cards : Card[])
+    +addCards(cards : Collection<Card>)
     +clear()
 }
 
@@ -77,6 +103,18 @@ class Server {
     +Server(noOfTables : int)
     +start()
     +stop()
+    +createAccount(String username, String password)
+    +login(String username, String password)
+    +logout(String username)
+    +buyChips(String username, int amount)
+    +joinTable(String username, int tableNumber)
+    +leaveTable(String username)
+}
+
+class Account {
+    -username : String
+    -password : String
+    -chips : int
 }
 
 class Table {
@@ -109,14 +147,14 @@ class Player {
 }
 
 interface Client {
-    +joinedTable(List<Player> players)
+    +joinedTable(int tableNumber, int bigBlind, List<Player> players, int position)
     +leftTable()
     +playerJoined(Player player)
     +playerLeft(Player player)
     +dealerRotated(Player dealer)
     +actorRotated(Player actor)
-    +holeCardsUpdated(Card[] cards)
-    +boardUpdated(List<Card> cards, int bet, int pot)
+    +dealPocketCards(Card[] cards)
+    +boardUpdated(List<Card> cards)
     +playerActed(Player player)
     +act(Set<Action> allowedActions) : Action
 }
@@ -126,7 +164,7 @@ Bot algorithm
 -------------
 
 Factors:
-- hole cards (Chen formula)
+- pocket cards (Chen formula)
 - community cards
   - potential duplicates (more than One Pair)
   - potential straight
