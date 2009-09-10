@@ -2,6 +2,11 @@ package org.ozsoft.texasholdem;
 
 import org.junit.Test;
 
+/**
+ * Test suit for the BasicBot class.
+ * 
+ * @author Oscar Stigter
+ */
 public class BasicBotTest {
     
     @Test

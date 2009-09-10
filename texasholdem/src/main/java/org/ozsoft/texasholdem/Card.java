@@ -1,9 +1,11 @@
 package org.ozsoft.texasholdem;
 
 /**
- * A generic game card.
+ * A generic game card in a deck (without jokers).
  * 
  * Its value is determined first by rank, then by suit.
+ * 
+ * @author Oscar Stigter
  */
 public class Card implements Comparable<Card> {
     
@@ -48,13 +50,33 @@ public class Card implements Comparable<Card> {
     /** The suit. */
     private final int suit;
     
+    /**
+     * Constructor based on rank and suit.
+     * 
+     * @param rank
+     *            The rank.
+     * @param suit
+     *            The suit.
+     * 
+     * @throws IllegalArgumentException
+     *             If the rank or suit is invalid.
+     */
     public Card(int rank, int suit) {
+        if (rank < 0 || rank > NO_OF_RANKS - 1) {
+            throw new IllegalArgumentException("Invalid rank");
+        }
+        if (suit < 0 || suit > NO_OF_SUITS - 1) {
+            throw new IllegalArgumentException("Invalid suit");
+        }
         this.rank = rank;
         this.suit = suit;
     }
     
     /**
-     * Returns the card represented by the specified string.
+     * Constructor based on a string representing a card.
+     * 
+     * The string must consist of a rank character and a suit character, in that
+     * order.
      * 
      * @param s
      *            The string representation of the card, e.g. "As", "Td", "7h".
@@ -62,38 +84,44 @@ public class Card implements Comparable<Card> {
      * @return The card.
      * 
      * @throws IllegalArgumentException
-     *             If the card string could not be parsed.
+     *             If the card string is null or of invalid length, or the rank
+     *             or suit could not be parsed.
      */
     public Card(String s) {
-        if ((s != null) && (s.length() == 2)) {
-            int length = s.length();
-            String rankSymbol = s.substring(0, length - 1);
-            char suitSymbol = s.charAt(length - 1);
-            int rank = -1;
-            for (int i = 0; i < Card.NO_OF_RANKS; i++) {
-                if (rankSymbol.equals(RANK_SYMBOLS[i])) {
-                    rank = i;
-                    break;
-                }
-            }
-            if (rank == -1) {
-                throw new IllegalArgumentException("Error parsing card; unknown rank: " + rankSymbol);
-            }
-            int suit = -1;
-            for (int i = 0; i < Card.NO_OF_SUITS; i++) {
-                if (suitSymbol == SUIT_SYMBOLS[i]) {
-                    suit = i;
-                    break;
-                }
-            }
-            if (suit == -1) {
-                throw new IllegalArgumentException("Error parsing card; unknown suit: " + suitSymbol);
-            }
-            this.rank = rank;
-            this.suit = suit;
-        } else {
-            throw new IllegalArgumentException("Null or empty string, or invalid length");
+        if (s == null) {
+            throw new IllegalArgumentException("Null string or of invalid length");
         }
+        s = s.trim();
+        if (s.length() != 2) {
+            throw new IllegalArgumentException("Empty string or invalid length");
+        }
+        
+        // Parse the rank character.
+        String rankSymbol = s.substring(0, 1);
+        char suitSymbol = s.charAt(1);
+        int rank = -1;
+        for (int i = 0; i < Card.NO_OF_RANKS; i++) {
+            if (rankSymbol.equals(RANK_SYMBOLS[i])) {
+                rank = i;
+                break;
+            }
+        }
+        if (rank == -1) {
+            throw new IllegalArgumentException("Unknown rank: " + rankSymbol);
+        }
+        // Parse the suit character.
+        int suit = -1;
+        for (int i = 0; i < Card.NO_OF_SUITS; i++) {
+            if (suitSymbol == SUIT_SYMBOLS[i]) {
+                suit = i;
+                break;
+            }
+        }
+        if (suit == -1) {
+            throw new IllegalArgumentException("Unknown suit: " + suitSymbol);
+        }
+        this.rank = rank;
+        this.suit = suit;
     }
     
     /**

@@ -5,11 +5,125 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * Unit test for the Card class.
+ * Test suit for the Card class.
  * 
  * @author Oscar Stigter
  */
 public class CardTest {
+    
+    /**
+     * Tests the basics (good-weather).
+     */
+    @Test
+    public void basics() {
+        Card card = new Card(Card.TEN, Card.HEARTS);
+        Assert.assertNotNull(card);
+        Assert.assertEquals(Card.TEN, card.getRank());
+        Assert.assertEquals(Card.HEARTS, card.getSuit());
+        Assert.assertEquals("Th", card.toString());
+        card = new Card("   As "); // Automatic trimming.
+        Assert.assertNotNull(card);
+        Assert.assertEquals(Card.ACE, card.getRank());
+        Assert.assertEquals(Card.SPADES, card.getSuit());
+        Assert.assertEquals("As", card.toString());
+    }
+    
+    /**
+     * Tests the constructors (bad-weather).
+     */
+    @Test
+    public void testConstructors() {
+        @SuppressWarnings("unused")
+        Card card = null;
+        
+        // Numeric rank too low.
+        try {
+            card = new Card(-1, 0);
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+
+        // Numeric rank too high.
+        try {
+            card = new Card(Card.NO_OF_RANKS, 0);
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+
+        // Numeric suit too low.
+        try {
+            card = new Card(0, -1);
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // Numeric suit too high.
+        try {
+            card = new Card(0, Card.NO_OF_SUITS);
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // Null string.
+        try {
+            card = new Card(null);
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // Empty string.
+        try {
+            card = new Card("");
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // String too short.
+        try {
+            card = new Card("A");
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // String too long.
+        try {
+            card = new Card("Ahx");
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // Unknown rank character.
+        try {
+            card = new Card("xh");
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // Unknown rank character.
+        try {
+            card = new Card("xh");
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+        
+        // Unknown suit character.
+        try {
+            card = new Card("Ax");
+            Assert.fail("No exception thrown");
+        } catch (IllegalArgumentException e) {
+            // OK.
+        }
+    }
     
     /**
      * Tests the card ordering.

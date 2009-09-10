@@ -8,6 +8,8 @@ import java.util.Collection;
  * The cards are ordered highest to lowest.
  *
  * NOTE: This class is implemented with the focus on performance (instead of clean design).
+ * 
+ * @author Oscar Stigter
  */
 public class Hand {
     
@@ -29,28 +31,40 @@ public class Hand {
     
     /**
      * Constructor with an array of initial cards.
-     *
-     * @param  initialCards  the initial cards
+     * 
+     * @param cards
+     *            The initial cards.
+     * 
+     * @throws IllegalArgumentException
+     *             If the array is null or the number of cards is invalid.
      */
-    public Hand(Card[] initialCards) {
-        for (Card card : initialCards) {
-            addCard(card);
-        }
+    public Hand(Card[] cards) {
+        addCards(cards);
     }
     
     /**
      * Constructor with a collection of initial cards.
-     *
-     * @param  initialCards  the initial cards
+     * 
+     * @param cards
+     *            The initial cards.
      */
-    public Hand(Collection<Card> initialCards) {
-        for (Card card : initialCards) {
+    public Hand(Collection<Card> cards) {
+        if (cards == null) {
+            throw new IllegalArgumentException("Null array");
+        }
+        for (Card card : cards) {
             addCard(card);
         }
     }
     
     /**
-     * Parses a string as a hand of cards.
+     * Constructor with a string representing the initial cards.
+     * 
+     * The string must contain of one or more cards.
+     * A card must be represented by a rank and a suit character.
+     * The cards must be separated by a space character.
+     * 
+     * Example: "Kh 7d 4c As Js"
      * 
      * @param s
      *            The string to parse.
@@ -58,19 +72,21 @@ public class Hand {
      * @return The hand of cards.
      * 
      * @throws IllegalArgumentException
-     *             If the string could not be parsed.
+     *             If the string could not be parsed or the number of cards is
+     *             too high.
      */
-    public static Hand parseHand(String s) {
+    public Hand(String s) {
         if (s == null || s.length() == 0) {
             throw new IllegalArgumentException("Null or empty string");
         }
         
-        Hand hand = new Hand();
         String[] parts = s.split("\\s");
-        for (String part : parts) {
-            hand.addCard(new Card(part));
+        if (parts.length > MAX_NO_OF_CARDS) {
+            throw new IllegalArgumentException("Too many cards in hand");
         }
-        return hand;
+        for (String part : parts) {
+            addCard(new Card(part));
+        }
     }
     
     /**
@@ -90,8 +106,15 @@ public class Hand {
      * 
      * @param card
      *            The card to add.
+     * 
+     * @throws IllegalArgumentException
+     *             If the card is null.
      */
     public void addCard(Card card) {
+        if (card == null) {
+            throw new IllegalArgumentException("Null card");
+        }
+        
         int insertIndex = -1;
         for (int i = 0; i < noOfCards; i++) {
             if (card.compareTo(cards[i]) > 0) {
@@ -117,11 +140,17 @@ public class Hand {
      * The cards are inserted at such a position that the hand remains sorted
      * (highest ranking cards first).
      * 
-     * @param addedCards
+     * @param cards
      *            The cards to add.
      */
-    public void addCards(Collection<Card> addedCards) {
-        for (Card card : addedCards) {
+    public void addCards(Card[] cards) {
+        if (cards == null) {
+            throw new IllegalArgumentException("Null array");
+        }
+        if (cards.length > MAX_NO_OF_CARDS) {
+            throw new IllegalArgumentException("Too many cards");
+        }
+        for (Card card : cards) {
             addCard(card);
         }
     }
@@ -132,11 +161,17 @@ public class Hand {
      * The cards are inserted at such a position that the hand remains sorted
      * (highest ranking cards first).
      * 
-     * @param addedCards
+     * @param cards
      *            The cards to add.
      */
-    public void addCards(Card[] addedCards) {
-        for (Card card : addedCards) {
+    public void addCards(Collection<Card> cards) {
+        if (cards == null) {
+            throw new IllegalArgumentException("Null collection");
+        }
+        if (cards.size() > MAX_NO_OF_CARDS) {
+            throw new IllegalArgumentException("Too many cards");
+        }
+        for (Card card : cards) {
             addCard(card);
         }
     }
