@@ -2,6 +2,8 @@ package org.ozsoft.texasholdem;
 
 /**
  * The hand value types in poker.
+ * 
+ * @author Oscar Stigter
  */
 public enum HandValueType {
     

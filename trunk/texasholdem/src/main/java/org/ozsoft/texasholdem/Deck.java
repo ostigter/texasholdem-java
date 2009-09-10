@@ -8,6 +8,8 @@ import java.util.Random;
  * A standard, generic deck of game cards without jokers.
  *
  * NOTE: This class is implemented with the focus on performance (instead of clean design).
+ * 
+ * @author Oscar Stigter
  */
 public class Deck {
     
