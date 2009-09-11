@@ -39,6 +39,9 @@ public class HandEvaluator {
     /** The ranks of the pairs. */
     private int[] pairs = new int[MAX_NO_OF_PAIRS];
     
+    /** The suit of the Flush. */
+    private int flushSuit = -1;
+    
     /** The rank of the Flush. */
     private int flushRank = -1;
     
@@ -125,13 +128,8 @@ public class HandEvaluator {
     private void findFlush() {
         for (int i = 0; i < Card.NO_OF_SUITS; i++) {
             if (suitDist[i] >= 5) {
-                // We found a flush! Now find the matching highest rank.
-                for (Card card : cards) {
-                    if (card.getSuit() == i) {
-                        flushRank = card.getRank();
-                        break;
-                    }
-                }
+                // We found a Flush!
+                flushSuit = i;
                 break;
             }
         }
@@ -329,11 +327,23 @@ public class HandEvaluator {
      * @return True if this hand contains a Flush.
      */
     private boolean isFlush() {
-        if (flushRank != -1) {
+        if (flushSuit != -1) {
             type = HandValueType.FLUSH;
             rankings[0] = type.getValue();
-            //FIXME: Use other 4 flushing cards as kickers.
-            rankings[1] = flushRank;
+            int index = 1;
+            for (Card card : cards) {
+                if (card.getSuit() == flushSuit) {
+                    int rank = card.getRank();
+                    if (index == 1) {
+                        flushRank = rank;
+                    }
+                    rankings[index++] = rank;
+                    if (index > 5) {
+                        // We don't need more kickers.
+                        break;
+                    }
+                }
+            }
             return true;
         } else {
             return false;
@@ -397,7 +407,7 @@ public class HandEvaluator {
      * @return True if this hand contains a Straight Flush.
      */
     private boolean isStraightFlush() {
-        if ((straightRank != -1) && (flushRank != -1)) {
+        if (straightRank != -1 && flushSuit != -1) {
             type = HandValueType.STRAIGHT_FLUSH;
             rankings[0] = type.getValue();
             rankings[1] = straightRank;
@@ -415,7 +425,7 @@ public class HandEvaluator {
      * @return True if this hand contains a Royal Flush.
      */
     private boolean isRoyalFlush() {
-        if ((straightRank == Card.ACE) && (flushRank == Card.ACE)) {
+        if (straightRank == Card.ACE && flushRank == Card.ACE) {
             type = HandValueType.ROYAL_FLUSH;
             rankings[0] = type.getValue();
             return true;
