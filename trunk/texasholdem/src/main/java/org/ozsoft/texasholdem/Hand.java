@@ -14,7 +14,7 @@ import java.util.Collection;
 public class Hand {
     
     /** The maximum number of cards in a hand. */
-    private static final int MAX_NO_OF_CARDS = 10;
+    private static final int MAX_NO_OF_CARDS = 7;
     
     /** The cards in this hand. */
     private Card[] cards = new Card[MAX_NO_OF_CARDS];
