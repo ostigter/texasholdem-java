@@ -128,7 +128,7 @@ public class HandEvaluatorTest {
     }
     
     /**
-     * Tests the Three of a Kind.
+     * Tests the Three of a Kind hand type.
      */
     @Test
     public void threeOfAKind() {
@@ -171,7 +171,7 @@ public class HandEvaluatorTest {
      }
 
     /**
-     * Tests the Straight.
+     * Tests the Straight hand type.
      */
     @Test
     public void straight() {
@@ -207,7 +207,7 @@ public class HandEvaluatorTest {
     }
 
     /**
-     * Tests the Flush.
+     * Tests the Flush hand type.
      */
     @Test
     public void flush() {
@@ -255,7 +255,7 @@ public class HandEvaluatorTest {
     }
 
     /**
-     * Tests the Full House.
+     * Tests the Full House hand type.
      */
     @Test
     public void fullHouse() {
@@ -289,6 +289,87 @@ public class HandEvaluatorTest {
         // Discarded cards (more than 5).
         evaluator = new HandEvaluator(new Hand("Ks Qs Qh Qc Tc Td 4c"));
         Assert.assertEquals(HandValueType.FULL_HOUSE, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 == value2);
+    }
+
+    /**
+     * Tests the Four of a Kind hand type.
+     */
+    @Test
+    public void fourOfAKind() {
+        HandEvaluator evaluator = null;
+        int value1, value2;
+        
+        // Base hand.
+        evaluator = new HandEvaluator(new Hand("As Ah Ac Ad Qs Th 8c"));
+        Assert.assertNotNull(evaluator);
+        Assert.assertEquals(HandValueType.FOUR_OF_A_KIND, evaluator.getType());
+        value1 = evaluator.getValue();
+
+        // Rank.
+        evaluator = new HandEvaluator(new Hand("Ks Kh Kc Kd Qs Th 8c"));
+        Assert.assertEquals(HandValueType.FOUR_OF_A_KIND, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 > value2);
+
+        // Kicker.
+        evaluator = new HandEvaluator(new Hand("As Ah Ac Ad Js Th 8c"));
+        Assert.assertEquals(HandValueType.FOUR_OF_A_KIND, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 > value2);
+
+        // Discarded cards (more than 5).
+        evaluator = new HandEvaluator(new Hand("As Ah Ac Ad Qs 3d 2c"));
+        Assert.assertEquals(HandValueType.FOUR_OF_A_KIND, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 == value2);
+    }
+
+    /**
+     * Tests the Straight Flush hand type.
+     */
+    @Test
+    public void straightFlush() {
+        HandEvaluator evaluator = null;
+        int value1, value2;
+        
+        // Base hand.
+        evaluator = new HandEvaluator(new Hand("Ks Qs Js Ts 9s 4d 2c"));
+        Assert.assertNotNull(evaluator);
+        Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
+        value1 = evaluator.getValue();
+
+        // Rank.
+        evaluator = new HandEvaluator(new Hand("Qh Jh Th 9h 8h 4d 2c"));
+        Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 > value2);
+
+        // Discarded cards (more than 5).
+        evaluator = new HandEvaluator(new Hand("Ks Qs Js Ts 9s 3d 2c"));
+        Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 == value2);
+    }
+
+    /**
+     * Tests the Royal Flush hand type.
+     */
+    @Test
+    public void royalFlush() {
+        HandEvaluator evaluator = null;
+        int value1, value2;
+        
+        // Base hand.
+        evaluator = new HandEvaluator(new Hand("As Ks Qs Js Ts 4d 2c"));
+        Assert.assertNotNull(evaluator);
+        Assert.assertEquals(HandValueType.ROYAL_FLUSH, evaluator.getType());
+        value1 = evaluator.getValue();
+
+        // Discarded cards (more than 5).
+        evaluator = new HandEvaluator(new Hand("As Ks Qs Js Ts 3d 2c"));
+        Assert.assertEquals(HandValueType.ROYAL_FLUSH, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
     }

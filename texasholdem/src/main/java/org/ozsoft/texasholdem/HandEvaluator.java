@@ -425,7 +425,7 @@ public class HandEvaluator {
      * @return True if this hand contains a Royal Flush.
      */
     private boolean isRoyalFlush() {
-        if (straightRank == Card.ACE && flushRank == Card.ACE) {
+        if (straightRank == Card.ACE && flushRank != Card.ACE) {
             type = HandValueType.ROYAL_FLUSH;
             rankings[0] = type.getValue();
             return true;

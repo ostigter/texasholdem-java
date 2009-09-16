@@ -5,7 +5,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * Test suit for the Card class.
+ * Test suite for the Card class.
  * 
  * @author Oscar Stigter
  */
