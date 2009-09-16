@@ -8,7 +8,7 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 /**
- * Test suit for the Hand class.
+ * Test suite for the Hand class.
  * 
  * @author Oscar Stigter
  */
