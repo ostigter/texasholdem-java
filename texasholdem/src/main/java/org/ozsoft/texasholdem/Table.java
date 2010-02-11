@@ -185,7 +185,7 @@ public class Table {
      * Posts the small blind.
      */
     private void postSmallBlind() {
-        int smallBlind = bigBlind / 2;
+        final int smallBlind = bigBlind / 2;
         actor.postSmallBlind(smallBlind);
         pot += smallBlind;
         notifyPlayerActed();
@@ -243,9 +243,9 @@ public class Table {
             bet = 0;
         }
         notifyBoardUpdated();
+        final int smallBlind = bigBlind / 2;
         while (playersToAct > 0) {
             rotateActor();
-            int smallBlind = bigBlind / 2;
             boolean isSmallBlindPosition = (actor.getBet() == smallBlind);
             Set<Action> allowedActions = getAllowedActions(actor);
             Action action = actor.act(allowedActions, minBet, bet);
@@ -293,6 +293,9 @@ public class Table {
                     break;
                 default:
                     throw new IllegalStateException("Invalid action: " + action);
+            }
+            if (actor.isBroke()) {
+                actor.setInAllPot(pot);
             }
             notifyPlayerActed();
         }
@@ -415,9 +418,9 @@ public class Table {
      *            The player that has acted.
      */
     private void notifyPlayerActed() {
-        Player publicClone = actor.publicClone();
         for (Player p : players) {
-            p.getClient().playerActed(publicClone);
+            Player playerInfo = p.equals(actor) ? actor : actor.publicClone();
+            p.getClient().playerActed(playerInfo);
         }
     }
     

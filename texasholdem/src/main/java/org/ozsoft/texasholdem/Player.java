@@ -34,6 +34,9 @@ public class Player {
     /** Number of bets and raises in the current betting round. */
     private int raises;
     
+    /** Pot when all-in. */
+    private int allInPot;
+    
     /** Last action performed. */
     private Action action;
 
@@ -82,6 +85,7 @@ public class Player {
         bet = 0;
         action = null;
         raises = 0;
+        allInPot = 0;
     }
     
     /**
@@ -207,6 +211,25 @@ public class Player {
         bet += blind;
     }
     
+    /**
+     * Returns the part of the pot this player has a stake in when all-in.
+     *  
+     * @return The all-in pot.
+     */
+    public int getAllInPot() {
+        return allInPot;
+    }
+    
+    /**
+     * Sets the part of the pot this player has a stake in when all-in.
+     * 
+     * @param allInPot
+     *            The all-in pot.
+     */
+    public void setInAllPot(int allInPot) {
+        this.allInPot = allInPot;
+    }
+    
 	/**
 	 * Asks the player to act and returns his selected action.
 	 * 
@@ -227,21 +250,27 @@ public class Player {
             case CHECK:
                 break;
             case CALL:
-                cash -= currentBet - bet;
-                bet += currentBet - bet;
+                int toPay = currentBet - bet;
+                if (toPay > cash) {
+                    toPay = cash;
+                }
+                cash -= toPay;
+                bet += toPay;
                 break;
             case BET:
-                if (minBet >= cash) {
-                    minBet = cash;
+                toPay = minBet;
+                if (toPay >= cash) {
+                    toPay = cash;
                 }
-                cash -= minBet;
-                bet += minBet;
+                cash -= toPay;
+                bet += toPay;
                 raises++;
                 break;
             case RAISE:
-                currentBet += minBet;
-                cash -= currentBet - bet;
-                bet += currentBet - bet;
+                toPay = currentBet - bet;
+                currentBet += toPay;
+                cash -= toPay;
+                bet += toPay;
                 raises++;
                 break;
             case FOLD:
