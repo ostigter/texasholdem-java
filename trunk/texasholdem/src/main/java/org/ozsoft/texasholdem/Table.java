@@ -8,7 +8,7 @@ import java.util.Set;
 /**
  * Limit Texas Hold'em poker table.
  * 
- * Controls the game flow.
+ * Controls the game flow for a single poker table.
  * 
  * @author Oscar Stigter
  */

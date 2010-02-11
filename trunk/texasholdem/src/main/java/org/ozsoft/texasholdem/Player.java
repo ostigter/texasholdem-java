@@ -7,45 +7,45 @@ import java.util.Set;
  * A Texas Hold'em player.
  * 
  * The player's actions are delegated to a PlayerClient, which can be either
- * human controlled or computer controlled.
+ * human-controlled or AI-controlled (bot).
  * 
  * @author Oscar Stigter
  */
 public class Player {
     
-    /** The name. */
+    /** Name. */
     private final String name;
     
-    /** The client responsible for the actual behavior. */
+    /** Client application responsible for the actual behavior. */
     private final Client client;
     
-    /** The hand of cards. */
+    /** Hand of cards. */
     private final Hand hand;
     
     /** Current amount of cash. */
     private int cash;
     
-    /** Whether the player has hole cards. */
+    /** Whether the player has his hole cards being dealt. */
     private boolean hasCards;
 
-    /** The current bet. */
+    /** Current bet. */
     private int bet;
     
-    /** The number of bets and raises in the current betting round. */
+    /** Number of bets and raises in the current betting round. */
     private int raises;
     
-    /** The last action performed. */
+    /** Last action performed. */
     private Action action;
 
     /**
-     * Constructs a player.
+     * Constructor.
      * 
      * @param name
      *            The player's name.
      * @param cash
      *            The player's starting amount of cash.
      * @param client
-     *            The client interface.
+     *            The client application.
      */
     public Player(String name, int cash, Client client) {
         this.name = name;
@@ -75,6 +75,9 @@ public class Player {
         resetBet();
     }
     
+    /**
+     * Resets the player's bet.
+     */
     public void resetBet() {
         bet = 0;
         action = null;
@@ -99,6 +102,11 @@ public class Player {
         }
     }
     
+	/**
+	 * Returns whether the player has his hole cards dealt.
+	 * 
+	 * @return True if the hole cards are dealt, otherwise false.
+	 */
     public boolean hasCards() {
         return hasCards;
     }
@@ -199,18 +207,20 @@ public class Player {
         bet += blind;
     }
     
-    /**
-     * Asks the player to act and returns the selected action.
-     * 
-     * @param actions
-     *            The allowed actions.
-     * @param minBet
-     *            The minimum bet.
-     * @param currentBet
-     *            The current bet.
-     * 
-     * @return The selected action.
-     */
+	/**
+	 * Asks the player to act and returns his selected action.
+	 * 
+	 * Determining the player's action is handled by the client application.
+	 * 
+	 * @param actions
+	 *            The allowed actions.
+	 * @param minBet
+	 *            The minimum bet.
+	 * @param currentBet
+	 *            The current bet.
+	 * 
+	 * @return The selected action.
+	 */
     public Action act(Set<Action> actions, int minBet, int currentBet) {
         action = client.act(actions);
         switch (action) {
