@@ -54,7 +54,7 @@ public class Deck {
     }
     
     /**
-     * Resets the deck to full.
+     * Resets the deck.
      * 
      * Does not re-order the cards.
      */
@@ -63,7 +63,7 @@ public class Deck {
     }
     
     /**
-     * Returns a single dealt cards.
+     * Deals a single card.
      *
      * @return  the card dealt
      */
@@ -75,10 +75,10 @@ public class Deck {
     }
     
     /**
-     * Returns the specified number of dealt cards.
+     * Deals multiple cards at once.
      * 
      * @param noOfCards
-     *            the number of cards to deal
+     *            The number of cards to deal.
      * 
      * @return The cards.
      * 
