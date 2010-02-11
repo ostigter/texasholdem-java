@@ -10,7 +10,7 @@ import org.ozsoft.texasholdem.Player;
 /**
  * Basic Texas Hold'em poker bot.
  * 
- * Currently plays merely based on its hole cards.
+ * Currently plays solely based on its hole cards.
  * 
  * TODO:
  * - hole cards

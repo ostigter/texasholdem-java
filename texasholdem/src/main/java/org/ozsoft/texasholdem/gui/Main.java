@@ -21,6 +21,8 @@ import org.ozsoft.texasholdem.bots.DummyBot;
 /**
  * The game's main frame.
  * 
+ * This is the core class of the Swing UI client application.
+ * 
  * @author Oscar Stigter
  */
 public class Main extends JFrame implements Client {
@@ -120,12 +122,6 @@ public class Main extends JFrame implements Client {
         setVisible(true);
 
         // Start the game.
-//		new Thread(new Runnable() {
-//        	@Override
-//        	public void run() {
-//                table.start();
-//        	}
-//        }).start();
         table.start();
     }
     

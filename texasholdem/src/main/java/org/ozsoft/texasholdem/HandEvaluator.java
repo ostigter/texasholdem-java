@@ -1,7 +1,7 @@
 package org.ozsoft.texasholdem;
 
 /**
- * Evaluator for calculating the hand value in Texas Hold'em poker.
+ * Evaluator for calculating the value of a poker hand.
  *
  * NOTE: This class is implemented with the focus on performance (instead of clean design).
  * 
@@ -15,7 +15,7 @@ public class HandEvaluator {
     /** The maximum number of counting pairs. */
     private static final int MAX_NO_OF_PAIRS = 2;
     
-    /** The anking factors (powers of 13, the number of ranks). */
+    /** The ranking factors (powers of 13, the number of ranks). */
     private static final int[] RANKING_FACTORS = {371293, 28561, 2197, 169, 13, 1};
     
     /** The hand value type. */
