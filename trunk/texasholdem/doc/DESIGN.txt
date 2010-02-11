@@ -24,14 +24,13 @@ Actions:
 
 Bet/Raise: All other players must act again (Call, Raise, Fold), bet/raised player has the final option (Call, Raise, Fold)
 
-Max. raises per betting round: 3, except when only 2 players left (Heads Up)
+Max. raises per betting round: 4, except when only 2 players left (Heads-up mode)
 
 All-in:
 - If a player uses all of his remaining cash to call (partially or full), he goes all-in.
 - All-in player must stay in hand until showdown, without acting.
-- Non-all-in players contribute to main pot.
-- Per all-in player, a side pot is created.
-- The main pot is the total pot minus the side pots.
+- At the showdown, each active player is processed, in order of the best hand to worst:
+  if he is NOT all-in, he wins the pot (done), otherwise (all-in) he wins his participation in the pot (next player). 
 
 Showdown:
 - First, all non-all-in players compete for the main pot (total pot minus all side pots).
@@ -64,6 +63,61 @@ enum Action {
 	RAISE
 	FOLD
 }
+
+
+All-in pot division
+-------------------
+
+Example 1:
+
+A: SB 1 (C: 2, P: 1, T: 1)
+B: BB 2 (C: 2, P: 2, T: 3)
+C: C  2 (C: 2, P: 2, T: 5)
+D: C  2 (C: 2, P: 2, T: 7)
+
+A: C  1 (C: 2, P: 2, T: 8)
+B: B  2 (C: 4, P: 4, T: 10) * All-in
+C: R  2 (C: 6, P: 6, T: 14) * All-in
+D: C  4 (C: 6, P: 6, T: 18)
+
+A: C  4 (C: 6, P: 6, T: 22)
+B: -    (C: 6, P: 4, T: 22)
+C: -    (C: 6, P: 6, T: 22)
+D: B  2 (C: 8, P: 8, T: 24)
+
+A: C 2  (C: 8, P: 8, T: 26)
+B: -    (C: 8, P: 4, T: 26)
+C: -    (C: 8, P: 6, T: 26)
+D: C    (C: 8, P: 8, T: 26)
+
+= A/D: 26
+= B: 10, A/D: 26 - 10 = 16
+= B: 10 (26 - 10 = 16), C: 14, A/D: 16 - 14 = 2
+= C: 14, A/D: 26 - 14 = 12
+= C: 14 (26 - 14 = 12), B: 10, A/D: 12 - 10 = 2
+
+Example 2:
+
+A: SB 1 (C: 2, P: 1, T: 1)
+B: BB 2 (C: 2, P: 2, T: 3)
+C: C  2 (C: 2, P: 2, T: 5)
+D: C  2 (C: 2, P: 2, T: 7)
+
+A: C  1 (C: 2, P: 2, T: 8)
+B: B  2 (C: 4, P: 4, T: 10) * All-in
+C: R  2 (C: 6, P: 6, T: 14) * All-in
+D: F    (C: 6, P: 2, T: 14)
+
+A: C  4 (C: 6, P: 6, T: 18)
+B: -    (C: 6, P: 4, T: 18)
+C: -    (C: 6, P: 6, T: 18)
+D: F    (C: 6, P: 2, T: 18)
+
+= A: 18
+= B: 10, A: 18 - 10 = 8
+= B: 10 (18 - 10 = 8), C: 14 > 8 => 8
+= C: 14, A: 18 - 14 = 4
+= C: 14 (18 - 14 = 4), B: 10 > 4 => 4
 
 
 Classes
