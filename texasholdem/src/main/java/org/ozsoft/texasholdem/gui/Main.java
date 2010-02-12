@@ -141,7 +141,6 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public void joinedTable(int bigBlind, List<Player> players) {
-        System.out.println("joinedTable");
         for (Player player : players) {
             PlayerPanel playerPanel = playerPanels.get(player.getName());
             if (playerPanel != null) {
@@ -156,7 +155,6 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public void messageReceived(String message) {
-        System.out.println("Message: " + message);
         boardPanel.setMessage(message);
         boardPanel.waitForUserInput();
     }
@@ -167,7 +165,6 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public void handStarted(Player dealer) {
-        System.out.println("Hand started");
         setDealer(false);
         dealerName = dealer.getName();
         setDealer(true);
@@ -179,7 +176,6 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public void actorRotated(Player actor) {
-        System.out.println("Actor rotated");
         setActorInTurn(false);
         actorName = actor.getName();
         setActorInTurn(true);
@@ -191,7 +187,6 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public void boardUpdated(List<Card> cards, int bet, int pot) {
-        System.out.println("Board updated");
         boardPanel.update(cards, bet, pot);
     }
 
@@ -201,7 +196,6 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public void playerUpdated(Player player) {
-        System.out.println("Player updated");
         PlayerPanel playerPanel = playerPanels.get(player.getName());
         if (playerPanel != null) {
             playerPanel.update(player);
@@ -215,7 +209,6 @@ public class Main extends JFrame implements Client {
     @Override
     public void playerActed(Player player) {
         String name = player.getName();
-        System.out.println(name + " acted");
         PlayerPanel playerPanel = playerPanels.get(name);
         if (playerPanel != null) {
             playerPanel.update(player);

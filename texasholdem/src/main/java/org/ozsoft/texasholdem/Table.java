@@ -2,8 +2,11 @@ package org.ozsoft.texasholdem;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Limit Texas Hold'em poker table.
@@ -339,39 +342,61 @@ public class Table {
      */
     private void doShowdown() {
         notifyMessage("Showdown!");
+	System.out.print("Board: ");
+	for (Card card : board) {
+	    System.out.print(card + " ");
+	}
+	System.out.println();
         notifyBoardUpdated();
-        int highestValue = 0;
-        List<Player> winners = new ArrayList<Player>();
-        for (Player player : activePlayers) {
-            // Create a hand with the community cards and the player's hole cards.
-            Hand playerHand = new Hand(board);
-            playerHand.addCards(player.getCards());
-            // Evaluate the combined hand.
-            HandEvaluator evaluator = new HandEvaluator(playerHand);
-            int value = evaluator.getValue();
-//			String description = evaluator.getType().getDescription();
-//			notifyMessage("%s's cards:  %s\t(%s, %d)", player, player.getHand(), description, value);
-            // Look for one or more winners.
-            if (value > highestValue) {
-                // New winner.
-                highestValue = value;
-                winners.clear();
-                winners.add(player);
-            } else if (value == highestValue) {
-                // Tie winner.
-                winners.add(player);
-            } else {
-                // Loser.
+        // Look at each hand value, sorted from highest to lowest.
+        Map<HandValue, List<Player>> winners = getWinners();
+        for (HandValue handValue : winners.keySet()) {
+            int value = handValue.getValue();
+            // Get players with this specific hand value.
+            List<Player> tiePlayers = winners.get(handValue); 
+            for (Player player : tiePlayers) {
+        	System.out.format("%s:\t%s (%d)\n", player, handValue.getDescription(), value);
+        	// Determine the player's share of the pot.
+        	int potShare = player.getAllInPot();
+        	if (potShare == 0) {
+        	    // Player is not all-in, so he competes for the whole pot.
+        	    potShare = pot / tiePlayers.size();
+        	}
+        	// Give the player his share of the pot.
+		player.win(potShare);
+		pot -= potShare;
+        	// If there is no more pot to divide, we're done.
+        	if (pot == 0) {
+        	    break;
+        	}
             }
         }
-        if (winners.size() == 1) {
-            // Single winner.
-            playerWins(winners.get(0));
-        } else {
-            // Tie; multiple winners.
-            //TODO: Handle tie
-            notifyMessage("A tie! X and Y share the pot.");
-        }
+    }
+    
+    /**
+     * Returns the active players mapped and sorted by their hand value.
+     * 
+     * The players are sorted in descending order (highest value first).
+     * 
+     * @return The active players mapped by their hand value (sorted). 
+     */
+    private Map<HandValue, List<Player>> getWinners() {
+	Map<HandValue, List<Player>> winners = new TreeMap<HandValue, List<Player>>();
+	for (Player player : activePlayers) {
+            // Create a hand with the community cards and the player's hole cards.
+            Hand hand = new Hand(board);
+            hand.addCards(player.getCards());
+            // Store the player together with other players with the same hand value.
+            HandValue handValue = new HandValue(hand);
+            System.out.format("%s:\t%s (%d, %s)\n", player, hand, handValue.getValue(), handValue.getDescription());
+            List<Player> playerList = winners.get(handValue);
+            if (playerList == null) {
+        	playerList = new LinkedList<Player>();
+            }
+            playerList.add(player);
+            winners.put(handValue, playerList);
+	}
+	return winners;
     }
     
     /**
@@ -383,7 +408,7 @@ public class Table {
     private void playerWins(Player player) {
         player.win(pot);
         pot = 0;
-//		notifyBoardUpdated();
+//        notifyBoardUpdated();
         notifyMessage("%s wins.", player);
     }
     
