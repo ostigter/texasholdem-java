@@ -184,6 +184,11 @@ public class HandEvaluatorTest {
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
         value1 = evaluator.getValue();
 
+        // Broadway (Ace-high Straight).
+        evaluator = new HandEvaluator(new Hand("As Ks Qs Js Th 4d 2c"));
+        Assert.assertNotNull(evaluator);
+        Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
+
         // Different suit (tie).
         evaluator = new HandEvaluator(new Hand("Ks Tc 9d 8h 7d 6s 4c"));
         Assert.assertNotNull(evaluator);
@@ -205,10 +210,10 @@ public class HandEvaluatorTest {
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
 
-        //FIXME: False Straight (Wheeling Ace).
+        // Wheel (5-high Straight with wheeling Ace).
         evaluator = new HandEvaluator(new Hand("Ad Qc Th 5s 4d 3h 2c"));
         Assert.assertNotNull(evaluator);
-        Assert.assertEquals(HandValueType.HIGH_CARD, evaluator.getType());
+        Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
     }
 
     /**
@@ -357,10 +362,10 @@ public class HandEvaluatorTest {
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
 
-        //FIXME: False Straight Flush (Wheeling Ace).
+        // Steel Wheel (5-high Straight Flush with wheeling Ace).
         evaluator = new HandEvaluator(new Hand("Ah Qd Ts 5s 4s 3s 2s"));
         Assert.assertNotNull(evaluator);
-        Assert.assertEquals(HandValueType.HIGH_CARD, evaluator.getType());
+        Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
     }
 
     /**
@@ -382,11 +387,6 @@ public class HandEvaluatorTest {
         Assert.assertEquals(HandValueType.ROYAL_FLUSH, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
-        
-        //FIXME: False Royal Flush (no Flush).
-        evaluator = new HandEvaluator(new Hand("Ah Ks Qd Jc Th"));
-        Assert.assertNotNull(evaluator);
-        Assert.assertEquals(HandValueType.ROYAL_FLUSH, evaluator.getType());
     }
 
 }

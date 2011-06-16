@@ -162,7 +162,7 @@ public class HandEvaluator {
                 }
             }
         }
-        // Special case for the Five-high Straight with a 'wheeling Ace'.
+        // Special case for the 'Steel Wheel' (Five-high Straight with a 'wheeling Ace') .
         if ((count == 4) && (rank == Card.FIVE) && (rankDist[Card.ACE] > 0)) {
             straightRank = rank;
         }
@@ -425,7 +425,7 @@ public class HandEvaluator {
      * @return True if this hand contains a Royal Flush.
      */
     private boolean isRoyalFlush() {
-        if (straightRank == Card.ACE && flushRank != Card.ACE) {
+        if (straightRank == Card.ACE && flushSuit != -1) {
             type = HandValueType.ROYAL_FLUSH;
             rankings[0] = type.getValue();
             return true;
