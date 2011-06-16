@@ -48,6 +48,9 @@ public class HandEvaluator {
     /** The rank of the Straight. */
     private int straightRank = -1;
     
+    /** Whether we have a Straight with a wheeling Ace. */
+    private boolean wheelingAce = false;
+    
     /** The rank of the Three-of-a-Kind. */
     private int tripleRank = -1;
     
@@ -67,8 +70,8 @@ public class HandEvaluator {
         
         // Find patterns.
         calculateDistributions();
-        findFlush();
         findStraight();
+        findFlush();
         findDuplicates();
         
         // Find special values.
@@ -128,9 +131,15 @@ public class HandEvaluator {
     private void findFlush() {
         for (int i = 0; i < Card.NO_OF_SUITS; i++) {
             if (suitDist[i] >= 5) {
-                // We found a Flush!
                 flushSuit = i;
-                break;
+                for (Card card : cards) {
+                    if (card.getSuit() == flushSuit) {
+                        if (!wheelingAce || card.getRank() != Card.ACE) {
+                            flushRank = card.getRank();
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
@@ -164,6 +173,7 @@ public class HandEvaluator {
         }
         // Special case for the 'Steel Wheel' (Five-high Straight with a 'wheeling Ace') .
         if ((count == 4) && (rank == Card.FIVE) && (rankDist[Card.ACE] > 0)) {
+            wheelingAce = true;
             straightRank = rank;
         }
     }
@@ -407,7 +417,7 @@ public class HandEvaluator {
      * @return True if this hand contains a Straight Flush.
      */
     private boolean isStraightFlush() {
-        if (straightRank != -1 && flushSuit != -1) {
+        if (straightRank != -1 && flushRank == straightRank) {
             type = HandValueType.STRAIGHT_FLUSH;
             rankings[0] = type.getValue();
             rankings[1] = straightRank;
@@ -425,7 +435,7 @@ public class HandEvaluator {
      * @return True if this hand contains a Royal Flush.
      */
     private boolean isRoyalFlush() {
-        if (straightRank == Card.ACE && flushSuit != -1) {
+        if (straightRank == Card.ACE && flushRank == Card.ACE) {
             type = HandValueType.ROYAL_FLUSH;
             rankings[0] = type.getValue();
             return true;
