@@ -363,7 +363,7 @@ public class HandEvaluatorTest {
         Assert.assertTrue(value1 == value2);
 
         // Steel Wheel (5-high Straight Flush with wheeling Ace).
-        evaluator = new HandEvaluator(new Hand("Ah Qd Ts 5s 4s 3s 2s"));
+        evaluator = new HandEvaluator(new Hand("As Qh Td 5s 4s 3s 2s"));
         Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
     }
