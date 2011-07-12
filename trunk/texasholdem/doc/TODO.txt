@@ -1,0 +1,5 @@
+TODO
+====
+
+* Winnings calculation (incl. all-in)
+* Fix GUI updates

@@ -5,7 +5,7 @@
 
     <groupId>org.ozsoft.texasholdem</groupId>
     <artifactId>TexasHoldEm</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3-SNAPSHOT</version>
 
     <name>TexasHoldEm</name>
     <description>Texas Hold'em poker game</description>
