@@ -147,7 +147,6 @@ public class Table {
     private void resetHand() {
         board.clear();
         notifyBoardUpdated();
-//		resetBets();
         activePlayers.clear();
         for (Player player : players) {
             player.resetHand();
