@@ -103,3 +103,42 @@ Winners:
 A: 10
 B: 20 (50 - 10 > 0) 
 C: 50 - 10 - 20 = 20
+
+
+In-all pot division
+-------------------
+
+Player  Cash    Action      Bet     Pot
+A       4       SB (2)      2       2 (A)
+B       8       BB (4)      4       6 (A, B)
+C       16      C (4)       4       10 (A, B, C)
+D       32      C (4)       4       14 (A, B, C, D)
+A       2       C (2)       4       18 (A, B, C, D) 
+B       4       -           4       18 (A, B, C, D)
+C       12      B 4         8       18 (A, B, C, D), 4 (C) 
+D       28      R 4         12      18 (A, B, C, D), 12 (C, D)
+* Ranking: A, B, C, D: A wins 18, C wins 12
+* Ranking: C, A, B, D: C wins 30       
+
+Player  Cash    Action      Bet     Pot     Comment
+A       4       SB (2)      2       2       Main pot:  2 (A)
+B       8       BB (4)      4       6       Main pot:  6 (A, B) 
+C       16      C (4)       4       10      Main pot: 10 (A, B, C)
+A       2       C (2)       4       12      Main pot: 12 (A, B, C)
+B       4       B 4         8       16      Side pot: 4 (B)
+C       12      C (4)       8       20      Side pot: 8 (B, C)
+* Ranking A, B, C: A wins 12, B wins 8
+* Ranking B, A, C: B wins 20
+* Ranking C, B, A: C wins 20
+
+Player  Cash    Action      Bet     Pot
+A       4       SB (2)      2       2
+B       8       BB (4)      4       6
+C       16      C (4)       4       10
+D       32      C (4)       4       14
+A       2       C (2)       4       16        All-in
+B       4       B 4         8                 All-in
+C       12      C (4)       8        
+* Ranking A, B, C: A wins 12, B wins 8
+* Ranking B, A, C: B wins 20
+* Ranking C, B, A: C wins 20

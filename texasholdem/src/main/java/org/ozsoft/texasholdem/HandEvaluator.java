@@ -76,8 +76,7 @@ public class HandEvaluator {
         
         // Find special values.
         boolean isSpecialValue =
-                (isRoyalFlush()    ||
-                 isStraightFlush() ||
+                (isStraightFlush() ||
                  isFourOfAKind()   ||
                  isFullHouse()     ||
                  isFlush()         ||
@@ -140,6 +139,7 @@ public class HandEvaluator {
                         }
                     }
                 }
+                break;
             }
         }
     }
@@ -407,41 +407,84 @@ public class HandEvaluator {
             return false;
         }
     }
-    
+
     /**
      * Returns true if this hand contains a Straight Flush.
      * 
-     * The value of a Straight Flush is based on the rank of the highest card
-     * of the Straight. There are no kickers.
-     *
+     * An Ace-high Straight Flush is a Royal Flush, which has a fixed hand value
+     * (no kickers).
+     * 
+     * The value of a (non-Royal Flush) Straight Flush is based on the rank of
+     * the highest card of the Straight. There are no kickers.
+     * 
      * @return True if this hand contains a Straight Flush.
      */
     private boolean isStraightFlush() {
         if (straightRank != -1 && flushRank == straightRank) {
-            type = HandValueType.STRAIGHT_FLUSH;
-            rankings[0] = type.getValue();
-            rankings[1] = straightRank;
-            return true;
+            // Flush and Straight (possibly separate); check for Straight Flush.
+            int straightRank2 = -1;
+            int lastSuit = -1;
+            int lastRank = -1;
+            int inStraight = 1;
+            int inFlush = 1;
+            for (Card card : cards) {
+                int rank = card.getRank();
+                int suit = card.getSuit();
+                if (lastRank != -1) {
+                    int rankDiff = lastRank - rank;
+                    if (rankDiff == 1) {
+                        // Consecutive rank; possible straight!
+                        inStraight++;
+                        if (straightRank2 == -1) {
+                            straightRank2 = lastRank;
+                        }
+                        if (suit == lastSuit) {
+                            inFlush++;
+                        } else {
+                            inFlush = 1;
+                        }
+                        if (inStraight >= 5 && inFlush >= 5) {
+                            // Straight!
+                            break;
+                        }
+                    } else if (rankDiff == 0) {
+                        // Duplicate rank; skip.
+                    } else {
+                        // Non-consecutive; reset.
+                        straightRank2 = -1;
+                        inStraight = 1;
+                        inFlush = 1;
+                    }
+                }
+                lastRank = rank;
+                lastSuit = suit;
+            }
+            
+            if (inStraight >= 5 && inFlush >= 5) {
+                if (straightRank == Card.ACE) {
+                    // Royal Flush.
+                    type = HandValueType.ROYAL_FLUSH;
+                    rankings[0] = type.getValue();
+                    return true;
+                } else {
+                    // Straight Flush.
+                    type = HandValueType.STRAIGHT_FLUSH;
+                    rankings[0] = type.getValue();
+                    rankings[1] = straightRank2;
+                    return true;
+                }
+            } else if (wheelingAce && inStraight >= 4 && inFlush >= 4) {
+                // Steel Wheel (Straight Flush with wheeling Ace).
+                type = HandValueType.STRAIGHT_FLUSH;
+                rankings[0] = type.getValue();
+                rankings[1] = straightRank2;
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
     }
     
-    /**
-     * Returns true if this hand contains a Royal Flush.
-     * 
-     * The value of a Royal Flush is fixed, i.e. two Royal Flushes will tie.
-     *
-     * @return True if this hand contains a Royal Flush.
-     */
-    private boolean isRoyalFlush() {
-        if (straightRank == Card.ACE && flushRank == Card.ACE) {
-            type = HandValueType.ROYAL_FLUSH;
-            rankings[0] = type.getValue();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 }

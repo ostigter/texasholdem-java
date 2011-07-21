@@ -215,7 +215,7 @@ public class Main extends JFrame implements Client {
             Action action = player.getAction();
             if (action != null) {
                 boardPanel.setMessage(String.format("%s %s.", name, action.getVerb()));
-                //FIXME: Determine actor is the human player.
+                //FIXME: Determine whether actor is the human player (not by name).
                 if (!name.equals("Player")) {
                     boardPanel.waitForUserInput();
                 }
