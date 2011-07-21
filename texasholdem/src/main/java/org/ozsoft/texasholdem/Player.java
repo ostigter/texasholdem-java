@@ -297,6 +297,7 @@ public class Player {
      */
     public Player publicClone() {
         Player clone = new Player(name, cash, null);
+        clone.hasCards = hasCards;
         clone.bet = bet;
         clone.raises = raises;
         clone.action = action;

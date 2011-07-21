@@ -180,18 +180,17 @@ public class PlayerPanel extends JPanel {
         }
         if (player.hasCards()) {
             Card[] cards = player.getCards();
-            if (cards != null) {
-                if (cards.length == 2) {
-                    card1Label.setIcon(ResourceManager.getCardImage(cards[0]));
-                    card2Label.setIcon(ResourceManager.getCardImage(cards[1]));
-                } else {
-                    throw new IllegalArgumentException("Invalid number of cards");
-                }
+            if (cards.length == 2) {
+                // Visible cards.
+                card1Label.setIcon(ResourceManager.getCardImage(cards[0]));
+                card2Label.setIcon(ResourceManager.getCardImage(cards[1]));
             } else {
+                // Hidden cards (face-down).
                 card1Label.setIcon(CARD_BACK_ICON);
                 card2Label.setIcon(CARD_BACK_ICON);
             }
         } else {
+            // No cards.
             card1Label.setIcon(CARD_PLACEHOLDER_ICON);
             card2Label.setIcon(CARD_PLACEHOLDER_ICON);
         }

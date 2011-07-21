@@ -50,7 +50,7 @@ public class Table {
     /** The minimum bet in the current hand. */
     private int minBet;
     
-    /** The bet in the current hand. */
+    /** The current bet in the current hand. */
     private int bet;
     
     /** The pot in the current hand. */
@@ -111,29 +111,41 @@ public class Table {
      */
     private void playHand() {
         resetHand();
+        
+        // Small blind.
         rotateActor();
         postSmallBlind();
+        
+        // Big blind.
         rotateActor();
         postBigBlind();
-        bet = bigBlind;
-        // The Pre-Flop.
+        
+        // Pre-Flop.
         dealHoleCards();
         doBettingRound();
+        
+        // Flop.
         if (activePlayers.size() > 1) {
-            // The Flop.
+            bet = 0;
             dealCommunityCards("Flop", 3);
             doBettingRound();
+
+            // Turn.
             if (activePlayers.size() > 1) {
-                // The Turn.
+                bet = 0;
                 dealCommunityCards("Turn", 1);
+                minBet = 2 * bigBlind;
                 doBettingRound();
+
+                // River.
                 if (activePlayers.size() > 1) {
-                    // The River.
+                    bet = 0;
                     dealCommunityCards("River", 1);
-                    bet = 2 * bigBlind;
                     doBettingRound();
+
+                    // Showdown.
                     if (activePlayers.size() > 1) {
-                        // The Showdown.
+                        bet = 0;
                         doShowdown();
                     }
                 }
@@ -159,6 +171,7 @@ public class Table {
         deck.shuffle();
         actorPosition = dealerPosition;
         minBet = bigBlind;
+        bet = minBet;
         for (Player player : players) {
             player.getClient().handStarted(dealer);
         }
@@ -190,6 +203,7 @@ public class Table {
         final int smallBlind = bigBlind / 2;
         actor.postSmallBlind(smallBlind);
         pot += smallBlind;
+        notifyBoardUpdated();
         notifyPlayerActed();
     }
     
@@ -199,6 +213,7 @@ public class Table {
     private void postBigBlind() {
         actor.postBigBlind(bigBlind);
         pot += bigBlind;
+        notifyBoardUpdated();
         notifyPlayerActed();
     }
     
@@ -208,8 +223,8 @@ public class Table {
     private void dealHoleCards() {
         for (Player player : players) {
             player.setCards(deck.deal(2));
-            player.getClient().playerUpdated(player);
         }
+        notifyPlayersUpdated();
         notifyMessage("%s deals the hole cards.", dealer);
     }
     
@@ -225,7 +240,7 @@ public class Table {
         for (int i = 0; i < noOfCards; i++) {
             board.add(deck.deal());
         }
-        notifyBoardUpdated();
+        notifyPlayersUpdated();
         notifyMessage("%s deals the %s.", dealer, phaseName);
     }
     
@@ -299,10 +314,18 @@ public class Table {
             if (actor.isBroke()) {
                 actor.setInAllPot(pot);
             }
+            notifyBoardUpdated();
             notifyPlayerActed();
         }
+        
+        // Reset player's bets.
+        for (Player player : activePlayers) {
+            player.resetBet();
+        }
+        notifyBoardUpdated();
+        notifyPlayersUpdated();
     }
-    
+
     /**
      * Returns the allowed actions of a specific player.
      * 
@@ -407,7 +430,7 @@ public class Table {
     private void playerWins(Player player) {
         player.win(pot);
         pot = 0;
-//        notifyBoardUpdated();
+        notifyBoardUpdated();
         notifyMessage("%s wins.", player);
     }
     
@@ -421,8 +444,8 @@ public class Table {
      */
     private void notifyMessage(String message, Object... args) {
         message = String.format(message, args);
-        for (Player p : players) {
-            p.getClient().messageReceived(message);
+        for (Player player : players) {
+            player.getClient().messageReceived(message);
         }
     }
     
@@ -436,10 +459,25 @@ public class Table {
     }
 
     /**
-     * Notifies clients that a player has acted.
+     * Notifies clients that one or more players have been updated.
      * 
-     * @param player
-     *            The player that has acted.
+     * A player's secret information is only sent its own client; other clients
+     * see only a player's public information.
+     */
+    private void notifyPlayersUpdated() {
+        for (Player playerToNotify : players) {
+            for (Player player : players) {
+                if (!player.equals(playerToNotify)) {
+                    // Hide secret information to other players.
+                    player = player.publicClone();
+                }
+                playerToNotify.getClient().playerUpdated(player);
+            }
+        }
+    }
+    
+    /**
+     * Notifies clients that a player has acted.
      */
     private void notifyPlayerActed() {
         for (Player p : players) {
