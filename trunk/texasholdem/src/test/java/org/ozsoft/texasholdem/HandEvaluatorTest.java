@@ -21,7 +21,6 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("As Qh Tc 8d 5d 4h 2c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.HIGH_CARD, evaluator.getType());
         value1 = evaluator.getValue();
 
@@ -98,7 +97,6 @@ public class HandEvaluatorTest {
 
         // Base hand.
         evaluator = new HandEvaluator(new Hand("Ks Qh Tc 5d 5c 2h 2c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.TWO_PAIRS, evaluator.getType());
         value1 = evaluator.getValue();
         
@@ -137,34 +135,29 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("Ah Qs Qh Qc Th 8s 6c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.THREE_OF_A_KIND, evaluator.getType());
         value1 = evaluator.getValue();
 
         // Rank.
         evaluator = new HandEvaluator(new Hand("Ah Js Jh Jc Th 8s 6c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.THREE_OF_A_KIND, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 > value2);
 
         // Major kicker.
         evaluator = new HandEvaluator(new Hand("Ks Qs Qh Qc Th 8s 6c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.THREE_OF_A_KIND, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 > value2);
 
         // Minor kicker.
         evaluator = new HandEvaluator(new Hand("As Qs Qh Qc 9h 8s 6c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.THREE_OF_A_KIND, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 > value2);
 
         // Discarded cards (more than 5).
         evaluator = new HandEvaluator(new Hand("As Qs Qh Qc Th 7s 6c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.THREE_OF_A_KIND, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
@@ -180,39 +173,35 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("Ks Th 9s 8d 7c 6h 4c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
         value1 = evaluator.getValue();
 
         // Broadway (Ace-high Straight).
         evaluator = new HandEvaluator(new Hand("As Ks Qs Js Th 4d 2c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value2 > value1);
 
         // Different suit (tie).
         evaluator = new HandEvaluator(new Hand("Ks Tc 9d 8h 7d 6s 4c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
 
         // Rank.
         evaluator = new HandEvaluator(new Hand("Ks 9d 8h 7d 6s 5c 2d"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 > value2);
 
         // Discarded cards (more than 5).
         evaluator = new HandEvaluator(new Hand("As Th 9s 8d 7c 6h 4c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
 
         // Wheel (5-high Straight with wheeling Ace).
         evaluator = new HandEvaluator(new Hand("Ad Qc Th 5s 4d 3h 2c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
     }
 
@@ -224,27 +213,23 @@ public class HandEvaluatorTest {
         HandEvaluator evaluator = null;
         int value1, value2;
         
-        // Flush.
-        evaluator = new HandEvaluator(new Hand("Kh Jh Jd 8h 6h 5s 3h"));
-        Assert.assertNotNull(evaluator);
-        Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
-
-        // Missing one.
-        evaluator = new HandEvaluator(new Hand("Kh Jh Jd 8h 6d 5s 3h"));
-        Assert.assertNotNull(evaluator);
-        Assert.assertFalse(evaluator.getType() == HandValueType.FLUSH);
-        
         // Base hand.
         evaluator = new HandEvaluator(new Hand("As Qs Ts 8s 6s 4d 2c"));
         Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
         value1 = evaluator.getValue();
         
-        // Different suit.
+        // Different suit (tie).
         evaluator = new HandEvaluator(new Hand("Ad Qd Td 8d 6d 4c 2h"));
         Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
 
+        // Missing one.
+        evaluator = new HandEvaluator(new Hand("Kh Jh Jd 8h 6d 5s 3h"));
+        Assert.assertFalse(evaluator.getType() == HandValueType.FLUSH);
+        value2 = evaluator.getValue();
+        Assert.assertTrue(value1 > value2);
+        
         // Major rank.
         evaluator = new HandEvaluator(new Hand("Ks Qs Ts 8s 6s 4d 2c"));
         Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
@@ -258,7 +243,7 @@ public class HandEvaluatorTest {
         Assert.assertTrue(value1 > value2);
 
         // Discarded cards (more than 5).
-        evaluator = new HandEvaluator(new Hand("As Qs Ts 8s 6s 3d 2c"));
+        evaluator = new HandEvaluator(new Hand("As Qs Ts 8s 6s 5s 2s"));
         Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
@@ -274,7 +259,6 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("As Qs Qh Qc Tc Td 4c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.FULL_HOUSE, evaluator.getType());
         value1 = evaluator.getValue();
 
@@ -313,7 +297,6 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("As Ah Ac Ad Qs Th 8c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.FOUR_OF_A_KIND, evaluator.getType());
         value1 = evaluator.getValue();
 
@@ -346,10 +329,9 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("Ks Qs Js Ts 9s 4d 2c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
         value1 = evaluator.getValue();
-
+        
         // Rank.
         evaluator = new HandEvaluator(new Hand("Qh Jh Th 9h 8h 4d 2c"));
         Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
@@ -363,9 +345,16 @@ public class HandEvaluatorTest {
         Assert.assertTrue(value1 == value2);
 
         // Steel Wheel (5-high Straight Flush with wheeling Ace).
-        evaluator = new HandEvaluator(new Hand("As Qh Td 5s 4s 3s 2s"));
-        Assert.assertNotNull(evaluator);
+        evaluator = new HandEvaluator(new Hand("As Qc Td 5s 4s 3s 2s"));
         Assert.assertEquals(HandValueType.STRAIGHT_FLUSH, evaluator.getType());
+        
+        // Wheel (5-high Straight with wheeling Ace), but no Steel Wheel.
+        evaluator = new HandEvaluator(new Hand("Ah Qc Td 5s 4s 3s 2s"));
+        Assert.assertEquals(HandValueType.STRAIGHT, evaluator.getType());
+
+        // Separate Flush and Straight (but no Straight Flush).
+        evaluator = new HandEvaluator(new Hand("Kh Qs Jh Th 9h 4h 2c"));
+        Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
     }
 
     /**
@@ -378,7 +367,6 @@ public class HandEvaluatorTest {
         
         // Base hand.
         evaluator = new HandEvaluator(new Hand("As Ks Qs Js Ts 4d 2c"));
-        Assert.assertNotNull(evaluator);
         Assert.assertEquals(HandValueType.ROYAL_FLUSH, evaluator.getType());
         value1 = evaluator.getValue();
 
@@ -387,6 +375,10 @@ public class HandEvaluatorTest {
         Assert.assertEquals(HandValueType.ROYAL_FLUSH, evaluator.getType());
         value2 = evaluator.getValue();
         Assert.assertTrue(value1 == value2);
+
+        // Separate Flush and Straight, but no Straight Flush or Royal Flush.
+        evaluator = new HandEvaluator(new Hand("As Kh Qs Js Ts 4s 2c"));
+        Assert.assertEquals(HandValueType.FLUSH, evaluator.getType());
     }
 
 }
