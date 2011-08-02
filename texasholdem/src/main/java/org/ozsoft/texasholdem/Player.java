@@ -40,7 +40,8 @@ public class Player {
     /** Last action performed. */
     private Action action;
     
-    private int amount;
+    /** Last action's bet increment. */
+    private int betIncrement;
 
     /**
      * Constructor.
@@ -88,7 +89,7 @@ public class Player {
         action = null;
         raises = 0;
         allInPot = 0;
-        amount = 0;
+        betIncrement = 0;
     }
     
     /**
@@ -136,10 +137,6 @@ public class Player {
         return cash;
     }
     
-    public int getAmount() {
-        return amount;
-    }
-    
     /**
      * Returns whether the player is broke.
      *
@@ -174,6 +171,15 @@ public class Player {
      */
     public Action getAction() {
         return action;
+    }
+    
+    /**
+     * Returns the bet increment of the last action.
+     * 
+     * @return The bet increment.
+     */
+    public int getBetIncrement() {
+        return betIncrement;
     }
     
     /**
@@ -257,28 +263,29 @@ public class Player {
             case CHECK:
                 break;
             case CALL:
-                amount = currentBet - bet;
-                if (amount > cash) {
+                betIncrement = currentBet - bet;
+                if (betIncrement > cash) {
                     //TODO: All-in with partial Call.
-                    amount = cash;
+                    betIncrement = cash;
                 }
-                cash -= amount;
-                bet += amount;
+                cash -= betIncrement;
+                bet += betIncrement;
                 break;
             case BET:
-                amount = minBet;
-                if (amount >= cash) {
-                    amount = cash;
+                betIncrement = minBet;
+                if (betIncrement >= cash) {
+                    //TODO: All-in with partial Bet.
+                    betIncrement = cash;
                 }
-                cash -= amount;
-                bet += amount;
+                cash -= betIncrement;
+                bet += betIncrement;
                 raises++;
                 break;
             case RAISE:
                 currentBet += minBet;
-                amount = currentBet - bet;
-                cash -= amount;
-                bet += amount;
+                betIncrement = currentBet - bet;
+                cash -= betIncrement;
+                bet += betIncrement;
                 raises++;
                 break;
             case FOLD:
