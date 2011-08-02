@@ -274,16 +274,16 @@ public class Table {
                     // Do nothing.
                     break;
                 case CALL:
-                    pot += actor.getAmount();
+                    pot += actor.getBetIncrement();
                     break;
                 case BET:
                     bet = minBet;
-                    pot += actor.getAmount();
+                    pot += actor.getBetIncrement();
                     playersToAct = activePlayers.size();
                     break;
                 case RAISE:
                     bet += minBet;
-                    pot += actor.getAmount();
+                    pot += actor.getBetIncrement();
                     if (actor.getRaises() == MAX_RAISES) {
                         // Max. number of raises reached; other players get one more turn.
                         playersToAct = activePlayers.size() - 1;
