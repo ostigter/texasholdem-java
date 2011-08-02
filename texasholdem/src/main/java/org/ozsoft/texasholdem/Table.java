@@ -260,10 +260,8 @@ public class Table {
             bet = 0;
         }
         notifyBoardUpdated();
-        final int smallBlind = bigBlind / 2;
         while (playersToAct > 0) {
             rotateActor();
-            boolean isSmallBlindPosition = (actor.getBet() == smallBlind);
             Set<Action> allowedActions = getAllowedActions(actor);
             Action action = actor.act(allowedActions, minBet, bet);
             if (!allowedActions.contains(action)) {
@@ -276,21 +274,16 @@ public class Table {
                     // Do nothing.
                     break;
                 case CALL:
-                    if (isSmallBlindPosition) {
-                        // Correct bet for small blind.
-                        pot += bet - smallBlind;
-                    } else {
-                        pot += bet;
-                    }
+                    pot += actor.getAmount();
                     break;
                 case BET:
                     bet = minBet;
-                    pot += bet;
+                    pot += actor.getAmount();
                     playersToAct = activePlayers.size();
                     break;
                 case RAISE:
                     bet += minBet;
-                    pot += bet;
+                    pot += actor.getAmount();
                     if (actor.getRaises() == MAX_RAISES) {
                         // Max. number of raises reached; other players get one more turn.
                         playersToAct = activePlayers.size() - 1;
