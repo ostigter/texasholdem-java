@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Fix pot increase on bet/raise
 * Fix GUI showdown
 * Winnings calculation (incl. all-in)
 * Different dealer and blind handling when head-to-head

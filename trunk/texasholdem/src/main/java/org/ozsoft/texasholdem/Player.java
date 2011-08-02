@@ -39,6 +39,8 @@ public class Player {
     
     /** Last action performed. */
     private Action action;
+    
+    private int amount;
 
     /**
      * Constructor.
@@ -86,6 +88,7 @@ public class Player {
         action = null;
         raises = 0;
         allInPot = 0;
+        amount = 0;
     }
     
     /**
@@ -131,6 +134,10 @@ public class Player {
      */
     public int getCash() {
         return cash;
+    }
+    
+    public int getAmount() {
+        return amount;
     }
     
     /**
@@ -250,27 +257,28 @@ public class Player {
             case CHECK:
                 break;
             case CALL:
-                int toPay = currentBet - bet;
-                if (toPay > cash) {
-                    toPay = cash;
+                amount = currentBet - bet;
+                if (amount > cash) {
+                    //TODO: All-in with partial Call.
+                    amount = cash;
                 }
-                cash -= toPay;
-                bet += toPay;
+                cash -= amount;
+                bet += amount;
                 break;
             case BET:
-                toPay = minBet;
-                if (toPay >= cash) {
-                    toPay = cash;
+                amount = minBet;
+                if (amount >= cash) {
+                    amount = cash;
                 }
-                cash -= toPay;
-                bet += toPay;
+                cash -= amount;
+                bet += amount;
                 raises++;
                 break;
             case RAISE:
-                toPay = currentBet - bet;
-                currentBet += toPay;
-                cash -= toPay;
-                bet += toPay;
+                currentBet += minBet;
+                amount = currentBet - bet;
+                cash -= amount;
+                bet += amount;
                 raises++;
                 break;
             case FOLD:
