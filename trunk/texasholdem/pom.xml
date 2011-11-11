@@ -11,6 +11,12 @@
     <name>TexasHoldEm</name>
     <description>Texas Hold'em poker game</description>
     <inceptionYear>2009</inceptionYear>
+    <licenses>
+        <license>
+            <name>Apache License 2.0</name>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
     <developers>
         <developer>
             <name>Oscar Stigter</name>
