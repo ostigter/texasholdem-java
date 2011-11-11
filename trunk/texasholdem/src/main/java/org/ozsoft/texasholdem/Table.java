@@ -158,6 +158,8 @@ public class Table {
      */
     private void resetHand() {
         board.clear();
+        bet = 0;
+        pot = 0;
         notifyBoardUpdated();
         activePlayers.clear();
         for (Player player : players) {
@@ -175,7 +177,8 @@ public class Table {
         for (Player player : players) {
             player.getClient().handStarted(dealer);
         }
-        notifyMessage("New hand. %s is the dealer.", dealer);
+        notifyPlayersUpdated(false);
+        notifyMessage("New hand, %s is the dealer.", dealer);
     }
 
     /**
@@ -224,7 +227,7 @@ public class Table {
         for (Player player : players) {
             player.setCards(deck.deal(2));
         }
-        notifyPlayersUpdated();
+        notifyPlayersUpdated(false);
         notifyMessage("%s deals the hole cards.", dealer);
     }
     
@@ -240,7 +243,7 @@ public class Table {
         for (int i = 0; i < noOfCards; i++) {
             board.add(deck.deal());
         }
-        notifyPlayersUpdated();
+        notifyPlayersUpdated(false);
         notifyMessage("%s deals the %s.", dealer, phaseName);
     }
     
@@ -316,7 +319,7 @@ public class Table {
             player.resetBet();
         }
         notifyBoardUpdated();
-        notifyPlayersUpdated();
+        notifyPlayersUpdated(false);
     }
 
     /**
@@ -356,34 +359,54 @@ public class Table {
      * Performs the Showdown.
      */
     private void doShowdown() {
-        notifyMessage("Showdown!");
 	System.out.print("Board: ");
 	for (Card card : board) {
 	    System.out.print(card + " ");
 	}
 	System.out.println();
-        notifyBoardUpdated();
         // Look at each hand value, sorted from highest to lowest.
-        Map<HandValue, List<Player>> winners = getWinners();
-        for (HandValue handValue : winners.keySet()) {
-            int value = handValue.getValue();
-            // Get players with this specific hand value.
-            List<Player> tiePlayers = winners.get(handValue); 
-            for (Player player : tiePlayers) {
-        	System.out.format("%s:\t%s (%d)\n", player, handValue.getDescription(), value);
-        	// Determine the player's share of the pot.
-        	int potShare = player.getAllInPot();
-        	if (potShare == 0) {
-        	    // Player is not all-in, so he competes for the whole pot.
-        	    potShare = pot / tiePlayers.size();
-        	}
-        	// Give the player his share of the pot.
-		player.win(potShare);
-		pot -= potShare;
-        	// If there is no more pot to divide, we're done.
-        	if (pot == 0) {
-        	    break;
-        	}
+        Map<HandValue, List<Player>> rankedPlayers = getRankedPlayers();
+        for (HandValue handValue : rankedPlayers.keySet()) {
+            // Get players with winning hand value.
+            List<Player> winners = rankedPlayers.get(handValue);
+            if (winners.size() == 1) {
+                // Single winner.
+                Player winner = winners.get(0);
+                winner.win(pot);
+                notifyBoardUpdated();
+                notifyPlayersUpdated(true);
+                notifyMessage("%s wins the pot.", winner);
+                break;
+            } else {
+                // Tie; share the pot amongs winners.
+                int tempPot = pot;
+                StringBuilder sb = new StringBuilder("Tie: ");
+                for (Player player : winners) {
+                    // Determine the player's share of the pot.
+                    int potShare = player.getAllInPot();
+                    if (potShare == 0) {
+                        // Player is not all-in, so he competes for the whole pot.
+                        potShare = pot / winners.size();
+                    }
+                    // Give the player his share of the pot.
+                    player.win(potShare);
+                    tempPot -= potShare;
+                    if (sb.length() > 0) {
+                        sb.append(", ");
+                    }
+                    sb.append(String.format("%s wins $%d\n", player, potShare));
+                    // If there is no more pot to divide, we're done.
+                    if (tempPot == 0) {
+                        break;
+                    }
+                }
+                notifyBoardUpdated();
+                notifyPlayersUpdated(true);
+                notifyMessage(sb.append('.').toString());
+                if (tempPot > 0) {
+                    throw new IllegalStateException("Pot not empty after sharing between winners");
+                }
+                break;
             }
         }
     }
@@ -395,7 +418,7 @@ public class Table {
      * 
      * @return The active players mapped by their hand value (sorted). 
      */
-    private Map<HandValue, List<Player>> getWinners() {
+    private Map<HandValue, List<Player>> getRankedPlayers() {
 	Map<HandValue, List<Player>> winners = new TreeMap<HandValue, List<Player>>();
 	for (Player player : activePlayers) {
             // Create a hand with the community cards and the player's hole cards.
@@ -403,7 +426,7 @@ public class Table {
             hand.addCards(player.getCards());
             // Store the player together with other players with the same hand value.
             HandValue handValue = new HandValue(hand);
-            System.out.format("%s:\t%s (%d, %s)\n", player, hand, handValue.getValue(), handValue.getDescription());
+            System.out.format("%s: %s\n", player, handValue);
             List<Player> playerList = winners.get(handValue);
             if (playerList == null) {
         	playerList = new LinkedList<Player>();
@@ -457,10 +480,10 @@ public class Table {
      * A player's secret information is only sent its own client; other clients
      * see only a player's public information.
      */
-    private void notifyPlayersUpdated() {
+    private void notifyPlayersUpdated(boolean showdown) {
         for (Player playerToNotify : players) {
             for (Player player : players) {
-                if (!player.equals(playerToNotify)) {
+                if (!showdown && !player.equals(playerToNotify)) {
                     // Hide secret information to other players.
                     player = player.publicClone();
                 }

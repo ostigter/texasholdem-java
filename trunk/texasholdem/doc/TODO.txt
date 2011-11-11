@@ -1,6 +1,6 @@
 TODO
 ====
 
-* Fix GUI showdown
+* Broke players
 * Winnings calculation (incl. all-in)
 * Different dealer and blind handling when head-to-head
