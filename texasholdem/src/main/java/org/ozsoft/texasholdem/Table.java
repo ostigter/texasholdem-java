@@ -43,7 +43,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Limit Texas Hold'em poker table.
+ * Limit Texas Hold'em poker table. <br />
+ * <br />
  * 
  * Controls the game flow for a single poker table.
  * 
@@ -202,8 +203,8 @@ public class Table {
                 activePlayers.add(player);
             }
         }
-        dealerPosition = (dealerPosition + 1) % players.size();
-        dealer = players.get(dealerPosition);
+        dealerPosition = (dealerPosition + 1) % activePlayers.size();
+        dealer = activePlayers.get(dealerPosition);
         deck.shuffle();
         actorPosition = dealerPosition;
         minBet = bigBlind;

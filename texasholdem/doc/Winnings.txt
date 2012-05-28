@@ -143,3 +143,17 @@ Player  Cash    Action      Bet     Pot
 A       4       SB (2)      2       2 (A) (total: 2)
 B       8       BB (4)      4       4 (A, B), 2 (B) (total: 6)
 C       16      C (4)       4       6 (A, B, C), 4 (B, C) (total: 10)
+A       2       C (2) *     4       6 (A, B, C), 6 (A, B, C) (total: 12)
+B       4       B (4) *     4       6 (A, B, C), 6 (A, B, C), 4 (B) (total: 16)
+C       12      C (4)       4       6 (A, B, C), 6 (A, B, C), 8 (B, C) (total: 20)
+A       -       -           4       6 (A, B, C), 6 (A, B, C), 8 (B, C) (total: 20)
+B       -       -           4       6 (A, B, C), 6 (A, B, C), 8 (B, C) (total: 20)
+C       8       -           4       6 (A, B, C), 6 (A, B, C), 8 (B, C) (total: 20)
+* Ranking: A, B, C:
+  * A receives 12 (6 + 6)
+  * B receives 8
+* Ranking: B, A, C:
+  * B receives 20
+* Ranking: A/B, C:
+  * A receives  6 (6/2 + 6/2)
+  * B receives 14 (6/2 + 6/2 + 8)
