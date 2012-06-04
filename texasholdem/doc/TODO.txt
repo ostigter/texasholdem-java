@@ -1,6 +1,5 @@
 TODO
 ====
 
-* Broke players
-* Winnings calculation (incl. all-in)
-* Different dealer and blind handling when head-to-head
+* Call or fold at showdown
+* Head-to-head mode (dealer and blind handling)

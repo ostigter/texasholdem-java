@@ -42,6 +42,8 @@ public enum Action {
     /** Raising the current bet. */
     RAISE("Raise", "raises"),
     
+    ALL_IN("All-in", "goes all-in"),
+    
     /** Folding. */
     FOLD("Fold", "folds"),
     
