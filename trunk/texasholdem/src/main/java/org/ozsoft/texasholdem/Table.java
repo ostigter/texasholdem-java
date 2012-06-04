@@ -35,8 +35,8 @@
 package org.ozsoft.texasholdem;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +89,7 @@ public class Table {
     private int bet;
     
     /** The pot in the current hand. */
-    private int pot;
+    private final List<Pot> pots;
     
     /** Whether the game is over. */
     private boolean gameOver;
@@ -106,6 +106,7 @@ public class Table {
         activePlayers = new ArrayList<Player>();
         deck = new Deck();
         board = new ArrayList<Card>();
+        pots = new ArrayList<Pot>();
     }
     
     /**
@@ -194,7 +195,7 @@ public class Table {
     private void resetHand() {
         board.clear();
         bet = 0;
-        pot = 0;
+        pots.clear();
         notifyBoardUpdated();
         activePlayers.clear();
         for (Player player : players) {
@@ -240,7 +241,7 @@ public class Table {
     private void postSmallBlind() {
         final int smallBlind = bigBlind / 2;
         actor.postSmallBlind(smallBlind);
-        pot += smallBlind;
+        contributePot(smallBlind);
         notifyBoardUpdated();
         notifyPlayerActed();
     }
@@ -250,7 +251,7 @@ public class Table {
      */
     private void postBigBlind() {
         actor.postBigBlind(bigBlind);
-        pot += bigBlind;
+        contributePot(bigBlind);
         notifyBoardUpdated();
         notifyPlayerActed();
     }
@@ -259,7 +260,7 @@ public class Table {
      * Deals the Hole Cards.
      */
     private void dealHoleCards() {
-        for (Player player : players) {
+        for (Player player : activePlayers) {
             player.setCards(deck.deal(2));
         }
         notifyPlayersUpdated(false);
@@ -311,17 +312,20 @@ public class Table {
                 case CHECK:
                     // Do nothing.
                     break;
+                case ALL_IN:
+                    // Do nothing.
+                    break;
                 case CALL:
-                    pot += actor.getBetIncrement();
+                    contributePot(actor.getBetIncrement());
                     break;
                 case BET:
                     bet = minBet;
-                    pot += actor.getBetIncrement();
+                    contributePot(actor.getBetIncrement());
                     playersToAct = activePlayers.size();
                     break;
                 case RAISE:
                     bet += minBet;
-                    pot += actor.getBetIncrement();
+                    contributePot(actor.getBetIncrement());
                     if (actor.getRaises() == MAX_RAISES) {
                         // Max. number of raises reached; other players get one more turn.
                         playersToAct = activePlayers.size() - 1;
@@ -342,9 +346,6 @@ public class Table {
                 default:
                     throw new IllegalStateException("Invalid action: " + action);
             }
-            if (actor.isBroke()) {
-                actor.setInAllPot(pot);
-            }
             notifyBoardUpdated();
             notifyPlayerActed();
         }
@@ -356,7 +357,7 @@ public class Table {
         notifyBoardUpdated();
         notifyPlayersUpdated(false);
     }
-
+    
     /**
      * Returns the allowed actions of a specific player.
      * 
@@ -366,110 +367,145 @@ public class Table {
      * @return The allowed actions.
      */
     private Set<Action> getAllowedActions(Player player) {
-        int actorBet = actor.getBet();
         Set<Action> actions = new HashSet<Action>();
-        if (bet == 0) {
+        if (player.isBroke()) {
             actions.add(Action.CHECK);
-            if (player.getRaises() < MAX_RAISES) {
-                actions.add(Action.BET);
-            }
         } else {
-            if (actorBet < bet) {
-                actions.add(Action.CALL);
-                if (player.getRaises() < MAX_RAISES) {
-                    actions.add(Action.RAISE);
-                }
-            } else {
+            int actorBet = actor.getBet();
+            if (bet == 0) {
                 actions.add(Action.CHECK);
                 if (player.getRaises() < MAX_RAISES) {
-                    actions.add(Action.RAISE);
+                    actions.add(Action.BET);
+                }
+            } else {
+                if (actorBet < bet) {
+                    actions.add(Action.CALL);
+                    if (player.getRaises() < MAX_RAISES) {
+                        actions.add(Action.RAISE);
+                    }
+                } else {
+                    actions.add(Action.CHECK);
+                    if (player.getRaises() < MAX_RAISES) {
+                        actions.add(Action.RAISE);
+                    }
                 }
             }
+            actions.add(Action.FOLD);
         }
-        actions.add(Action.FOLD);
         return actions;
+    }
+    
+    /**
+     * Contributes to the pot.
+     * 
+     * @param amount
+     *            The amount to contribute.
+     */
+    private void contributePot(int amount) {
+        for (Pot pot : pots) {
+            if (!pot.hasContributer(actor)) {
+                int potBet = pot.getBet();
+                if (amount >= potBet) {
+                    // Regular call, bet or raise.
+                    pot.addContributer(actor);
+                    amount -= pot.getBet();
+                } else {
+                    // Partial call (all-in); redistribute pots.
+                    pots.add(pot.split(actor, amount));
+                    amount = 0;
+                }
+            }
+            if (amount <= 0) {
+                break;
+            }
+        }
+        if (amount > 0) {
+            Pot pot = new Pot(amount);
+            pot.addContributer(actor);
+            pots.add(pot);
+        }
     }
     
     /**
      * Performs the Showdown.
      */
     private void doShowdown() {
-	System.out.print("Board: ");
-	for (Card card : board) {
-	    System.out.print(card + " ");
-	}
-	System.out.println();
-        // Look at each hand value, sorted from highest to lowest.
-        Map<HandValue, List<Player>> rankedPlayers = getRankedPlayers();
-        for (HandValue handValue : rankedPlayers.keySet()) {
-            // Get players with winning hand value.
-            List<Player> winners = rankedPlayers.get(handValue);
-            if (winners.size() == 1) {
-                // Single winner.
-                Player winner = winners.get(0);
-                winner.win(pot);
-                notifyBoardUpdated();
-                notifyPlayersUpdated(true);
-                notifyMessage("%s wins the pot.", winner);
-                break;
-            } else {
-                // Tie; share the pot amongs winners.
-                int tempPot = pot;
-                StringBuilder sb = new StringBuilder("Tie: ");
-                for (Player player : winners) {
-                    // Determine the player's share of the pot.
-                    int potShare = player.getAllInPot();
-                    if (potShare == 0) {
-                        // Player is not all-in, so he competes for the whole pot.
-                        potShare = pot / winners.size();
-                    }
-                    // Give the player his share of the pot.
-                    player.win(potShare);
-                    tempPot -= potShare;
-                    if (sb.length() > 0) {
-                        sb.append(", ");
-                    }
-                    sb.append(String.format("%s wins $%d\n", player, potShare));
-                    // If there is no more pot to divide, we're done.
-                    if (tempPot == 0) {
-                        break;
-                    }
-                }
-                notifyBoardUpdated();
-                notifyPlayersUpdated(true);
-                notifyMessage(sb.append('.').toString());
-                if (tempPot > 0) {
-                    throw new IllegalStateException("Pot not empty after sharing between winners");
-                }
-                break;
-            }
+        // Sort players by hand value (highest to lowest).
+        System.out.print("Board: ");
+        for (Card card : board) {
+            System.out.print(card + " ");
         }
-    }
-    
-    /**
-     * Returns the active players mapped and sorted by their hand value.
-     * 
-     * The players are sorted in descending order (highest value first).
-     * 
-     * @return The active players mapped by their hand value (sorted). 
-     */
-    private Map<HandValue, List<Player>> getRankedPlayers() {
-	Map<HandValue, List<Player>> winners = new TreeMap<HandValue, List<Player>>();
-	for (Player player : activePlayers) {
+        System.out.println();
+        Map<HandValue, List<Player>> rankedPlayers = new TreeMap<HandValue, List<Player>>();
+        for (Player player : activePlayers) {
             // Create a hand with the community cards and the player's hole cards.
             Hand hand = new Hand(board);
             hand.addCards(player.getCards());
             // Store the player together with other players with the same hand value.
             HandValue handValue = new HandValue(hand);
             System.out.format("%s: %s\n", player, handValue);
-            List<Player> playerList = winners.get(handValue);
+            List<Player> playerList = rankedPlayers.get(handValue);
             if (playerList == null) {
-        	playerList = new LinkedList<Player>();
+                playerList = new ArrayList<Player>();
             }
             playerList.add(player);
-            winners.put(handValue, playerList);
-	}
-	return winners;
+            rankedPlayers.put(handValue, playerList);
+        }
+
+        printPot();
+        int totalPot = getTotalPot();
+
+        // Per rank (single or multiple winners), calculate pot distribution.
+        Map<Player, Integer> potDivision = new HashMap<Player, Integer>();
+        for (HandValue handValue : rankedPlayers.keySet()) {
+            List<Player> winners = rankedPlayers.get(handValue);
+            for (Pot pot : pots) {
+                // Determine how many winners share this pot.
+                int noOfWinnersInPot = 0;
+                for (Player winner : winners) {
+                    if (pot.hasContributer(winner)) {
+                        noOfWinnersInPot++;
+                    }
+                }
+                if (noOfWinnersInPot > 0) {
+                    // Divide pot over winners.
+                    int potShare = pot.getValue() / noOfWinnersInPot;
+                    for (Player winner : winners) {
+                        if (pot.hasContributer(winner)) {
+                            Integer oldShare = potDivision.get(winner);
+                            if (oldShare != null) {
+                                potDivision.put(winner, oldShare + potShare);
+                            } else {
+                                potDivision.put(winner, potShare);
+                            }
+                            
+                        }
+                    }
+                    pot.clear();
+                }
+            }
+        }
+        
+        // Divide winnings.
+        StringBuilder winnerText = new StringBuilder();
+        int totalWon = 0;
+        for (Player winner : potDivision.keySet()) {
+            int potShare = potDivision.get(winner);
+            winner.win(potShare);
+            totalWon += potShare;
+            if (winnerText.length() > 0) {
+                winnerText.append(", ");
+            }
+            winnerText.append(String.format("%s wins $%d", winner, potShare));
+            notifyPlayersUpdated(false);
+        }
+        winnerText.append('.');
+        notifyMessage(winnerText.toString());
+        
+        // Sanity check.
+        if (totalWon != totalPot) {
+            throw new IllegalStateException("Incorrect pot division");
+        }
     }
     
     /**
@@ -479,8 +515,6 @@ public class Table {
      *            The winning player.
      */
     private void playerWins(Player player) {
-        player.win(pot);
-        pot = 0;
         notifyBoardUpdated();
         notifyMessage("%s wins.", player);
     }
@@ -504,9 +538,18 @@ public class Table {
      * Notifies clients that the board has been updated.
      */
     private void notifyBoardUpdated() {
+        int pot = getTotalPot();
         for (Player player : players) {
             player.getClient().boardUpdated(board, bet, pot);
         }
+    }
+    
+    private int getTotalPot() {
+        int totalPot = 0;
+        for (Pot pot : pots) {
+            totalPot += pot.getValue();
+        }
+        return totalPot;
     }
 
     /**
@@ -537,4 +580,15 @@ public class Table {
         }
     }
     
+    /**
+     * Debug method to print the pot.
+     */
+    private void printPot() {
+        System.out.println("Pot:");
+        for (Pot pot : pots) {
+            System.out.format("  %s\n", pot);
+        }
+        System.out.format("  Total: %d\n", getTotalPot());
+    }
+
 }

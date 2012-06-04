@@ -29,34 +29,31 @@ import java.util.Set;
  * @author Oscar Stigter
  */
 public class Player {
-    
+
     /** Name. */
     private final String name;
-    
+
     /** Client application responsible for the actual behavior. */
     private final Client client;
-    
+
     /** Hand of cards. */
     private final Hand hand;
-    
+
     /** Current amount of cash. */
     private int cash;
-    
+
     /** Whether the player has his hole cards being dealt. */
     private boolean hasCards;
 
     /** Current bet. */
     private int bet;
-    
+
     /** Number of bets and raises in the current betting round. */
     private int raises;
-    
-    /** Pot when all-in. */
-    private int allInPot;
-    
+
     /** Last action performed. */
     private Action action;
-    
+
     /** Last action's bet increment. */
     private int betIncrement;
 
@@ -79,7 +76,7 @@ public class Player {
 
         resetHand();
     }
-    
+
     /**
      * Returns the client.
      * 
@@ -88,7 +85,7 @@ public class Player {
     public Client getClient() {
         return client;
     }
-    
+
     /**
      * Prepares the player for another hand.
      */
@@ -97,18 +94,17 @@ public class Player {
         hasCards = false;
         resetBet();
     }
-    
+
     /**
      * Resets the player's bet.
      */
     public void resetBet() {
         bet = 0;
-        action = null;
+        action = (hasCards & isBroke()) ? Action.ALL_IN : null;
         raises = 0;
-        allInPot = 0;
         betIncrement = 0;
     }
-    
+
     /**
      * Sets the hole cards.
      */
@@ -126,52 +122,52 @@ public class Player {
             }
         }
     }
-    
-	/**
-	 * Returns whether the player has his hole cards dealt.
-	 * 
-	 * @return True if the hole cards are dealt, otherwise false.
-	 */
+
+    /**
+     * Returns whether the player has his hole cards dealt.
+     * 
+     * @return True if the hole cards are dealt, otherwise false.
+     */
     public boolean hasCards() {
         return hasCards;
     }
-    
+
     /**
      * Returns the player's name.
-     *
+     * 
      * @return The name.
      */
     public String getName() {
         return name;
     }
-    
+
     /**
      * Returns the player's current amount of cash.
-     *
+     * 
      * @return The amount of cash.
      */
     public int getCash() {
         return cash;
     }
-    
+
     /**
      * Returns whether the player is broke.
-     *
+     * 
      * @return True if the player is broke, otherwise false.
      */
     public boolean isBroke() {
         return (cash == 0);
     }
-    
+
     /**
      * Returns the player's current bet.
-     *
+     * 
      * @return The current bet.
      */
     public int getBet() {
         return bet;
     }
-    
+
     /**
      * Returns the number of raises the player has done in this betting round.
      * 
@@ -180,16 +176,16 @@ public class Player {
     public int getRaises() {
         return raises;
     }
-    
+
     /**
      * Returns the player's action.
-     *
-     * @return  the action
+     * 
+     * @return the action
      */
     public Action getAction() {
         return action;
     }
-    
+
     /**
      * Returns the bet increment of the last action.
      * 
@@ -198,25 +194,25 @@ public class Player {
     public int getBetIncrement() {
         return betIncrement;
     }
-    
+
     /**
      * Returns the player's hand of cards.
-     *
+     * 
      * @return The hand of cards.
      */
     public Hand getHand() {
         return hand;
     }
-    
+
     /**
      * Returns the player's hole cards.
-     *
+     * 
      * @return The hole cards.
      */
     public Card[] getCards() {
         return hand.getCards();
     }
-    
+
     /**
      * Posts the small blind.
      * 
@@ -228,7 +224,7 @@ public class Player {
         cash -= blind;
         bet += blind;
     }
-    
+
     /**
      * Posts the big blinds.
      * 
@@ -240,78 +236,66 @@ public class Player {
         cash -= blind;
         bet += blind;
     }
-    
+
     /**
-     * Returns the part of the pot this player has a stake in when all-in.
-     *  
-     * @return The all-in pot.
-     */
-    public int getAllInPot() {
-        return allInPot;
-    }
-    
-    /**
-     * Sets the part of the pot this player has a stake in when all-in.
+     * Asks the player to act and returns his selected action.
      * 
-     * @param allInPot
-     *            The all-in pot.
+     * Determining the player's action is handled by the client application.
+     * 
+     * @param actions
+     *            The allowed actions.
+     * @param minBet
+     *            The minimum bet.
+     * @param currentBet
+     *            The current bet.
+     * 
+     * @return The selected action.
      */
-    public void setInAllPot(int allInPot) {
-        this.allInPot = allInPot;
-    }
-    
-	/**
-	 * Asks the player to act and returns his selected action.
-	 * 
-	 * Determining the player's action is handled by the client application.
-	 * 
-	 * @param actions
-	 *            The allowed actions.
-	 * @param minBet
-	 *            The minimum bet.
-	 * @param currentBet
-	 *            The current bet.
-	 * 
-	 * @return The selected action.
-	 */
     public Action act(Set<Action> actions, int minBet, int currentBet) {
-        action = client.act(actions);
-        switch (action) {
-            case CHECK:
-                break;
-            case CALL:
-                betIncrement = currentBet - bet;
-                if (betIncrement > cash) {
-                    //TODO: All-in with partial Call.
-                    betIncrement = cash;
-                }
-                cash -= betIncrement;
-                bet += betIncrement;
-                break;
-            case BET:
-                betIncrement = minBet;
-                if (betIncrement >= cash) {
-                    //TODO: All-in with partial Bet.
-                    betIncrement = cash;
-                }
-                cash -= betIncrement;
-                bet += betIncrement;
-                raises++;
-                break;
-            case RAISE:
-                currentBet += minBet;
-                betIncrement = currentBet - bet;
-                cash -= betIncrement;
-                bet += betIncrement;
-                raises++;
-                break;
-            case FOLD:
-                hand.removeAllCards();
-                break;
+        if (actions.size() > 2) {
+            // Multiple possibilities, actor must choose.
+            action = client.act(actions);
+            switch (action) {
+                case CHECK:
+                    break;
+                case CALL:
+                    betIncrement = currentBet - bet;
+                    if (betIncrement > cash) {
+                        betIncrement = cash;
+                    }
+                    cash -= betIncrement;
+                    bet += betIncrement;
+                    break;
+                case BET:
+                    betIncrement = minBet;
+                    if (betIncrement > cash) {
+                        betIncrement = cash;
+                    }
+                    cash -= betIncrement;
+                    bet += betIncrement;
+                    raises++;
+                    break;
+                case RAISE:
+                    currentBet += minBet;
+                    betIncrement = currentBet - bet;
+                    if (betIncrement > cash) {
+                        betIncrement = cash;
+                    }
+                    cash -= betIncrement;
+                    bet += betIncrement;
+                    raises++;
+                    break;
+                case FOLD:
+                    hand.removeAllCards();
+                    break;
+            }
+        } else {
+            // Only 1 option, so must be all-in.
+            action = Action.CHECK;
         }
         return action;
     }
-    
+
     /**
      * Wins the pot.
      * 
@@ -321,7 +305,7 @@ public class Player {
     public void win(int pot) {
         cash += pot;
     }
-    
+
     /**
      * Returns a clone of this player with only public information.
      * 
@@ -335,14 +319,15 @@ public class Player {
         clone.action = action;
         return clone;
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
     public String toString() {
         return name;
     }
-    
+
 }
