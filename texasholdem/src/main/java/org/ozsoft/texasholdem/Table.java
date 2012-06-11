@@ -43,7 +43,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * Limit Texas Hold'em poker table. <br />
+ * Fixed Limit Texas Hold'em poker table. <br />
  * <br />
  * 
  * Controls the game flow for a single poker table.
@@ -338,16 +338,24 @@ public class Table {
                     actor.setCards(null);
                     activePlayers.remove(actor);
                     if (activePlayers.size() == 1) {
-                        // The player left wins.
-                        playerWins(activePlayers.get(0));
+                        // The player left wins the pot.
+                        notifyBoardUpdated();
+                        notifyPlayerActed();
+                        Player winner = activePlayers.get(0);
+                        int amount = getTotalPot();
+                        winner.win(amount);
+                        notifyBoardUpdated();
+                        notifyMessage("%s wins $%d.", winner, amount);
                         playersToAct = 0;
                     }
                     break;
                 default:
                     throw new IllegalStateException("Invalid action: " + action);
             }
-            notifyBoardUpdated();
-            notifyPlayerActed();
+            if (playersToAct > 0) {
+                notifyBoardUpdated();
+                notifyPlayerActed();
+            }
         }
         
         // Reset player's bets.
@@ -506,17 +514,6 @@ public class Table {
         if (totalWon != totalPot) {
             throw new IllegalStateException("Incorrect pot division");
         }
-    }
-    
-    /**
-     * Let's a player win the pot.
-     * 
-     * @param player
-     *            The winning player.
-     */
-    private void playerWins(Player player) {
-        notifyBoardUpdated();
-        notifyMessage("%s wins.", player);
     }
     
     /**
