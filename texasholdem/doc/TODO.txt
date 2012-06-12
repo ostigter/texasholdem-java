@@ -1,8 +1,7 @@
 TODO
 ====
 
-* Call or fold at showdown
 * Head-to-head mode (dealer and blind handling)
 * Smarter bots
-* No Limit table
+* No Limit table support
 * Network game (client/server)

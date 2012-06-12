@@ -56,6 +56,9 @@ public class Player {
 
     /** Last action's bet increment. */
     private int betIncrement;
+    
+    /** Whether this player is all-in. */
+    private boolean isAllIn;
 
     /**
      * Constructor.
@@ -93,6 +96,7 @@ public class Player {
         hand.removeAllCards();
         hasCards = false;
         resetBet();
+        isAllIn = false;
     }
 
     /**
@@ -100,7 +104,7 @@ public class Player {
      */
     public void resetBet() {
         bet = 0;
-        action = (hasCards & isBroke()) ? Action.ALL_IN : null;
+        action = (hasCards && cash == 0) ? Action.ALL_IN : null;
         raises = 0;
         betIncrement = 0;
     }
@@ -151,15 +155,6 @@ public class Player {
     }
 
     /**
-     * Returns whether the player is broke.
-     * 
-     * @return True if the player is broke, otherwise false.
-     */
-    public boolean isBroke() {
-        return (cash == 0);
-    }
-
-    /**
      * Returns the player's current bet.
      * 
      * @return The current bet.
@@ -193,6 +188,15 @@ public class Player {
      */
     public int getBetIncrement() {
         return betIncrement;
+    }
+    
+    /**
+     * Indicates whether this player is all-in.
+     * 
+     * @return True if all-in, otherwise false.
+     */
+    public boolean isAllIn() {
+        return isAllIn;
     }
 
     /**
@@ -265,6 +269,7 @@ public class Player {
                     }
                     cash -= betIncrement;
                     bet += betIncrement;
+                    isAllIn = (cash == 0);
                     break;
                 case BET:
                     betIncrement = minBet;
@@ -274,6 +279,7 @@ public class Player {
                     cash -= betIncrement;
                     bet += betIncrement;
                     raises++;
+                    isAllIn = (cash == 0);
                     break;
                 case RAISE:
                     currentBet += minBet;
@@ -284,6 +290,7 @@ public class Player {
                     cash -= betIncrement;
                     bet += betIncrement;
                     raises++;
+                    isAllIn = (cash == 0);
                     break;
                 case FOLD:
                     hand.removeAllCards();

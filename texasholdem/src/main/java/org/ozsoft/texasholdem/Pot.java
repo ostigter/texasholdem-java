@@ -17,6 +17,7 @@
 
 package org.ozsoft.texasholdem;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,7 +32,7 @@ public class Pot {
     private int bet;
 
     /** Contributing players to this pot. */
-    public final Set<Player> contributers;
+    public final Set<Player> contributors;
 
     /**
      * Constructor.
@@ -41,7 +42,7 @@ public class Pot {
      */
     public Pot(int bet) {
         this.bet = bet;
-        contributers = new HashSet<Player>();
+        contributors = new HashSet<Player>();
     }
 
     /**
@@ -52,6 +53,15 @@ public class Pot {
     public int getBet() {
         return bet;
     }
+    
+    /**
+     * Returns the contributing players.
+     * 
+     * @return The conributing players.
+     */
+    public Set<Player> getContributors() {
+        return Collections.unmodifiableSet(contributors);
+    }
 
     /**
      * Adds a contributing player.
@@ -60,7 +70,7 @@ public class Pot {
      *            The player.
      */
     public void addContributer(Player player) {
-        contributers.add(player);
+        contributors.add(player);
     }
 
     /**
@@ -72,7 +82,7 @@ public class Pot {
      * @return True if the player has contributed, otherwise false.
      */
     public boolean hasContributer(Player player) {
-        return contributers.contains(player);
+        return contributors.contains(player);
     }
 
     /**
@@ -81,7 +91,7 @@ public class Pot {
      * @return The total value.
      */
     public int getValue() {
-        return bet * contributers.size();
+        return bet * contributors.size();
     }
 
     /**
@@ -97,11 +107,11 @@ public class Pot {
      */
     public Pot split(Player player, int partialBet) {
         Pot pot = new Pot(bet - partialBet);
-        for (Player contributer : contributers) {
+        for (Player contributer : contributors) {
             pot.addContributer(contributer);
         }
         bet = partialBet;
-        contributers.add(player);
+        contributors.add(player);
         return pot;
     }
 
@@ -110,7 +120,7 @@ public class Pot {
      */
     public void clear() {
         bet = 0;
-        contributers.clear();
+        contributors.clear();
     }
 
     /*
@@ -124,7 +134,7 @@ public class Pot {
         sb.append(String.valueOf(bet));
         sb.append(": {");
         boolean isFirst = true;
-        for (Player contributer : contributers) {
+        for (Player contributer : contributors) {
             if (isFirst) {
                 isFirst = false;
             } else {
