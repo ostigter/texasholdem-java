@@ -51,7 +51,7 @@ public class ConsoleClient implements Client {
         table.addPlayer(new Player("Joe",    STARTING_CASH, new DummyBot()));
         table.addPlayer(new Player("Mike",   STARTING_CASH, new DummyBot()));
         table.addPlayer(new Player("Eddie",  STARTING_CASH, new DummyBot()));
-        table.start();
+        table.run();
     }
 
     /**

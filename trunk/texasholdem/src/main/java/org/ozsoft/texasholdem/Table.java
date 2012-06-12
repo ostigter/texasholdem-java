@@ -52,8 +52,14 @@ import java.util.TreeMap;
  */
 public class Table {
     
-    /** The maximum number of bets or raises in a single hand per player. */
+    /** The maximum number of bets or raises per player in a single hand. */
     private static final int MAX_RAISES = 4;
+    
+    /**
+     * Determines whether players will always call the showdown, or fold when no
+     * chance.
+     */
+    private static final boolean ALWAYS_CALL_SHOWDOWN = false;
     
     /** The size of the big blind. */
     private final int bigBlind;
@@ -91,8 +97,8 @@ public class Table {
     /** The pot in the current hand. */
     private final List<Pot> pots;
     
-    /** Whether the game is over. */
-    private boolean gameOver;
+    /** The player who bet or raised last (aggressor). */
+    private Player lastBettor;
     
     /**
      * Constructor.
@@ -122,24 +128,26 @@ public class Table {
     /**
      * Main game loop.
      */
-    public void start() {
-        resetGame();
-        while (!gameOver) {
-            playHand();
-        }
-        notifyMessage("Game over.");
-    }
-    
-    /**
-     * Resets the game.
-     */
-    private void resetGame() {
-        dealerPosition = -1;
-        actorPosition = -1;
-        gameOver = false;
+    public void run() {
         for (Player player : players) {
             player.getClient().joinedTable(bigBlind, players);
         }
+        dealerPosition = -1;
+        actorPosition = -1;
+        while (true) {
+            int noOfActivePlayers = 0;
+            for (Player player : players) {
+                if (player.getCash() >= bigBlind) {
+                    noOfActivePlayers++;
+                }
+            }
+            if (noOfActivePlayers > 1) {
+                playHand();
+            } else {
+                break;
+            }
+        }
+        notifyMessage("Game over.");
     }
     
     /**
@@ -194,13 +202,12 @@ public class Table {
      */
     private void resetHand() {
         board.clear();
-        bet = 0;
         pots.clear();
         notifyBoardUpdated();
         activePlayers.clear();
         for (Player player : players) {
             player.resetHand();
-            if (!player.isBroke()) {
+            if (player.getCash() >= bigBlind) {
                 activePlayers.add(player);
             }
         }
@@ -222,10 +229,8 @@ public class Table {
      */
     private void rotateActor() {
         if (activePlayers.size() > 0) {
-            do {
-                actorPosition = (actorPosition + 1) % players.size();
-                actor = players.get(actorPosition);
-            } while (!activePlayers.contains(actor));
+            actorPosition = (actorPosition + 1) % activePlayers.size();
+            actor = activePlayers.get(actorPosition);
             for (Player player : players) {
                 player.getClient().actorRotated(actor);
             }
@@ -298,6 +303,7 @@ public class Table {
             actorPosition = dealerPosition;
             bet = 0;
         }
+        lastBettor = null;
         notifyBoardUpdated();
         while (playersToAct > 0) {
             rotateActor();
@@ -321,11 +327,13 @@ public class Table {
                 case BET:
                     bet = minBet;
                     contributePot(actor.getBetIncrement());
+                    lastBettor = actor;
                     playersToAct = activePlayers.size();
                     break;
                 case RAISE:
                     bet += minBet;
                     contributePot(actor.getBetIncrement());
+                    lastBettor = actor;
                     if (actor.getRaises() == MAX_RAISES) {
                         // Max. number of raises reached; other players get one more turn.
                         playersToAct = activePlayers.size() - 1;
@@ -376,7 +384,7 @@ public class Table {
      */
     private Set<Action> getAllowedActions(Player player) {
         Set<Action> actions = new HashSet<Action>();
-        if (player.isBroke()) {
+        if (player.isAllIn()) {
             actions.add(Action.CHECK);
         } else {
             int actorBet = actor.getBet();
@@ -438,32 +446,91 @@ public class Table {
      * Performs the Showdown.
      */
     private void doShowdown() {
-        // Sort players by hand value (highest to lowest).
+        printPot();
         System.out.print("Board: ");
         for (Card card : board) {
             System.out.print(card + " ");
         }
         System.out.println();
-        Map<HandValue, List<Player>> rankedPlayers = new TreeMap<HandValue, List<Player>>();
-        for (Player player : activePlayers) {
-            // Create a hand with the community cards and the player's hole cards.
-            Hand hand = new Hand(board);
-            hand.addCards(player.getCards());
-            // Store the player together with other players with the same hand value.
-            HandValue handValue = new HandValue(hand);
-            System.out.format("%s: %s\n", player, handValue);
-            List<Player> playerList = rankedPlayers.get(handValue);
-            if (playerList == null) {
-                playerList = new ArrayList<Player>();
+        
+        // Determine show order; start with all-in players...
+        List<Player> showingPlayers = new ArrayList<Player>();
+        for (Pot pot : pots) {
+            for (Player contributor : pot.getContributors()) {
+                if (!showingPlayers.contains(contributor) && contributor.isAllIn()) {
+                    showingPlayers.add(contributor);
+                }
             }
-            playerList.add(player);
-            rankedPlayers.put(handValue, playerList);
         }
-
-        printPot();
-        int totalPot = getTotalPot();
+        // ...then last player to bet or raise (aggressor)...
+        if (lastBettor != null) {
+            if (!showingPlayers.contains(lastBettor)) {
+                showingPlayers.add(lastBettor);
+            }
+        }
+        //...and finally the remaining players, starting left of the button.
+        int pos = (dealerPosition + 1) % activePlayers.size();
+        while (showingPlayers.size() < activePlayers.size()) {
+            Player player = activePlayers.get(pos);
+            if (!showingPlayers.contains(player)) {
+                showingPlayers.add(player);
+            }
+            pos = (pos + 1) % activePlayers.size();
+        }
+        
+        // Players show or fold in order.
+        boolean firstToShow = true;
+        int bestHandValue = -1;
+        for (Player playerToShow : showingPlayers) {
+            Hand hand = new Hand(board);
+            hand.addCards(playerToShow.getCards());
+            HandValue handValue = new HandValue(hand);
+            boolean doShow = ALWAYS_CALL_SHOWDOWN;
+            if (!doShow) {
+                if (playerToShow.isAllIn()) {
+                    // All-in players must always show.
+                    doShow = true;
+                    firstToShow = false;
+                } else if (firstToShow) {
+                    // First player to show.
+                    doShow = true;
+                    bestHandValue = handValue.getValue();
+                    firstToShow = false;
+                } else {
+                    // Remaining players only show when having a chance to win.
+                    if (handValue.getValue() >= bestHandValue) {
+                        doShow = true;
+                        bestHandValue = handValue.getValue();
+                    }
+                }
+            }
+            if (doShow) {
+                // Show hand.
+                for (Player player : players) {
+                    player.getClient().playerUpdated(playerToShow);
+                }
+                notifyMessage("%s has %s.", playerToShow, handValue.getDescription());
+            } else {
+                // Fold.
+                playerToShow.setCards(null);
+                activePlayers.remove(playerToShow);
+                for (Player player : players) {
+                    if (player.equals(playerToShow)) {
+                        player.getClient().playerUpdated(playerToShow);
+                    } else {
+                        // Hide secret information to other players.
+                        player.getClient().playerUpdated(playerToShow.publicClone());
+                    }
+                }
+                notifyMessage("%s folds.", playerToShow);
+            }
+        }
+        
+        // Sort players by hand value (highest to lowest).
+        Map<HandValue, List<Player>> rankedPlayers = getRankedPlayers();
 
         // Per rank (single or multiple winners), calculate pot distribution.
+        int totalPot = getTotalPot();
         Map<Player, Integer> potDivision = new HashMap<Player, Integer>();
         for (HandValue handValue : rankedPlayers.keySet()) {
             List<Player> winners = rankedPlayers.get(handValue);
@@ -505,15 +572,34 @@ public class Table {
                 winnerText.append(", ");
             }
             winnerText.append(String.format("%s wins $%d", winner, potShare));
-            notifyPlayersUpdated(false);
+            notifyPlayersUpdated(true);
         }
         winnerText.append('.');
         notifyMessage(winnerText.toString());
         
         // Sanity check.
         if (totalWon != totalPot) {
-            throw new IllegalStateException("Incorrect pot division");
+            System.err.println("*** ERROR: Incorrect pot division");
         }
+    }
+    
+    private Map<HandValue, List<Player>> getRankedPlayers() {
+        Map<HandValue, List<Player>> rankedPlayers = new TreeMap<HandValue, List<Player>>();
+        for (Player player : activePlayers) {
+            // Create a hand with the community cards and the player's hole cards.
+            Hand hand = new Hand(board);
+            hand.addCards(player.getCards());
+            // Store the player together with other players with the same hand value.
+            HandValue handValue = new HandValue(hand);
+            System.out.format("%s: %s\n", player, handValue);
+            List<Player> playerList = rankedPlayers.get(handValue);
+            if (playerList == null) {
+                playerList = new ArrayList<Player>();
+            }
+            playerList.add(player);
+            rankedPlayers.put(handValue, playerList);
+        }
+        return rankedPlayers;
     }
     
     /**

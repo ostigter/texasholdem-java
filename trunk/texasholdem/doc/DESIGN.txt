@@ -1,7 +1,7 @@
 Design
 ======
 
-Limit Texas Hold'em
+Fixed Limit Texas Hold'em poker
 
 Big blind:   Any even size
 Small blind: Half of big blind
@@ -159,7 +159,7 @@ Bot algorithm
 -------------
 
 Factors:
-- pocket cards (Chen formula)
+- hole cards (Chen formula)
 - community cards
   - potential duplicates (more than One Pair)
   - potential straight
@@ -169,6 +169,7 @@ Factors:
 - bet
 - pot
 - cash
+- chance to win
 - actions from earlier table positions
 - bluffing
 - opponent behavior

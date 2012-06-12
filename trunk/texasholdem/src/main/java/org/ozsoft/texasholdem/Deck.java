@@ -17,6 +17,7 @@
 
 package org.ozsoft.texasholdem;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -39,8 +40,8 @@ public class Deck {
     /** The index of the next card to deal. */
     private int nextCardIndex = 0;
     
-    /** The randomizer instance. */
-    private Random random = new Random();
+    /** Random number generator (crypographical quality). */
+    private Random random = new SecureRandom();
 
     /**
      * Constructor.
