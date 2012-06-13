@@ -184,12 +184,12 @@ public class BoardPanel extends JPanel {
         if (bet == 0) {
             betLabel.setText(" ");
         } else {
-            betLabel.setText("$ " + bet);
+            betLabel.setText("$" + bet);
         }
         if (pot == 0) {
             potLabel.setText(" ");
         } else {
-            potLabel.setText("$ " + pot);
+            potLabel.setText("$" + pot);
         }
         int noOfCards = (cards == null) ? 0 : cards.size();
         for (int i = 0; i < NO_OF_CARDS; i++) {
