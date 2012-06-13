@@ -204,19 +204,26 @@ public class Table {
         board.clear();
         pots.clear();
         notifyBoardUpdated();
+        
+        // Determine the active players.
         activePlayers.clear();
         for (Player player : players) {
             player.resetHand();
+            // Player must be able to afford at least the big blind.
             if (player.getCash() >= bigBlind) {
                 activePlayers.add(player);
             }
         }
+        
+        // Rotate the dealer button.
         dealerPosition = (dealerPosition + 1) % activePlayers.size();
         dealer = activePlayers.get(dealerPosition);
+
         deck.shuffle();
         actorPosition = dealerPosition;
         minBet = bigBlind;
         bet = minBet;
+        
         for (Player player : players) {
             player.getClient().handStarted(dealer);
         }
@@ -228,15 +235,10 @@ public class Table {
      * Rotates the position of the player in turn (the actor).
      */
     private void rotateActor() {
-        if (activePlayers.size() > 0) {
-            actorPosition = (actorPosition + 1) % activePlayers.size();
-            actor = activePlayers.get(actorPosition);
-            for (Player player : players) {
-                player.getClient().actorRotated(actor);
-            }
-        } else {
-            // Should never happen.
-            throw new IllegalStateException("No active players left");
+        actorPosition = (actorPosition + 1) % activePlayers.size();
+        actor = activePlayers.get(actorPosition);
+        for (Player player : players) {
+            player.getClient().actorRotated(actor);
         }
     }
     
@@ -305,19 +307,19 @@ public class Table {
         }
         lastBettor = null;
         notifyBoardUpdated();
+        
         while (playersToAct > 0) {
             rotateActor();
             Set<Action> allowedActions = getAllowedActions(actor);
             Action action = actor.act(allowedActions, minBet, bet);
             if (!allowedActions.contains(action)) {
+                // Sanity check for client mistakes.
                 String msg = String.format("Illegal action (%s) from player %s!", action, actor);
                 throw new IllegalStateException(msg);
             }
             playersToAct--;
             switch (action) {
                 case CHECK:
-                    // Do nothing.
-                    break;
                 case ALL_IN:
                     // Do nothing.
                     break;
@@ -346,7 +348,7 @@ public class Table {
                     actor.setCards(null);
                     activePlayers.remove(actor);
                     if (activePlayers.size() == 1) {
-                        // The player left wins the pot.
+                        // Only one player left, so he wins the entire pot.
                         notifyBoardUpdated();
                         notifyPlayerActed();
                         Player winner = activePlayers.get(0);
@@ -358,6 +360,7 @@ public class Table {
                     }
                     break;
                 default:
+                    // Should never happen.
                     throw new IllegalStateException("Invalid action: " + action);
             }
             if (playersToAct > 0) {
@@ -443,10 +446,14 @@ public class Table {
     }
     
     /**
-     * Performs the Showdown.
+     * Performs the showdown.
      */
     private void doShowdown() {
-        printPot();
+        System.out.println("Pot:");
+        for (Pot pot : pots) {
+            System.out.format("  %s\n", pot);
+        }
+        System.out.format("  Total: %d\n", getTotalPot());
         System.out.print("Board: ");
         for (Card card : board) {
             System.out.print(card + " ");
@@ -478,7 +485,7 @@ public class Table {
             pos = (pos + 1) % activePlayers.size();
         }
         
-        // Players show or fold in order.
+        // Players automatically show or fold in order.
         boolean firstToShow = true;
         int bestHandValue = -1;
         for (Player playerToShow : showingPlayers) {
@@ -492,7 +499,7 @@ public class Table {
                     doShow = true;
                     firstToShow = false;
                 } else if (firstToShow) {
-                    // First player to show.
+                    // First player must always show.
                     doShow = true;
                     bestHandValue = handValue.getValue();
                     firstToShow = false;
@@ -527,7 +534,21 @@ public class Table {
         }
         
         // Sort players by hand value (highest to lowest).
-        Map<HandValue, List<Player>> rankedPlayers = getRankedPlayers();
+        Map<HandValue, List<Player>> rankedPlayers = new TreeMap<HandValue, List<Player>>();
+        for (Player player : activePlayers) {
+            // Create a hand with the community cards and the player's hole cards.
+            Hand hand = new Hand(board);
+            hand.addCards(player.getCards());
+            // Store the player together with other players with the same hand value.
+            HandValue handValue = new HandValue(hand);
+            System.out.format("%s: %s\n", player, handValue);
+            List<Player> playerList = rankedPlayers.get(handValue);
+            if (playerList == null) {
+                playerList = new ArrayList<Player>();
+            }
+            playerList.add(player);
+            rankedPlayers.put(handValue, playerList);
+        }
 
         // Per rank (single or multiple winners), calculate pot distribution.
         int totalPot = getTotalPot();
@@ -583,25 +604,6 @@ public class Table {
         }
     }
     
-    private Map<HandValue, List<Player>> getRankedPlayers() {
-        Map<HandValue, List<Player>> rankedPlayers = new TreeMap<HandValue, List<Player>>();
-        for (Player player : activePlayers) {
-            // Create a hand with the community cards and the player's hole cards.
-            Hand hand = new Hand(board);
-            hand.addCards(player.getCards());
-            // Store the player together with other players with the same hand value.
-            HandValue handValue = new HandValue(hand);
-            System.out.format("%s: %s\n", player, handValue);
-            List<Player> playerList = rankedPlayers.get(handValue);
-            if (playerList == null) {
-                playerList = new ArrayList<Player>();
-            }
-            playerList.add(player);
-            rankedPlayers.put(handValue, playerList);
-        }
-        return rankedPlayers;
-    }
-    
     /**
      * Notifies listeners with a custom game message.
      * 
@@ -627,6 +629,11 @@ public class Table {
         }
     }
     
+    /**
+     * Returns the total pot size.
+     * 
+     * @return The total pot size.
+     */
     private int getTotalPot() {
         int totalPot = 0;
         for (Pot pot : pots) {
@@ -636,7 +643,8 @@ public class Table {
     }
 
     /**
-     * Notifies clients that one or more players have been updated.
+     * Notifies clients that one or more players have been updated. <br />
+     * <br />
      * 
      * A player's secret information is only sent its own client; other clients
      * see only a player's public information.
@@ -663,15 +671,4 @@ public class Table {
         }
     }
     
-    /**
-     * Debug method to print the pot.
-     */
-    private void printPot() {
-        System.out.println("Pot:");
-        for (Pot pot : pots) {
-            System.out.format("  %s\n", pot);
-        }
-        System.out.format("  Total: %d\n", getTotalPot());
-    }
-
 }
