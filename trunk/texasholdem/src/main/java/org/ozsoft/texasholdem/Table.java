@@ -147,6 +147,16 @@ public class Table {
                 break;
             }
         }
+        
+        // Game over.
+        board.clear();
+        pots.clear();
+        bet = 0;
+        notifyBoardUpdated();
+        for (Player player : players) {
+            player.resetHand();
+        }
+        notifyPlayersUpdated(false);
         notifyMessage("Game over.");
     }
     
@@ -157,7 +167,9 @@ public class Table {
         resetHand();
         
         // Small blind.
-        rotateActor();
+        if (activePlayers.size() > 2) {
+            rotateActor();
+        }
         postSmallBlind();
         
         // Big blind.
@@ -201,6 +213,7 @@ public class Table {
      * Resets the game for a new hand.
      */
     private void resetHand() {
+        // Clear the board.
         board.clear();
         pots.clear();
         notifyBoardUpdated();
@@ -219,11 +232,18 @@ public class Table {
         dealerPosition = (dealerPosition + 1) % activePlayers.size();
         dealer = activePlayers.get(dealerPosition);
 
+        // Shuffle the deck.
         deck.shuffle();
+
+        // Determine the first player to act.
         actorPosition = dealerPosition;
+        actor = activePlayers.get(actorPosition);
+        
+        // Set the initial bet to the big blind.
         minBet = bigBlind;
         bet = minBet;
         
+        // Notify all clients a new hand has started.
         for (Player player : players) {
             player.getClient().handStarted(dealer);
         }
@@ -305,6 +325,12 @@ public class Table {
             actorPosition = dealerPosition;
             bet = 0;
         }
+        
+        if (playersToAct == 2) {
+            // Heads Up mode; player who is not the dealer starts.
+            actorPosition = dealerPosition;
+        }
+        
         lastBettor = null;
         notifyBoardUpdated();
         
@@ -336,12 +362,12 @@ public class Table {
                     bet += minBet;
                     contributePot(actor.getBetIncrement());
                     lastBettor = actor;
-                    if (actor.getRaises() == MAX_RAISES) {
+                    if (actor.getRaises() < MAX_RAISES || activePlayers.size() == 2) { 
+                        // All players get another turn.
+                        playersToAct = activePlayers.size();
+                    } else {
                         // Max. number of raises reached; other players get one more turn.
                         playersToAct = activePlayers.size() - 1;
-                    } else {
-                        // Otherwise, all players get another turn.
-                        playersToAct = activePlayers.size();
                     }
                     break;
                 case FOLD:
@@ -393,18 +419,18 @@ public class Table {
             int actorBet = actor.getBet();
             if (bet == 0) {
                 actions.add(Action.CHECK);
-                if (player.getRaises() < MAX_RAISES) {
+                if (player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
                     actions.add(Action.BET);
                 }
             } else {
                 if (actorBet < bet) {
                     actions.add(Action.CALL);
-                    if (player.getRaises() < MAX_RAISES) {
+                    if (player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
                         actions.add(Action.RAISE);
                     }
                 } else {
                     actions.add(Action.CHECK);
-                    if (player.getRaises() < MAX_RAISES) {
+                    if (player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
                         actions.add(Action.RAISE);
                     }
                 }

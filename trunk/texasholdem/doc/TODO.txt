@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Heads Up mode (dealer and blind handling with 2 players left)
 * Distribution of odd chips from the pot
 * Smarter bots
 * No Limit table support
