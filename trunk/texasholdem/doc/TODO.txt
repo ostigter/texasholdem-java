@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Distribution of odd chips from the pot
-* Smarter bots
+* Smarter basic bot AI (at least some intelligence)
 * No Limit table support
 * Network game (client/server)

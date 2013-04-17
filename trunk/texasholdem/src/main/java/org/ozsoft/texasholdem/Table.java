@@ -94,7 +94,7 @@ public class Table {
     /** The current bet in the current hand. */
     private int bet;
     
-    /** The pot in the current hand. */
+    /** All pots in the current hand (main pot and any side pots). */
     private final List<Pot> pots;
     
     /** The player who bet or raised last (aggressor). */
@@ -602,6 +602,23 @@ public class Table {
                             }
                             
                         }
+                    }
+                    // Determine if we have any odd chips left in the pot.
+                    int oddChips = pot.getValue() % noOfWinnersInPot;
+                    if (oddChips > 0) {
+                        // Divide odd chips over winners, starting left of the dealer.
+                        pos = dealerPosition;
+                        while (oddChips > 0) {
+                            pos = (pos + 1) % activePlayers.size();
+                            Player winner = activePlayers.get(pos);
+                            Integer oldShare = potDivision.get(winner);
+                            if (oldShare != null) {
+                                potDivision.put(winner, oldShare + 1);
+                                System.out.format("%s receives an odd chip from the pot.\n", winner);
+                                oddChips--;
+                            }
+                        }
+                        
                     }
                     pot.clear();
                 }
