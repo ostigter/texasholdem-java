@@ -29,7 +29,7 @@ import org.ozsoft.texasholdem.Player;
  * 
  * Currently plays solely based on its hole cards.
  * 
- * TODO: 
+ * TODO: Implement basic bot AI.
  * - hole cards (Chen formula)
  * - board cards
  * - bet
