@@ -28,9 +28,9 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 
-import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
 import org.ozsoft.texasholdem.Player;
+import org.ozsoft.texasholdem.actions.Action;
 
 /**
  * Panel representing a player at the table.

@@ -42,6 +42,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.ozsoft.texasholdem.actions.Action;
+import org.ozsoft.texasholdem.actions.AllInAction;
+import org.ozsoft.texasholdem.actions.BetAction;
+import org.ozsoft.texasholdem.actions.CallAction;
+import org.ozsoft.texasholdem.actions.CheckAction;
+import org.ozsoft.texasholdem.actions.FoldAction;
+import org.ozsoft.texasholdem.actions.RaiseAction;
+
 /**
  * Fixed Limit Texas Hold'em poker table. <br />
  * <br />
@@ -55,11 +63,11 @@ public class Table {
     /** The maximum number of bets or raises per player in a single hand. */
     private static final int MAX_RAISES = 4;
     
-    /**
-     * Determines whether players will always call the showdown, or fold when no
-     * chance.
-     */
+    /** Whether players will always call the showdown, or fold when no chance. */
     private static final boolean ALWAYS_CALL_SHOWDOWN = false;
+    
+    /** Table type (poker variant). */
+    private final TableType tableType;
     
     /** The size of the big blind. */
     private final int bigBlind;
@@ -106,7 +114,8 @@ public class Table {
      * @param bigBlind
      *            The size of the big blind.
      */
-    public Table(int bigBlind) {
+    public Table(TableType type, int bigBlind) {
+        this.tableType = type;
         this.bigBlind = bigBlind;
         players = new ArrayList<Player>();
         activePlayers = new ArrayList<Player>();
@@ -130,7 +139,7 @@ public class Table {
      */
     public void run() {
         for (Player player : players) {
-            player.getClient().joinedTable(bigBlind, players);
+            player.getClient().joinedTable(tableType, bigBlind, players);
         }
         dealerPosition = -1;
         actorPosition = -1;
@@ -338,56 +347,52 @@ public class Table {
             rotateActor();
             Set<Action> allowedActions = getAllowedActions(actor);
             Action action = actor.act(allowedActions, minBet, bet);
-            if (!allowedActions.contains(action)) {
-                // Sanity check for client mistakes.
-                String msg = String.format("Illegal action (%s) from player %s!", action, actor);
-                throw new IllegalStateException(msg);
-            }
+            //FIXME: Check for allowed action is broken!
+//            if (!allowedActions.contains(action)) {
+//                // Sanity check for client mistakes.
+//                String msg = String.format("Illegal action (%s) from player %s!", action, actor);
+//                throw new IllegalStateException(msg);
+//            }
             playersToAct--;
-            switch (action) {
-                case CHECK:
-                case ALL_IN:
-                    // Do nothing.
-                    break;
-                case CALL:
-                    contributePot(actor.getBetIncrement());
-                    break;
-                case BET:
-                    bet = minBet;
-                    contributePot(actor.getBetIncrement());
-                    lastBettor = actor;
+            if (action instanceof CheckAction) {
+                // Do nothing.
+            } else if (action instanceof AllInAction) {
+                // Do nothing.
+            } else if (action instanceof CallAction) {
+                contributePot(actor.getBetIncrement());
+            } else if (action instanceof BetAction) {
+                bet = action.getAmount();
+                contributePot(actor.getBetIncrement());
+                lastBettor = actor;
+                playersToAct = activePlayers.size();
+            } else if (action instanceof RaiseAction) {
+                bet += action.getAmount();
+                contributePot(actor.getBetIncrement());
+                lastBettor = actor;
+                if (tableType == TableType.NO_LIMIT || actor.getRaises() < MAX_RAISES || activePlayers.size() == 2) { 
+                    // All players get another turn.
                     playersToAct = activePlayers.size();
-                    break;
-                case RAISE:
-                    bet += minBet;
-                    contributePot(actor.getBetIncrement());
-                    lastBettor = actor;
-                    if (actor.getRaises() < MAX_RAISES || activePlayers.size() == 2) { 
-                        // All players get another turn.
-                        playersToAct = activePlayers.size();
-                    } else {
-                        // Max. number of raises reached; other players get one more turn.
-                        playersToAct = activePlayers.size() - 1;
-                    }
-                    break;
-                case FOLD:
-                    actor.setCards(null);
-                    activePlayers.remove(actor);
-                    if (activePlayers.size() == 1) {
-                        // Only one player left, so he wins the entire pot.
-                        notifyBoardUpdated();
-                        notifyPlayerActed();
-                        Player winner = activePlayers.get(0);
-                        int amount = getTotalPot();
-                        winner.win(amount);
-                        notifyBoardUpdated();
-                        notifyMessage("%s wins $%d.", winner, amount);
-                        playersToAct = 0;
-                    }
-                    break;
-                default:
-                    // Should never happen.
-                    throw new IllegalStateException("Invalid action: " + action);
+                } else {
+                    // Max. number of raises reached; other players get one more turn.
+                    playersToAct = activePlayers.size() - 1;
+                }
+            } else if (action instanceof FoldAction) {
+                actor.setCards(null);
+                activePlayers.remove(actor);
+                if (activePlayers.size() == 1) {
+                    // Only one player left, so he wins the entire pot.
+                    notifyBoardUpdated();
+                    notifyPlayerActed();
+                    Player winner = activePlayers.get(0);
+                    int amount = getTotalPot();
+                    winner.win(amount);
+                    notifyBoardUpdated();
+                    notifyMessage("%s wins $%d.", winner, amount);
+                    playersToAct = 0;
+                }
+            } else {
+                // Should never happen.
+                throw new IllegalStateException("Invalid action: " + action);
             }
             if (playersToAct > 0) {
                 notifyBoardUpdated();
@@ -419,18 +424,18 @@ public class Table {
             int actorBet = actor.getBet();
             if (bet == 0) {
                 actions.add(Action.CHECK);
-                if (player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
+                if (tableType == TableType.NO_LIMIT || player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
                     actions.add(Action.BET);
                 }
             } else {
                 if (actorBet < bet) {
                     actions.add(Action.CALL);
-                    if (player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
+                    if (tableType == TableType.NO_LIMIT || player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
                         actions.add(Action.RAISE);
                     }
                 } else {
                     actions.add(Action.CHECK);
-                    if (player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
+                    if (tableType == TableType.NO_LIMIT || player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
                         actions.add(Action.RAISE);
                     }
                 }

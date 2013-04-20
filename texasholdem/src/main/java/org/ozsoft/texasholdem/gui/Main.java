@@ -28,12 +28,13 @@ import java.util.Set;
 
 import javax.swing.JFrame;
 
-import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
 import org.ozsoft.texasholdem.Client;
 import org.ozsoft.texasholdem.Player;
 import org.ozsoft.texasholdem.Table;
-import org.ozsoft.texasholdem.bots.DummyBot;
+import org.ozsoft.texasholdem.TableType;
+import org.ozsoft.texasholdem.actions.Action;
+import org.ozsoft.texasholdem.bots.BasicBot;
 
 /**
  * The game's main frame.
@@ -96,11 +97,11 @@ public class Main extends JFrame implements Client {
         
         players = new LinkedHashMap<String, Player>();
         players.put("Player", new Player("Player", STARTING_CASH, this));
-        players.put("Joe",    new Player("Joe",    STARTING_CASH, new DummyBot()));
-        players.put("Mike",   new Player("Mike",   STARTING_CASH, new DummyBot()));
-        players.put("Eddie",  new Player("Eddie",  STARTING_CASH, new DummyBot()));
+        players.put("Joe",    new Player("Joe",    STARTING_CASH, new BasicBot()));
+        players.put("Mike",   new Player("Mike",   STARTING_CASH, new BasicBot()));
+        players.put("Eddie",  new Player("Eddie",  STARTING_CASH, new BasicBot()));
 
-        table = new Table(BIG_BLIND);
+        table = new Table(TableType.NO_LIMIT, BIG_BLIND);
         for (Player player : players.values()) {
             table.addPlayer(player);
         }
@@ -157,7 +158,7 @@ public class Main extends JFrame implements Client {
      * @see org.ozsoft.texasholdem.Client#joinedTable(int, java.util.List)
      */
     @Override
-    public void joinedTable(int bigBlind, List<Player> players) {
+    public void joinedTable(TableType type, int bigBlind, List<Player> players) {
         for (Player player : players) {
             PlayerPanel playerPanel = playerPanels.get(player.getName());
             if (playerPanel != null) {
@@ -248,7 +249,7 @@ public class Main extends JFrame implements Client {
      */
     @Override
     public Action act(Set<Action> allowedActions) {
-        boardPanel.setMessage("Please select an action.");
+        boardPanel.setMessage("Please select an action:");
         return controlPanel.getUserInput(allowedActions);
     }
 

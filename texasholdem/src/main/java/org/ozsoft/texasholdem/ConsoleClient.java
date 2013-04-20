@@ -23,7 +23,12 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
 
-import org.ozsoft.texasholdem.bots.DummyBot;
+import org.ozsoft.texasholdem.actions.Action;
+import org.ozsoft.texasholdem.actions.BetAction;
+import org.ozsoft.texasholdem.actions.CallAction;
+import org.ozsoft.texasholdem.actions.CheckAction;
+import org.ozsoft.texasholdem.actions.RaiseAction;
+import org.ozsoft.texasholdem.bots.BasicBot;
 
 /**
  * Console version of a Texas Hold'em client.
@@ -46,11 +51,11 @@ public class ConsoleClient implements Client {
      */
     public ConsoleClient() {
         consoleReader = new BufferedReader(new InputStreamReader(System.in));
-        Table table = new Table(BIG_BLIND);
+        Table table = new Table(TableType.FIXED_LIMIT, BIG_BLIND);
         table.addPlayer(new Player("Player", STARTING_CASH, this));
-        table.addPlayer(new Player("Joe",    STARTING_CASH, new DummyBot()));
-        table.addPlayer(new Player("Mike",   STARTING_CASH, new DummyBot()));
-        table.addPlayer(new Player("Eddie",  STARTING_CASH, new DummyBot()));
+        table.addPlayer(new Player("Joe",    STARTING_CASH, new BasicBot()));
+        table.addPlayer(new Player("Mike",   STARTING_CASH, new BasicBot()));
+        table.addPlayer(new Player("Eddie",  STARTING_CASH, new BasicBot()));
         table.run();
     }
 
@@ -78,7 +83,8 @@ public class ConsoleClient implements Client {
      * @see org.ozsoft.texasholdem.Client#joinedTable(int, java.util.List)
      */
     @Override
-    public void joinedTable(int bigBlind, List<Player> players) {
+    public void joinedTable(TableType type, int bigBlind, List<Player> players) {
+        // Empty implementation.
     }
 
     /*
@@ -114,10 +120,7 @@ public class ConsoleClient implements Client {
      */
     @Override
     public void playerUpdated(Player player) {
-//		Card[] cards = player.getCards();
-//		if (cards.length == 2) {
-//			System.out.format("Hole cards: %s %s\n", cards[0], cards[1]);
-//		}
+        // Empty implementation.
     }
 
     /*
@@ -134,10 +137,26 @@ public class ConsoleClient implements Client {
      * @see org.ozsoft.texasholdem.Client#act(java.util.Set)
      */
     @Override
-    public Action act(Set<Action> actions) {
+    public Action act(Set<Action> allowedActions) {
+        boolean checkAllowed = false;
+        boolean callAllowed = false;
+        boolean betAllowed = false;
+        boolean raiseAllowed = false;
+        for (Action action : allowedActions) {
+            if (action instanceof CheckAction) {
+                checkAllowed = true;
+            } else if (action instanceof CallAction) {
+                callAllowed = true;
+            } else if (action instanceof BetAction) {
+                betAllowed = true;
+            } else if (action instanceof RaiseAction) {
+                raiseAllowed = true;
+            }
+        }
+        
         StringBuilder sb = new StringBuilder("Please select an action: ");
-        int i = actions.size();
-        for (Action action : actions) {
+        int i = allowedActions.size();
+        for (Action action : allowedActions) {
             sb.append(action);
             i--;
             if (i > 1) {
@@ -155,20 +174,29 @@ public class ConsoleClient implements Client {
             System.out.print(prompt);
             try {
                 String input = consoleReader.readLine();
-                if (input != null) {
-                    for (Action action : actions) {
-                        String command = action.toString().toLowerCase();
-                        if (command.startsWith(input.toLowerCase())) {
-                            selectedAction = action;
-                            break;
+                if (input != null && input.length() > 0) {
+                    char c = input.charAt(0);
+                    if (c == 'c') {
+                        if (checkAllowed) {
+                            selectedAction = Action.CHECK;
+                        } else if (callAllowed) {
+                            selectedAction = Action.CALL;
                         }
+                    } else if (c == 'b' && betAllowed) {
+                        //TODO: Ask player for bet amount instead of fixed amount.
+                        selectedAction = new BetAction(4);
+                    } else if (c == 'r' && raiseAllowed) {
+                        //TODO: Ask player for raise amount instead of fixed amount.
+                        selectedAction = new RaiseAction(4);
+                    } else if (c == 'f') {
+                        selectedAction = Action.FOLD;
                     }
                     if (selectedAction == null) {
                         System.out.println("Invalid action -- please try again.");
                     }
                 }
             } catch (IOException e) {
-                // The VM is killed; ignore.
+                // The VM is killed; safe to ignore.
             }
         }
         return selectedAction;

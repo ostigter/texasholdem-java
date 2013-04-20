@@ -20,9 +20,10 @@ package org.ozsoft.texasholdem.bots;
 import java.util.List;
 import java.util.Set;
 
-import org.ozsoft.texasholdem.Action;
 import org.ozsoft.texasholdem.Card;
 import org.ozsoft.texasholdem.Player;
+import org.ozsoft.texasholdem.TableType;
+import org.ozsoft.texasholdem.actions.Action;
 
 /**
  * Basic Texas Hold'em poker bot.
@@ -50,7 +51,7 @@ public class BasicBot extends Bot {
      * @see th.Client#joinedTable(int, java.util.List)
      */
     @Override
-    public void joinedTable(int bigBlind, List<Player> players) {
+    public void joinedTable(TableType type, int bigBlind, List<Player> players) {
         // Not implemented.
     }
 

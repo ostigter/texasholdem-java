@@ -20,6 +20,8 @@ package org.ozsoft.texasholdem;
 import java.util.List;
 import java.util.Set;
 
+import org.ozsoft.texasholdem.actions.Action;
+
 /**
  * A player client showing the table information and acting on behalf of the
  * player.
@@ -41,12 +43,14 @@ public interface Client {
     /**
      * Handles the player joining a table.
      * 
+     * @param type
+     *            The table type (betting structure).
      * @param bigBlind
      *            The table's big blind.
      * @param players
      *            The players at the table (including this player).
      */
-    void joinedTable(int bigBlind, List<Player> players);
+    void joinedTable(TableType type, int bigBlind, List<Player> players);
     
     /**
      * Handles the start of a new hand.
