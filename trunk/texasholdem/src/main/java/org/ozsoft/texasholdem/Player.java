@@ -20,6 +20,13 @@ package org.ozsoft.texasholdem;
 import java.util.List;
 import java.util.Set;
 
+import org.ozsoft.texasholdem.actions.Action;
+import org.ozsoft.texasholdem.actions.BetAction;
+import org.ozsoft.texasholdem.actions.CallAction;
+import org.ozsoft.texasholdem.actions.CheckAction;
+import org.ozsoft.texasholdem.actions.FoldAction;
+import org.ozsoft.texasholdem.actions.RaiseAction;
+
 /**
  * A Texas Hold'em player.
  * 
@@ -246,7 +253,7 @@ public class Player {
      * 
      * Determining the player's action is handled by the client application.
      * 
-     * @param actions
+     * @param allowedActions
      *            The allowed actions.
      * @param minBet
      *            The minimum bet.
@@ -255,49 +262,44 @@ public class Player {
      * 
      * @return The selected action.
      */
-    public Action act(Set<Action> actions, int minBet, int currentBet) {
-        if (actions.size() > 2) {
+    public Action act(Set<Action> allowedActions, int minBet, int currentBet) {
+        if (allowedActions.size() > 2) {
             // Multiple possibilities, actor must choose.
-            action = client.act(actions);
-            switch (action) {
-                case CHECK:
-                    break;
-                case CALL:
-                    betIncrement = currentBet - bet;
-                    if (betIncrement > cash) {
-                        betIncrement = cash;
-                    }
-                    cash -= betIncrement;
-                    bet += betIncrement;
-                    isAllIn = (cash == 0);
-                    break;
-                case BET:
-                    betIncrement = minBet;
-                    if (betIncrement > cash) {
-                        betIncrement = cash;
-                    }
-                    cash -= betIncrement;
-                    bet += betIncrement;
-                    raises++;
-                    isAllIn = (cash == 0);
-                    break;
-                case RAISE:
-                    currentBet += minBet;
-                    betIncrement = currentBet - bet;
-                    if (betIncrement > cash) {
-                        betIncrement = cash;
-                    }
-                    cash -= betIncrement;
-                    bet += betIncrement;
-                    raises++;
-                    isAllIn = (cash == 0);
-                    break;
-                case FOLD:
-                    hand.removeAllCards();
-                    break;
+            action = client.act(allowedActions);
+            if (action instanceof CheckAction) {
+                // Do nothing.
+            } else if (action instanceof CallAction) {
+                betIncrement = currentBet - bet;
+                if (betIncrement > cash) {
+                    betIncrement = cash;
+                }
+                cash -= betIncrement;
+                bet += betIncrement;
+                isAllIn = (cash == 0);
+            } else if (action instanceof BetAction) {
+                betIncrement = action.getAmount();
+                if (betIncrement > cash) {
+                    betIncrement = cash;
+                }
+                cash -= betIncrement;
+                bet += betIncrement;
+                raises++;
+                isAllIn = (cash == 0);
+            } else if (action instanceof RaiseAction) {
+                currentBet += action.getAmount();
+                betIncrement = currentBet - bet;
+                if (betIncrement > cash) {
+                    betIncrement = cash;
+                }
+                cash -= betIncrement;
+                bet += betIncrement;
+                raises++;
+                isAllIn = (cash == 0);
+            } else if (action instanceof FoldAction) {
+                hand.removeAllCards();
             }
         } else {
-            // Only 1 option, so must be all-in.
+            // Only 1 option, so must be all-in and forced to check.
             action = Action.CHECK;
         }
         return action;

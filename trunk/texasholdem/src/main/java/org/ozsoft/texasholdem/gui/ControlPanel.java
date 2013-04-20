@@ -17,6 +17,7 @@
 
 package org.ozsoft.texasholdem.gui;
 
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,7 +28,9 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import org.ozsoft.texasholdem.Action;
+import org.ozsoft.texasholdem.actions.Action;
+import org.ozsoft.texasholdem.actions.BetAction;
+import org.ozsoft.texasholdem.actions.RaiseAction;
 
 /**
  * Panel with buttons to let a human player select a poker action.
@@ -37,8 +40,8 @@ import org.ozsoft.texasholdem.Action;
 public class ControlPanel extends JPanel implements ActionListener {
     
     /** Serial version UID. */
-    private static final long serialVersionUID = 1L;
-    
+    private static final long serialVersionUID = 4059653681621749416L;
+
     /** Monitor while waiting for user input. */
     private final Object monitor = new Object();
     
@@ -159,9 +162,11 @@ public class ControlPanel extends JPanel implements ActionListener {
         } else if (source == callButton) {
             action = Action.CALL;
         } else if (source == betButton) {
-            action = Action.BET;
+            //TODO: Ask player for bet amount instead of using fixed amount.
+            action = new BetAction(4);
         } else if (source == raiseButton) {
-            action = Action.RAISE;
+            //TODO: Ask player for raise amount instead of using fixed amount.
+            action = new RaiseAction(4);
         } else {
             action = Action.FOLD;
         }

@@ -20,7 +20,7 @@ package org.ozsoft.texasholdem.bots;
 import org.ozsoft.texasholdem.Client;
 
 /**
- * Abstract base class for all bots.
+ * Abstract base class for all bot implementations.
  *  
  * @author Oscar Stigter
  */
