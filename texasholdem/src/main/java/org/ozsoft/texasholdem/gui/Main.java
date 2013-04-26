@@ -72,6 +72,9 @@ public class Main extends JFrame implements Client {
     /** The player panels. */
     private final Map<String, PlayerPanel> playerPanels;
     
+    /** The human player. */
+    private final Player humanPlayer;
+    
     /** The current dealer's name. */
     private String dealerName; 
 
@@ -96,7 +99,8 @@ public class Main extends JFrame implements Client {
         addComponent(boardPanel, 1, 1, 1, 1);
         
         players = new LinkedHashMap<String, Player>();
-        players.put("Player", new Player("Player", STARTING_CASH, this));
+        humanPlayer = new Player("Player", STARTING_CASH, this);
+        players.put("Player", humanPlayer);
         players.put("Joe",    new Player("Joe",    STARTING_CASH, new BasicBot()));
         players.put("Mike",   new Player("Mike",   STARTING_CASH, new BasicBot()));
         players.put("Eddie",  new Player("Eddie",  STARTING_CASH, new BasicBot()));
@@ -153,10 +157,6 @@ public class Main extends JFrame implements Client {
         new Main();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#joinedTable(int, java.util.List)
-     */
     @Override
     public void joinedTable(TableType type, int bigBlind, List<Player> players) {
         for (Player player : players) {
@@ -167,20 +167,12 @@ public class Main extends JFrame implements Client {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#messageReceived(java.lang.String)
-     */
     @Override
     public void messageReceived(String message) {
         boardPanel.setMessage(message);
         boardPanel.waitForUserInput();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#handStarted(org.ozsoft.texasholdem.Player)
-     */
     @Override
     public void handStarted(Player dealer) {
         setDealer(false);
@@ -188,10 +180,6 @@ public class Main extends JFrame implements Client {
         setDealer(true);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#actorRotated(org.ozsoft.texasholdem.Player)
-     */
     @Override
     public void actorRotated(Player actor) {
         setActorInTurn(false);
@@ -199,19 +187,11 @@ public class Main extends JFrame implements Client {
         setActorInTurn(true);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#boardUpdated(java.util.List, int, int)
-     */
     @Override
     public void boardUpdated(List<Card> cards, int bet, int pot) {
         boardPanel.update(cards, bet, pot);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#playerUpdated(org.ozsoft.texasholdem.Player)
-     */
     @Override
     public void playerUpdated(Player player) {
         PlayerPanel playerPanel = playerPanels.get(player.getName());
@@ -220,10 +200,6 @@ public class Main extends JFrame implements Client {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#playerActed(org.ozsoft.texasholdem.Player)
-     */
     @Override
     public void playerActed(Player player) {
         String name = player.getName();
@@ -243,14 +219,10 @@ public class Main extends JFrame implements Client {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#act(java.util.Set)
-     */
     @Override
-    public Action act(Set<Action> allowedActions) {
+    public Action act(int minBet, int currentBet, Set<Action> allowedActions) {
         boardPanel.setMessage("Please select an action:");
-        return controlPanel.getUserInput(allowedActions);
+        return controlPanel.getUserInput(minBet, humanPlayer.getCash(), allowedActions);
     }
 
     /**
@@ -272,10 +244,10 @@ public class Main extends JFrame implements Client {
         gc.gridy = y;
         gc.gridwidth = width;
         gc.gridheight = height;
-        gc.weightx = 0.0;
-        gc.weighty = 0.0;
         gc.anchor = GridBagConstraints.CENTER;
         gc.fill = GridBagConstraints.NONE;
+        gc.weightx = 0.0;
+        gc.weighty = 0.0;
         getContentPane().add(component, gc);
     }
 

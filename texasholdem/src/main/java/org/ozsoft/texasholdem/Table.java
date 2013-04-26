@@ -362,11 +362,13 @@ public class Table {
                 contributePot(actor.getBetIncrement());
             } else if (action instanceof BetAction) {
                 bet = action.getAmount();
+                minBet = action.getAmount();
                 contributePot(actor.getBetIncrement());
                 lastBettor = actor;
                 playersToAct = activePlayers.size();
             } else if (action instanceof RaiseAction) {
                 bet += action.getAmount();
+                minBet = action.getAmount();
                 contributePot(actor.getBetIncrement());
                 lastBettor = actor;
                 if (tableType == TableType.NO_LIMIT || actor.getRaises() < MAX_RAISES || activePlayers.size() == 2) { 
@@ -480,16 +482,11 @@ public class Table {
      * Performs the showdown.
      */
     private void doShowdown() {
-        System.out.println("Pot:");
-        for (Pot pot : pots) {
-            System.out.format("  %s\n", pot);
-        }
-        System.out.format("  Total: %d\n", getTotalPot());
-        System.out.print("Board: ");
-        for (Card card : board) {
-            System.out.print(card + " ");
-        }
-        System.out.println();
+//        System.out.println("Pot:");
+//        for (Pot pot : pots) {
+//            System.out.format("  %s\n", pot);
+//        }
+//        System.out.format("  Total: %d\n", getTotalPot());
         
         // Determine show order; start with all-in players...
         List<Player> showingPlayers = new ArrayList<Player>();
@@ -572,7 +569,7 @@ public class Table {
             hand.addCards(player.getCards());
             // Store the player together with other players with the same hand value.
             HandValue handValue = new HandValue(hand);
-            System.out.format("%s: %s\n", player, handValue);
+//            System.out.format("[DEBUG] %s: %s\n", player, handValue);
             List<Player> playerList = rankedPlayers.get(handValue);
             if (playerList == null) {
                 playerList = new ArrayList<Player>();
@@ -619,7 +616,7 @@ public class Table {
                             Integer oldShare = potDivision.get(winner);
                             if (oldShare != null) {
                                 potDivision.put(winner, oldShare + 1);
-                                System.out.format("%s receives an odd chip from the pot.\n", winner);
+//                                System.out.format("[DEBUG] %s receives an odd chip from the pot.\n", winner);
                                 oddChips--;
                             }
                         }

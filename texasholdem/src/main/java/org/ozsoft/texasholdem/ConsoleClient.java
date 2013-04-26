@@ -132,12 +132,8 @@ public class ConsoleClient implements Client {
         System.out.format("%s %s.\n", player, player.getAction().getVerb());
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.ozsoft.texasholdem.Client#act(java.util.Set)
-     */
     @Override
-    public Action act(Set<Action> allowedActions) {
+    public Action act(int minBet, int currentBet, Set<Action> allowedActions) {
         boolean checkAllowed = false;
         boolean callAllowed = false;
         boolean betAllowed = false;

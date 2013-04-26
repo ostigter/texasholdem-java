@@ -17,8 +17,6 @@
 
 package org.ozsoft.texasholdem.gui;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
@@ -33,7 +31,7 @@ import org.ozsoft.texasholdem.actions.BetAction;
 import org.ozsoft.texasholdem.actions.RaiseAction;
 
 /**
- * Panel with buttons to let a human player select a poker action.
+ * Panel with buttons to let a human player select an action.
  * 
  * @author Oscar Stigter
  */
@@ -42,9 +40,6 @@ public class ControlPanel extends JPanel implements ActionListener {
     /** Serial version UID. */
     private static final long serialVersionUID = 4059653681621749416L;
 
-    /** Monitor while waiting for user input. */
-    private final Object monitor = new Object();
-    
     /** The Check button. */
     private final JButton checkButton;
     
@@ -62,25 +57,28 @@ public class ControlPanel extends JPanel implements ActionListener {
     
     /** The Continue button. */
     private final JButton continueButton;
+    
+    /** The betting panel. */
+    private final AmountPanel amountPanel;
 
+    /** Monitor while waiting for user input. */
+    private final Object monitor = new Object();
+    
     /** The selected action. */
-    private Action action;
+    private Action selectedAction;
     
     /**
      * Constructor.
-     * 
-     * @param main
-     *            The main frame.
      */
     public ControlPanel() {
         setBackground(UIConstants.TABLE_COLOR);
-        setLayout(new FlowLayout());
         continueButton = createActionButton(Action.CONTINUE);
         checkButton = createActionButton(Action.CHECK);
         callButton = createActionButton(Action.CALL);
         betButton = createActionButton(Action.BET);
         raiseButton = createActionButton(Action.RAISE);
         foldButton = createActionButton(Action.FOLD);
+        amountPanel = new AmountPanel();
     }
     
     /**
@@ -92,60 +90,90 @@ public class ControlPanel extends JPanel implements ActionListener {
             public void run() {
                 removeAll();
                 add(continueButton);
-                validate();
-                repaint();}
+                repaint();
+            }
         });
         Set<Action> allowedActions = new HashSet<Action>();
         allowedActions.add(Action.CONTINUE);
-        getUserInput(allowedActions);
+        getUserInput(0, 0, allowedActions);
     }
     
     /**
      * Waits for the user to click an action button and returns the selected
      * action.
      * 
+     * @param minBet
+     *            The minimum bet.
+     * @param cash
+     *            The player's remaining cash.
      * @param allowedActions
      *            The allowed actions.
      * 
      * @return The selected action.
      */
-    public Action getUserInput(final Set<Action> allowedActions) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                // Show the buttons for the allowed actions.
-                removeAll();
-                if (allowedActions.contains(Action.CONTINUE)) {
-                    add(continueButton);
-                } else {
-                    if (allowedActions.contains(Action.CHECK)) {
-                        add(checkButton);
+    public Action getUserInput(int minBet, int cash, final Set<Action> allowedActions) {
+        selectedAction = null;
+        while (selectedAction == null) {
+            // Show the buttons for the allowed actions.
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    removeAll();
+                    if (allowedActions.contains(Action.CONTINUE)) {
+                        add(continueButton);
+                    } else {
+                        if (allowedActions.contains(Action.CHECK)) {
+                            add(checkButton);
+                        }
+                        if (allowedActions.contains(Action.CALL)) {
+                            add(callButton);
+                        }
+                        if (allowedActions.contains(Action.BET)) {
+                            add(betButton);
+                        }
+                        if (allowedActions.contains(Action.RAISE)) {
+                            add(raiseButton);
+                        }
+                        if (allowedActions.contains(Action.FOLD)) {
+                            add(foldButton);
+                        }
                     }
-                    if (allowedActions.contains(Action.CALL)) {
-                        add(callButton);
-                    }
-                    if (allowedActions.contains(Action.BET)) {
-                        add(betButton);
-                    }
-                    if (allowedActions.contains(Action.RAISE)) {
-                        add(raiseButton);
-                    }
-                    if (allowedActions.contains(Action.FOLD)) {
-                        add(foldButton);
-                    }
+                    repaint();
                 }
-                validate();
-                repaint();
+            });
+            
+            // Wait for the user to select an action.
+            synchronized (monitor) {
+                try {
+                    monitor.wait();
+                } catch (InterruptedException e) {
+                    // Ignore.
+                }
             }
-        });
-        synchronized (monitor) {
-            try {
-                monitor.wait();
-            } catch (InterruptedException e) {
-                // Ignore.
+            
+            // In case of a bet or raise, show panel to select amount.
+            if (selectedAction == Action.BET || selectedAction == Action.RAISE) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        removeAll();
+                        add(amountPanel);
+                        repaint();
+                    }
+                });
+                selectedAction = amountPanel.show(selectedAction, minBet, cash);
+                if (selectedAction == Action.BET) {
+                    selectedAction = new BetAction(amountPanel.getAmount());
+                } else if (selectedAction == Action.RAISE) {
+                    selectedAction = new RaiseAction(amountPanel.getAmount());
+                } else {
+                    // User cancelled.
+                    selectedAction = null;
+                }
             }
         }
-        return action;
+        
+        return selectedAction;
     }
     
     /*
@@ -156,19 +184,17 @@ public class ControlPanel extends JPanel implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
         if (source == continueButton) {
-            action = Action.CONTINUE;
+            selectedAction = Action.CONTINUE;
         } else if (source == checkButton) {
-            action = Action.CHECK;
+            selectedAction = Action.CHECK;
         } else if (source == callButton) {
-            action = Action.CALL;
+            selectedAction = Action.CALL;
         } else if (source == betButton) {
-            //TODO: Ask player for bet amount instead of using fixed amount.
-            action = new BetAction(4);
+            selectedAction = Action.BET;
         } else if (source == raiseButton) {
-            //TODO: Ask player for raise amount instead of using fixed amount.
-            action = new RaiseAction(4);
+            selectedAction = Action.RAISE;
         } else {
-            action = Action.FOLD;
+            selectedAction = Action.FOLD;
         }
         synchronized (monitor) {
             monitor.notifyAll();

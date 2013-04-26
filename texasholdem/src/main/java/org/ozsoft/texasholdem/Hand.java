@@ -86,8 +86,6 @@ public class Hand {
      * @param s
      *            The string to parse.
      * 
-     * @return The hand of cards.
-     * 
      * @throws IllegalArgumentException
      *             If the string could not be parsed or the number of cards is
      *             too high.

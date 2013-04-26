@@ -18,6 +18,7 @@
 package org.ozsoft.texasholdem.gui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -59,8 +60,8 @@ public class BoardPanel extends JPanel {
     /**
      * Constructor.
      * 
-     * @param mainFrame
-     *            The main frame.
+     * @param controlPanel
+     *            The control panel.
      */
     public BoardPanel(ControlPanel controlPanel) {
         this.controlPanel = controlPanel;
@@ -80,7 +81,7 @@ public class BoardPanel extends JPanel {
         gc.fill = GridBagConstraints.NONE;
         gc.weightx = 1.0;
         gc.weighty = 0.0;
-        gc.insets = new Insets(5, 5, 0, 5);
+        gc.insets = new Insets(0, 5, 0, 5);
         add(label, gc);
         
         label = new JLabel("Pot");
@@ -93,10 +94,10 @@ public class BoardPanel extends JPanel {
         gc.fill = GridBagConstraints.NONE;
         gc.weightx = 1.0;
         gc.weighty = 0.0;
-        gc.insets = new Insets(5, 5, 0, 5);
+        gc.insets = new Insets(0, 5, 0, 5);
         add(label, gc);
         
-        betLabel = new JLabel();
+        betLabel = new JLabel(" ");
         betLabel.setBorder(UIConstants.LABEL_BORDER);
         betLabel.setForeground(Color.GREEN);
         betLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -111,7 +112,7 @@ public class BoardPanel extends JPanel {
         gc.insets = new Insets(5, 5, 5, 5);
         add(betLabel, gc);
 
-        potLabel = new JLabel();
+        potLabel = new JLabel(" ");
         potLabel.setBorder(UIConstants.LABEL_BORDER);
         potLabel.setForeground(Color.GREEN);
         potLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -134,11 +135,11 @@ public class BoardPanel extends JPanel {
             gc.gridy = 2;
             gc.gridwidth = 1;
             gc.gridheight = 1;
-            gc.weightx = 0.0;
-            gc.weighty = 0.0;
             gc.anchor = GridBagConstraints.CENTER;
             gc.fill = GridBagConstraints.NONE;
-            gc.insets = new Insets(10, 5, 10, 5);
+            gc.weightx = 0.0;
+            gc.weighty = 0.0;
+            gc.insets = new Insets(5, 1, 5, 1);
             add(cardLabels[i], gc);
         }
         
@@ -150,11 +151,11 @@ public class BoardPanel extends JPanel {
         gc.gridy = 3;
         gc.gridwidth = 5;
         gc.gridheight = 1;
-        gc.weightx = 1.0;
-        gc.weighty = 0.0;
         gc.anchor = GridBagConstraints.CENTER;
         gc.fill = GridBagConstraints.HORIZONTAL;
-        gc.insets = new Insets(10, 0, 5, 0);
+        gc.weightx = 1.0;
+        gc.weighty = 1.0;
+        gc.insets = new Insets(0, 0, 0, 0);
         add(messageLabel, gc);
         
         // Control panel.
@@ -162,12 +163,14 @@ public class BoardPanel extends JPanel {
         gc.gridy = 4;
         gc.gridwidth = 5;
         gc.gridheight = 1;
-        gc.weightx = 1.0;
-        gc.weighty = 1.0;
-        gc.insets = new Insets(5, 0, 5, 0);
+        gc.insets = new Insets(0, 0, 0, 0);
         gc.anchor = GridBagConstraints.CENTER;
         gc.fill = GridBagConstraints.BOTH;
+        gc.weightx = 1.0;
+        gc.weighty = 1.0;
         add(controlPanel, gc);
+        
+        setPreferredSize(new Dimension(400, 270));
         
         update(null, 0, 0);
     }
