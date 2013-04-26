@@ -91,6 +91,4 @@ public abstract class PokerUtils {
         return (int) Math.round(score);        
     }
 
-    
-
 }

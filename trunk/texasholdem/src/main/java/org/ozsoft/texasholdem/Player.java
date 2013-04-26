@@ -265,7 +265,7 @@ public class Player {
     public Action act(Set<Action> allowedActions, int minBet, int currentBet) {
         if (allowedActions.size() > 2) {
             // Multiple possibilities, actor must choose.
-            action = client.act(allowedActions);
+            action = client.act(minBet, currentBet, allowedActions);
             if (action instanceof CheckAction) {
                 // Do nothing.
             } else if (action instanceof CallAction) {

@@ -86,7 +86,7 @@ public class BasicBot extends Bot {
     }
 
     @Override
-    public Action act(Set<Action> allowedActions) {
+    public Action act(int minBet, int currentBet, Set<Action> allowedActions) {
         // Always just check or call.
         if (allowedActions.contains(Action.CHECK)) {
             return Action.CHECK;

@@ -99,11 +99,15 @@ public interface Client {
     /**
      * Requests this player to act, selecting one of the allowed actions.
      * 
+     * @param minBet
+     *            The minimum bet.
+     * @param currentBet
+     *            The current bet.
      * @param allowedActions
      *            The allowed actions.
      * 
      * @return The selected action.
      */
-    Action act(Set<Action> allowedActions);
+    Action act(int minBet, int currentBet, Set<Action> allowedActions);
 
 }

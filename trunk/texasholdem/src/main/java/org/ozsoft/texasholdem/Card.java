@@ -98,8 +98,6 @@ public class Card implements Comparable<Card> {
      * @param s
      *            The string representation of the card, e.g. "As", "Td", "7h".
      * 
-     * @return The card.
-     * 
      * @throws IllegalArgumentException
      *             If the card string is null or of invalid length, or the rank
      *             or suit could not be parsed.

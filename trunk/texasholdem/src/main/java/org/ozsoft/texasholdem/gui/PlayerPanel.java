@@ -82,9 +82,6 @@ public class PlayerPanel extends JPanel {
     
     /**
      * Constructor.
-     * 
-     * @param player
-     *            The player.
      */
     public PlayerPanel() {
         setBorder(BORDER);
