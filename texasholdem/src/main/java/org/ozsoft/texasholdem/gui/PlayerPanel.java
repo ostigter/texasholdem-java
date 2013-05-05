@@ -40,7 +40,7 @@ import org.ozsoft.texasholdem.actions.Action;
 public class PlayerPanel extends JPanel {
     
     /** The serial version UID. */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5851738752943098606L;
 
     /** Filled dealer button image when player is dealer. */
     private static final Icon BUTTON_PRESENT_ICON =

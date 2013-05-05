@@ -53,9 +53,9 @@ public class ConsoleClient implements Client {
         consoleReader = new BufferedReader(new InputStreamReader(System.in));
         Table table = new Table(TableType.FIXED_LIMIT, BIG_BLIND);
         table.addPlayer(new Player("Player", STARTING_CASH, this));
-        table.addPlayer(new Player("Joe",    STARTING_CASH, new BasicBot()));
-        table.addPlayer(new Player("Mike",   STARTING_CASH, new BasicBot()));
-        table.addPlayer(new Player("Eddie",  STARTING_CASH, new BasicBot()));
+        table.addPlayer(new Player("Joe",    STARTING_CASH, new BasicBot(0,  75)));
+        table.addPlayer(new Player("Mike",   STARTING_CASH, new BasicBot(25, 50)));
+        table.addPlayer(new Player("Eddie",  STARTING_CASH, new BasicBot(50, 25)));
         table.run();
     }
 
@@ -179,11 +179,9 @@ public class ConsoleClient implements Client {
                             selectedAction = Action.CALL;
                         }
                     } else if (c == 'b' && betAllowed) {
-                        //TODO: Ask player for bet amount instead of fixed amount.
-                        selectedAction = new BetAction(4);
+                        selectedAction = new BetAction(minBet);
                     } else if (c == 'r' && raiseAllowed) {
-                        //TODO: Ask player for raise amount instead of fixed amount.
-                        selectedAction = new RaiseAction(4);
+                        selectedAction = new RaiseAction(minBet);
                     } else if (c == 'f') {
                         selectedAction = Action.FOLD;
                     }

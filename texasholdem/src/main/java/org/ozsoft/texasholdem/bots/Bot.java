@@ -26,6 +26,7 @@ import org.ozsoft.texasholdem.Client;
  */
 public abstract class Bot implements Client {
     
-    // Empty class; should be implemented by an actual bot.
-
+    /** Number of hole cards. */
+    protected static final int NO_OF_HOLE_CARDS = 2;
+    
 }

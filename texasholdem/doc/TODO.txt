@@ -1,5 +1,7 @@
 TODO
 ====
 
-* Smarter basic bot AI (at least some intelligence)
+* Refactor action design
+* Table log (replayable) with GUI panel
 * Network game (client/server)
+* Heads Up bot arena

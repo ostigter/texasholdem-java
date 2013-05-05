@@ -37,8 +37,8 @@ import org.ozsoft.texasholdem.Card;
 public class BoardPanel extends JPanel {
     
     /** The serial version UID. */
-    private static final long serialVersionUID = 1L;
-    
+    private static final long serialVersionUID = 8530615901667282755L;
+
     /** The maximum number of community cards. */
     private static final int NO_OF_CARDS = 5;
     
@@ -187,12 +187,12 @@ public class BoardPanel extends JPanel {
         if (bet == 0) {
             betLabel.setText(" ");
         } else {
-            betLabel.setText("$" + bet);
+            betLabel.setText("$ " + bet);
         }
         if (pot == 0) {
             potLabel.setText(" ");
         } else {
-            potLabel.setText("$" + pot);
+            potLabel.setText("$ " + pot);
         }
         int noOfCards = (cards == null) ? 0 : cards.size();
         for (int i = 0; i < NO_OF_CARDS; i++) {

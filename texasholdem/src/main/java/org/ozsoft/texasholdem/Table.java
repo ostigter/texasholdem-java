@@ -43,11 +43,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.ozsoft.texasholdem.actions.Action;
-import org.ozsoft.texasholdem.actions.AllInAction;
 import org.ozsoft.texasholdem.actions.BetAction;
-import org.ozsoft.texasholdem.actions.CallAction;
-import org.ozsoft.texasholdem.actions.CheckAction;
-import org.ozsoft.texasholdem.actions.FoldAction;
 import org.ozsoft.texasholdem.actions.RaiseAction;
 
 /**
@@ -296,6 +292,7 @@ public class Table {
      * Deals the Hole Cards.
      */
     private void dealHoleCards() {
+        System.out.println();
         for (Player player : activePlayers) {
             player.setCards(deck.deal(2));
         }
@@ -347,18 +344,19 @@ public class Table {
             rotateActor();
             Set<Action> allowedActions = getAllowedActions(actor);
             Action action = actor.act(allowedActions, minBet, bet);
-            //FIXME: Check for allowed action is broken!
-//            if (!allowedActions.contains(action)) {
-//                // Sanity check for client mistakes.
-//                String msg = String.format("Illegal action (%s) from player %s!", action, actor);
-//                throw new IllegalStateException(msg);
-//            }
+            if (!allowedActions.contains(action)) {
+                if (action instanceof BetAction && !allowedActions.contains(Action.BET)) {
+                    throw new IllegalStateException(String.format("Player '%s' acted with illegal Bet action", actor));
+                } else if (action instanceof RaiseAction && !allowedActions.contains(Action.RAISE)) {
+                    throw new IllegalStateException(String.format("Player '%s' acted with illegal Raise action", actor));
+                }
+            }
             playersToAct--;
-            if (action instanceof CheckAction) {
+            if (action == Action.CHECK) {
                 // Do nothing.
-            } else if (action instanceof AllInAction) {
+            } else if (action == Action.ALL_IN) {
                 // Do nothing.
-            } else if (action instanceof CallAction) {
+            } else if (action == Action.CALL) {
                 contributePot(actor.getBetIncrement());
             } else if (action instanceof BetAction) {
                 bet = action.getAmount();
@@ -378,9 +376,10 @@ public class Table {
                     // Max. number of raises reached; other players get one more turn.
                     playersToAct = activePlayers.size() - 1;
                 }
-            } else if (action instanceof FoldAction) {
+            } else if (action == Action.FOLD) {
                 actor.setCards(null);
                 activePlayers.remove(actor);
+                actorPosition--;
                 if (activePlayers.size() == 1) {
                     // Only one player left, so he wins the entire pot.
                     notifyBoardUpdated();
@@ -389,11 +388,11 @@ public class Table {
                     int amount = getTotalPot();
                     winner.win(amount);
                     notifyBoardUpdated();
-                    notifyMessage("%s wins $%d.", winner, amount);
+                    notifyMessage("%s wins $ %d.", winner, amount);
                     playersToAct = 0;
                 }
             } else {
-                // Should never happen.
+                // Programming error, should never happen.
                 throw new IllegalStateException("Invalid action: " + action);
             }
             if (playersToAct > 0) {
@@ -637,7 +636,7 @@ public class Table {
             if (winnerText.length() > 0) {
                 winnerText.append(", ");
             }
-            winnerText.append(String.format("%s wins $%d", winner, potShare));
+            winnerText.append(String.format("%s wins $ %d", winner, potShare));
             notifyPlayersUpdated(true);
         }
         winnerText.append('.');

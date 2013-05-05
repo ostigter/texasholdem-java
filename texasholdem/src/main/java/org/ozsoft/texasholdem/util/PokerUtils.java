@@ -26,7 +26,7 @@ public abstract class PokerUtils {
      * 
      * @return The score based on the Chen formula.
      */
-    public static int getChenScore(Card[] cards) {
+    public static double getChenScore(Card[] cards) {
         if (cards.length != 2) {
             throw new IllegalArgumentException("Invalid number of cards: " + cards.length);
         }
@@ -87,8 +87,13 @@ public abstract class PokerUtils {
             score += 1.0;
         }
         
+        // Minimum score is 0.
+        if (score < 0.0) {
+            score = 0.0;
+        }
+        
         // 6. Round half point scores up.
-        return (int) Math.round(score);        
+        return Math.round(score);        
     }
 
 }

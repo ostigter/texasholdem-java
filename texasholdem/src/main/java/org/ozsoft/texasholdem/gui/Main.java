@@ -46,13 +46,13 @@ import org.ozsoft.texasholdem.bots.BasicBot;
 public class Main extends JFrame implements Client {
     
     /** Serial version UID. */
-    private static final long serialVersionUID = 1L;
-    
+    private static final long serialVersionUID = -5414633931666096443L;
+
     /** The starting cash per player. */
-    private static final int STARTING_CASH = 100;
+    private static final int STARTING_CASH = 500;
     
     /** The size of the big blind. */
-    private static final int BIG_BLIND = 2;
+    private static final int BIG_BLIND = 10;
     
     /** The table. */
     private final Table table;
@@ -101,9 +101,9 @@ public class Main extends JFrame implements Client {
         players = new LinkedHashMap<String, Player>();
         humanPlayer = new Player("Player", STARTING_CASH, this);
         players.put("Player", humanPlayer);
-        players.put("Joe",    new Player("Joe",    STARTING_CASH, new BasicBot()));
-        players.put("Mike",   new Player("Mike",   STARTING_CASH, new BasicBot()));
-        players.put("Eddie",  new Player("Eddie",  STARTING_CASH, new BasicBot()));
+        players.put("Joe",    new Player("Joe",   STARTING_CASH, new BasicBot(0, 75)));
+        players.put("Mike",   new Player("Mike",  STARTING_CASH, new BasicBot(25, 50)));
+        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new BasicBot(50, 25)));
 
         table = new Table(TableType.NO_LIMIT, BIG_BLIND);
         for (Player player : players.values()) {
