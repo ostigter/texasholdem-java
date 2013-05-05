@@ -39,27 +39,27 @@ public class PokerUtilsTest {
         
         card1 = new Card(Card.ACE, Card.SPADES);
         card2 = new Card(Card.ACE, Card.HEARTS);
-        Assert.assertEquals(20, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(20.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
 
         card1 = new Card(Card.ACE, Card.SPADES);
         card2 = new Card(Card.KING, Card.SPADES);
-        Assert.assertEquals(12, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(12.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
 
         card1 = new Card(Card.KING, Card.SPADES);
         card2 = new Card(Card.KING, Card.HEARTS);
-        Assert.assertEquals(16, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(16.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
 
         card1 = new Card(Card.TEN, Card.CLUBS);
         card2 = new Card(Card.TEN, Card.DIAMONDS);
-        Assert.assertEquals(10, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(10.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
 
         card1 = new Card(Card.FIVE, Card.CLUBS);
         card2 = new Card(Card.SEVEN, Card.CLUBS);
-        Assert.assertEquals(6, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(6.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
 
         card1 = new Card(Card.DEUCE, Card.CLUBS);
         card2 = new Card(Card.SEVEN, Card.DIAMONDS);
-        Assert.assertEquals(-1, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(0.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
     }
     
 }

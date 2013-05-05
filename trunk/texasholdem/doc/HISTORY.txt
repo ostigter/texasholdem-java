@@ -4,11 +4,15 @@ HISTORY
 Release     Date            Description
 ---------------------------------------------------------------------------------------------------
 
-0.4a        ?               - Implemented pot splitting
+0.5a        ?               - Added No-Limit game engine
+                            - Updated GUI with No-Limit game engine
+                            - Implemented basic bot AI.
+
+0.4a        17-Apr-2013     - Implemented pot splitting
                             - Implemented all-in and broke players
                             - Finished GUI game engine (Fixed Limit poker)
                             - Improved poker engine (rule compliancy)
-                            - Implemented Heads Up (head to head) mode
+                            - Implemented Heads Up (head-to-head) mode
                             - General code cleanup
                             - Divide odd chips from the pot
                             - Added HISTORY.txt file
