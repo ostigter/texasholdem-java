@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.ozsoft.texasholdem.TableType;
 import org.ozsoft.texasholdem.actions.Action;
 import org.ozsoft.texasholdem.actions.BetAction;
 import org.ozsoft.texasholdem.actions.RaiseAction;
@@ -39,6 +40,9 @@ public class ControlPanel extends JPanel implements ActionListener {
     
     /** Serial version UID. */
     private static final long serialVersionUID = 4059653681621749416L;
+    
+    /** The table type (betting structure). */
+    private final TableType tableType;
 
     /** The Check button. */
     private final JButton checkButton;
@@ -70,7 +74,8 @@ public class ControlPanel extends JPanel implements ActionListener {
     /**
      * Constructor.
      */
-    public ControlPanel() {
+    public ControlPanel(TableType tableType) {
+        this.tableType = tableType;
         setBackground(UIConstants.TABLE_COLOR);
         continueButton = createActionButton(Action.CONTINUE);
         checkButton = createActionButton(Action.CHECK);
@@ -152,7 +157,7 @@ public class ControlPanel extends JPanel implements ActionListener {
             }
             
             // In case of a bet or raise, show panel to select amount.
-            if (selectedAction == Action.BET || selectedAction == Action.RAISE) {
+            if (tableType == TableType.NO_LIMIT && (selectedAction == Action.BET || selectedAction == Action.RAISE)) {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {

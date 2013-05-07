@@ -24,9 +24,9 @@ package org.ozsoft.texasholdem;
  */
 public enum TableType {
     
-    FIXED_LIMIT("Fixed-limit"),
+    FIXED_LIMIT("Fixed-Limit"),
     
-    NO_LIMIT("No-limit"),
+    NO_LIMIT("No-Limit"),
     
     ;
     
