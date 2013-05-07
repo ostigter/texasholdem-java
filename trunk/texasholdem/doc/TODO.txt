@@ -1,7 +1,6 @@
 TODO
 ====
 
-* Refactor action design
+* Heads Up bot arena
 * Table log (replayable) with GUI panel
 * Network game (client/server)
-* Heads Up bot arena

@@ -102,6 +102,7 @@ public class BasicBot extends Bot {
 
     @Override
     public void playerUpdated(Player player) {
+        System.out.println("### Player updated: " + player);
         if (player.getCards().length == NO_OF_HOLE_CARDS) {
             this.cards = player.getCards();
         }

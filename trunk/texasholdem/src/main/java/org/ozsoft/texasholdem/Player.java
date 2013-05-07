@@ -18,14 +18,8 @@
 package org.ozsoft.texasholdem;
 
 import java.util.List;
-import java.util.Set;
 
 import org.ozsoft.texasholdem.actions.Action;
-import org.ozsoft.texasholdem.actions.BetAction;
-import org.ozsoft.texasholdem.actions.CallAction;
-import org.ozsoft.texasholdem.actions.CheckAction;
-import org.ozsoft.texasholdem.actions.FoldAction;
-import org.ozsoft.texasholdem.actions.RaiseAction;
 
 /**
  * A Texas Hold'em player.
@@ -49,23 +43,11 @@ public class Player {
     /** Current amount of cash. */
     private int cash;
 
-    /** Whether the player has his hole cards being dealt. */
-    private boolean hasCards;
-
     /** Current bet. */
     private int bet;
 
-    /** Number of bets and raises in the current betting round. */
-    private int raises;
-
     /** Last action performed. */
     private Action action;
-
-    /** Last action's bet increment. */
-    private int betIncrement;
-    
-    /** Whether this player is all-in. */
-    private boolean isAllIn;
 
     /**
      * Constructor.
@@ -101,9 +83,7 @@ public class Player {
      */
     public void resetHand() {
         hand.removeAllCards();
-        hasCards = false;
         resetBet();
-        isAllIn = false;
     }
 
     /**
@@ -111,9 +91,7 @@ public class Player {
      */
     public void resetBet() {
         bet = 0;
-        action = (hasCards && cash == 0) ? Action.ALL_IN : null;
-        raises = 0;
-        betIncrement = 0;
+        action = (hasCards() && cash == 0) ? Action.ALL_IN : null;
     }
 
     /**
@@ -121,12 +99,9 @@ public class Player {
      */
     public void setCards(List<Card> cards) {
         hand.removeAllCards();
-        if (cards == null) {
-            hasCards = false;
-        } else {
+        if (cards != null) {
             if (cards.size() == 2) {
                 hand.addCards(cards);
-                hasCards = true;
                 System.out.format("[CHEAT] %s's cards:\t%s\n", name, hand);
             } else {
                 throw new IllegalArgumentException("Invalid number of cards");
@@ -140,7 +115,7 @@ public class Player {
      * @return True if the hole cards are dealt, otherwise false.
      */
     public boolean hasCards() {
-        return hasCards;
+        return (hand.size() > 0);
     }
 
     /**
@@ -169,50 +144,43 @@ public class Player {
     public int getBet() {
         return bet;
     }
-
+    
     /**
-     * Returns the number of raises the player has done in this betting round.
+     * Sets the player's current bet.
      * 
-     * @return The number of raises.
+     * @param bet
+     *            The current bet.
      */
-    public int getRaises() {
-        return raises;
+    public void setBet(int bet) {
+        this.bet = bet;
     }
 
     /**
-     * Returns the player's action.
+     * Returns the player's most recent action.
      * 
-     * @return the action
+     * @return The action.
      */
     public Action getAction() {
         return action;
     }
-
-    /**
-     * Returns the bet increment of the last action.
-     * 
-     * @return The bet increment.
-     */
-    public int getBetIncrement() {
-        return betIncrement;
-    }
     
+    /**
+     * Sets the player's most recent action.
+     * 
+     * @param action
+     *            The action.
+     */
+    public void setAction(Action action) {
+        this.action = action;
+    }
+
     /**
      * Indicates whether this player is all-in.
      * 
      * @return True if all-in, otherwise false.
      */
     public boolean isAllIn() {
-        return isAllIn;
-    }
-
-    /**
-     * Returns the player's hand of cards.
-     * 
-     * @return The hand of cards.
-     */
-    public Hand getHand() {
-        return hand;
+        return hasCards() && (cash == 0);
     }
 
     /**
@@ -247,72 +215,28 @@ public class Player {
         cash -= blind;
         bet += blind;
     }
-
+    
     /**
-     * Asks the player to act and returns his selected action.
+     * Pays an amount of cash.
      * 
-     * Determining the player's action is handled by the client application.
-     * 
-     * @param allowedActions
-     *            The allowed actions.
-     * @param minBet
-     *            The minimum bet.
-     * @param currentBet
-     *            The current bet.
-     * 
-     * @return The selected action.
+     * @param amount
+     *            The amount of cash to pay.
      */
-    public Action act(Set<Action> allowedActions, int minBet, int currentBet) {
-        if (allowedActions.size() > 2) {
-            // Multiple possibilities, actor must choose.
-            action = client.act(minBet, currentBet, allowedActions);
-            if (action instanceof CheckAction) {
-                // Do nothing.
-            } else if (action instanceof CallAction) {
-                betIncrement = currentBet - bet;
-                if (betIncrement > cash) {
-                    betIncrement = cash;
-                }
-                cash -= betIncrement;
-                bet += betIncrement;
-                isAllIn = (cash == 0);
-            } else if (action instanceof BetAction) {
-                betIncrement = action.getAmount();
-                if (betIncrement > cash) {
-                    betIncrement = cash;
-                }
-                cash -= betIncrement;
-                bet += betIncrement;
-                raises++;
-                isAllIn = (cash == 0);
-            } else if (action instanceof RaiseAction) {
-                currentBet += action.getAmount();
-                betIncrement = currentBet - bet;
-                if (betIncrement > cash) {
-                    betIncrement = cash;
-                }
-                cash -= betIncrement;
-                bet += betIncrement;
-                raises++;
-                isAllIn = (cash == 0);
-            } else if (action instanceof FoldAction) {
-                hand.removeAllCards();
-            }
-        } else {
-            // Only 1 option, so must be all-in and forced to check.
-            action = Action.CHECK;
+    public void payCash(int amount) {
+        if (amount > cash) {
+            throw new IllegalStateException("Player asked to pay more cash than he owns!");
         }
-        return action;
+        cash -= amount;
     }
-
+    
     /**
-     * Wins the pot.
+     * Wins an amount of money.
      * 
-     * @param pot
-     *            The pot.
+     * @param amount
+     *            The amount won.
      */
-    public void win(int pot) {
-        cash += pot;
+    public void win(int amount) {
+        cash += amount;
     }
 
     /**
@@ -322,9 +246,7 @@ public class Player {
      */
     public Player publicClone() {
         Player clone = new Player(name, cash, null);
-        clone.hasCards = hasCards;
         clone.bet = bet;
-        clone.raises = raises;
         clone.action = action;
         return clone;
     }

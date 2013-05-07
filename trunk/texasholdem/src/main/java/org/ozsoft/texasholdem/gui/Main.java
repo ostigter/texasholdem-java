@@ -34,7 +34,7 @@ import org.ozsoft.texasholdem.Player;
 import org.ozsoft.texasholdem.Table;
 import org.ozsoft.texasholdem.TableType;
 import org.ozsoft.texasholdem.actions.Action;
-import org.ozsoft.texasholdem.bots.BasicBot;
+import org.ozsoft.texasholdem.bots.DummyBot;
 
 /**
  * The game's main frame.
@@ -47,12 +47,15 @@ public class Main extends JFrame implements Client {
     
     /** Serial version UID. */
     private static final long serialVersionUID = -5414633931666096443L;
-
-    /** The starting cash per player. */
-    private static final int STARTING_CASH = 500;
     
+    /** Table type (betting structure). */
+    private static final TableType TABLE_TYPE = TableType.NO_LIMIT;
+
     /** The size of the big blind. */
     private static final int BIG_BLIND = 10;
+    
+    /** The starting cash per player. */
+    private static final int STARTING_CASH = 500;
     
     /** The table. */
     private final Table table;
@@ -85,7 +88,7 @@ public class Main extends JFrame implements Client {
      * Constructor.
      */
     public Main() {
-        super("Limit Texas Hold'em poker");
+        super("Texas Hold'em poker");
         
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         getContentPane().setBackground(UIConstants.TABLE_COLOR);
@@ -93,7 +96,7 @@ public class Main extends JFrame implements Client {
 
         gc = new GridBagConstraints();
         
-        controlPanel = new ControlPanel();
+        controlPanel = new ControlPanel(TABLE_TYPE);
         
         boardPanel = new BoardPanel(controlPanel);        
         addComponent(boardPanel, 1, 1, 1, 1);
@@ -101,11 +104,14 @@ public class Main extends JFrame implements Client {
         players = new LinkedHashMap<String, Player>();
         humanPlayer = new Player("Player", STARTING_CASH, this);
         players.put("Player", humanPlayer);
-        players.put("Joe",    new Player("Joe",   STARTING_CASH, new BasicBot(0, 75)));
-        players.put("Mike",   new Player("Mike",  STARTING_CASH, new BasicBot(25, 50)));
-        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new BasicBot(50, 25)));
+//        players.put("Joe",    new Player("Joe",   STARTING_CASH, new BasicBot(0, 75)));
+//        players.put("Mike",   new Player("Mike",  STARTING_CASH, new BasicBot(25, 50)));
+//        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new BasicBot(50, 25)));
+        players.put("Joe",    new Player("Joe",   STARTING_CASH, new DummyBot()));
+        players.put("Mike",   new Player("Mike",  STARTING_CASH, new DummyBot()));
+        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new DummyBot()));
 
-        table = new Table(TableType.NO_LIMIT, BIG_BLIND);
+        table = new Table(TABLE_TYPE, BIG_BLIND);
         for (Player player : players.values()) {
             table.addPlayer(player);
         }

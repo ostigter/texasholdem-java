@@ -56,8 +56,8 @@ import org.ozsoft.texasholdem.actions.RaiseAction;
  */
 public class Table {
     
-    /** The maximum number of bets or raises per player in a single hand. */
-    private static final int MAX_RAISES = 4;
+    /** In fixed-limit games, the maximum number of raises per betting round. */
+    private static final int MAX_RAISES = 3;
     
     /** Whether players will always call the showdown, or fold when no chance. */
     private static final boolean ALWAYS_CALL_SHOWDOWN = false;
@@ -103,6 +103,9 @@ public class Table {
     
     /** The player who bet or raised last (aggressor). */
     private Player lastBettor;
+    
+    /** Number of raises in the current betting round. */
+    private int raises;
     
     /**
      * Constructor.
@@ -292,10 +295,10 @@ public class Table {
      * Deals the Hole Cards.
      */
     private void dealHoleCards() {
-        System.out.println();
         for (Player player : activePlayers) {
             player.setCards(deck.deal(2));
         }
+        System.out.println();
         notifyPlayersUpdated(false);
         notifyMessage("%s deals the hole cards.", dealer);
     }
@@ -338,63 +341,95 @@ public class Table {
         }
         
         lastBettor = null;
+        raises = 0;
         notifyBoardUpdated();
         
         while (playersToAct > 0) {
             rotateActor();
-            Set<Action> allowedActions = getAllowedActions(actor);
-            Action action = actor.act(allowedActions, minBet, bet);
-            if (!allowedActions.contains(action)) {
-                if (action instanceof BetAction && !allowedActions.contains(Action.BET)) {
-                    throw new IllegalStateException(String.format("Player '%s' acted with illegal Bet action", actor));
-                } else if (action instanceof RaiseAction && !allowedActions.contains(Action.RAISE)) {
-                    throw new IllegalStateException(String.format("Player '%s' acted with illegal Raise action", actor));
-                }
-            }
-            playersToAct--;
-            if (action == Action.CHECK) {
-                // Do nothing.
-            } else if (action == Action.ALL_IN) {
-                // Do nothing.
-            } else if (action == Action.CALL) {
-                contributePot(actor.getBetIncrement());
-            } else if (action instanceof BetAction) {
-                bet = action.getAmount();
-                minBet = action.getAmount();
-                contributePot(actor.getBetIncrement());
-                lastBettor = actor;
-                playersToAct = activePlayers.size();
-            } else if (action instanceof RaiseAction) {
-                bet += action.getAmount();
-                minBet = action.getAmount();
-                contributePot(actor.getBetIncrement());
-                lastBettor = actor;
-                if (tableType == TableType.NO_LIMIT || actor.getRaises() < MAX_RAISES || activePlayers.size() == 2) { 
-                    // All players get another turn.
-                    playersToAct = activePlayers.size();
-                } else {
-                    // Max. number of raises reached; other players get one more turn.
-                    playersToAct = activePlayers.size() - 1;
-                }
-            } else if (action == Action.FOLD) {
-                actor.setCards(null);
-                activePlayers.remove(actor);
-                actorPosition--;
-                if (activePlayers.size() == 1) {
-                    // Only one player left, so he wins the entire pot.
-                    notifyBoardUpdated();
-                    notifyPlayerActed();
-                    Player winner = activePlayers.get(0);
-                    int amount = getTotalPot();
-                    winner.win(amount);
-                    notifyBoardUpdated();
-                    notifyMessage("%s wins $ %d.", winner, amount);
-                    playersToAct = 0;
-                }
+            Action action = null;
+            if (actor.isAllIn()) {
+                // Player is all-in, so must check.
+                action = Action.CHECK;
+                playersToAct--;
             } else {
-                // Programming error, should never happen.
-                throw new IllegalStateException("Invalid action: " + action);
+                // Otherwise allow client to act.
+                Set<Action> allowedActions = getAllowedActions(actor);
+                action = actor.getClient().act(minBet, bet, allowedActions);
+                // Verify chosen action to guard against broken clients (accidental or on purpose).
+                if (!allowedActions.contains(action)) {
+                    if (action instanceof BetAction && !allowedActions.contains(Action.BET)) {
+                        throw new IllegalStateException(String.format("Player '%s' acted with illegal Bet action", actor));
+                    } else if (action instanceof RaiseAction && !allowedActions.contains(Action.RAISE)) {
+                        throw new IllegalStateException(String.format("Player '%s' acted with illegal Raise action", actor));
+                    }
+                }
+                playersToAct--;
+                if (action == Action.CHECK) {
+                    // Do nothing.
+                } else if (action == Action.CALL) {
+                    int betIncrement = bet - actor.getBet();
+                    if (betIncrement > actor.getCash()) {
+                        betIncrement = actor.getCash();
+                    }
+                    actor.payCash(betIncrement);
+                    actor.setBet(actor.getBet() + betIncrement);
+                    contributePot(betIncrement);
+                } else if (action instanceof BetAction) {
+                    int amount = (tableType == TableType.FIXED_LIMIT) ? minBet : action.getAmount();
+                    if (amount < minBet && amount < actor.getCash()) {
+                        throw new IllegalStateException("Illegal client action: bet less than minimum bet!");
+                    }
+                    actor.setBet(amount);
+                    actor.payCash(amount);
+                    contributePot(amount);
+                    bet = amount;
+                    minBet = amount;
+                    lastBettor = actor;
+                    playersToAct = activePlayers.size();
+                } else if (action instanceof RaiseAction) {
+                    int amount = (tableType == TableType.FIXED_LIMIT) ? minBet : action.getAmount();
+                    if (amount < minBet && amount < actor.getCash()) {
+                        throw new IllegalStateException("Illegal client action: raise less than minimum bet!");
+                    }
+                    bet += amount;
+                    minBet = amount;
+                    int betIncrement = bet - actor.getBet();
+                    if (betIncrement > actor.getCash()) {
+                        betIncrement = actor.getCash();
+                    }
+                    actor.setBet(bet);
+                    actor.payCash(betIncrement);
+                    contributePot(betIncrement);
+                    lastBettor = actor;
+                    raises++;
+                    if (tableType == TableType.NO_LIMIT || raises < MAX_RAISES || activePlayers.size() == 2) { 
+                        // All players get another turn.
+                        playersToAct = activePlayers.size();
+                    } else {
+                        // Max. number of raises reached; other players get one more turn.
+                        playersToAct = activePlayers.size() - 1;
+                    }
+                } else if (action == Action.FOLD) {
+                    actor.setCards(null);
+                    activePlayers.remove(actor);
+                    actorPosition--;
+                    if (activePlayers.size() == 1) {
+                        // Only one player left, so he wins the entire pot.
+                        notifyBoardUpdated();
+                        notifyPlayerActed();
+                        Player winner = activePlayers.get(0);
+                        int amount = getTotalPot();
+                        winner.win(amount);
+                        notifyBoardUpdated();
+                        notifyMessage("%s wins $ %d.", winner, amount);
+                        playersToAct = 0;
+                    }
+                } else {
+                    // Programming error, should never happen.
+                    throw new IllegalStateException("Invalid action: " + action);
+                }
             }
+            actor.setAction(action);
             if (playersToAct > 0) {
                 notifyBoardUpdated();
                 notifyPlayerActed();
@@ -425,18 +460,18 @@ public class Table {
             int actorBet = actor.getBet();
             if (bet == 0) {
                 actions.add(Action.CHECK);
-                if (tableType == TableType.NO_LIMIT || player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
+                if (tableType == TableType.NO_LIMIT || raises < MAX_RAISES || activePlayers.size() == 2) {
                     actions.add(Action.BET);
                 }
             } else {
                 if (actorBet < bet) {
                     actions.add(Action.CALL);
-                    if (tableType == TableType.NO_LIMIT || player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
+                    if (tableType == TableType.NO_LIMIT || raises < MAX_RAISES || activePlayers.size() == 2) {
                         actions.add(Action.RAISE);
                     }
                 } else {
                     actions.add(Action.CHECK);
-                    if (tableType == TableType.NO_LIMIT || player.getRaises() < MAX_RAISES || activePlayers.size() == 2) {
+                    if (tableType == TableType.NO_LIMIT || raises < MAX_RAISES || activePlayers.size() == 2) {
                         actions.add(Action.RAISE);
                     }
                 }
@@ -481,11 +516,11 @@ public class Table {
      * Performs the showdown.
      */
     private void doShowdown() {
-//        System.out.println("Pot:");
+//        System.out.println("\n[DEBUG] Pots:");
 //        for (Pot pot : pots) {
 //            System.out.format("  %s\n", pot);
 //        }
-//        System.out.format("  Total: %d\n", getTotalPot());
+//        System.out.format("[DEBUG]  Total: %d\n", getTotalPot());
         
         // Determine show order; start with all-in players...
         List<Player> showingPlayers = new ArrayList<Player>();
@@ -644,7 +679,7 @@ public class Table {
         
         // Sanity check.
         if (totalWon != totalPot) {
-            System.err.println("*** ERROR: Incorrect pot division");
+            throw new IllegalStateException("Incorrect pot division!");
         }
     }
     
