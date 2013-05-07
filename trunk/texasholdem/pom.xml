@@ -5,7 +5,7 @@
 
     <groupId>org.ozsoft.texasholdem</groupId>
     <artifactId>TexasHoldEm</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <packaging>jar</packaging>
 
     <name>TexasHoldEm</name>
