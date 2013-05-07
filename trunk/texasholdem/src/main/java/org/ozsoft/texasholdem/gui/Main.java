@@ -34,7 +34,7 @@ import org.ozsoft.texasholdem.Player;
 import org.ozsoft.texasholdem.Table;
 import org.ozsoft.texasholdem.TableType;
 import org.ozsoft.texasholdem.actions.Action;
-import org.ozsoft.texasholdem.bots.DummyBot;
+import org.ozsoft.texasholdem.bots.BasicBot;
 
 /**
  * The game's main frame.
@@ -104,12 +104,9 @@ public class Main extends JFrame implements Client {
         players = new LinkedHashMap<String, Player>();
         humanPlayer = new Player("Player", STARTING_CASH, this);
         players.put("Player", humanPlayer);
-//        players.put("Joe",    new Player("Joe",   STARTING_CASH, new BasicBot(0, 75)));
-//        players.put("Mike",   new Player("Mike",  STARTING_CASH, new BasicBot(25, 50)));
-//        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new BasicBot(50, 25)));
-        players.put("Joe",    new Player("Joe",   STARTING_CASH, new DummyBot()));
-        players.put("Mike",   new Player("Mike",  STARTING_CASH, new DummyBot()));
-        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new DummyBot()));
+        players.put("Joe",    new Player("Joe",   STARTING_CASH, new BasicBot(0, 75)));
+        players.put("Mike",   new Player("Mike",  STARTING_CASH, new BasicBot(25, 50)));
+        players.put("Eddie",  new Player("Eddie", STARTING_CASH, new BasicBot(50, 25)));
 
         table = new Table(TABLE_TYPE, BIG_BLIND);
         for (Player player : players.values()) {
