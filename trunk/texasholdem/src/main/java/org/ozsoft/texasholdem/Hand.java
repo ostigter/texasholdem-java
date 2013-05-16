@@ -20,11 +20,13 @@ package org.ozsoft.texasholdem;
 import java.util.Collection;
 
 /**
- * A generic hand of game cards.
+ * A generic hand of game cards. <br />
+ * <br />
  * 
- * The cards are ordered highest to lowest.
+ * The cards are ordered highest to lowest. <br />
+ * <br />
  *
- * NOTE: This class is implemented with the focus on performance (instead of clean design).
+ * <b>NOTE:</b> This class is implemented with the focus on performance (instead of clean design).
  * 
  * @author Oscar Stigter
  */
@@ -209,11 +211,7 @@ public class Hand {
         noOfCards = 0;
     }
     
-    /**
-     * Returns a string representation of this object.
-     *
-     * @return  the string representation
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

@@ -23,9 +23,10 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * A standard, generic deck of game cards without jokers.
+ * A standard, generic deck of game cards without jokers. <br />
+ * <br />
  *
- * NOTE: This class is implemented with the focus on performance (instead of clean design).
+ * <b>NOTE:</b> This class is implemented with the focus on performance (instead of clean design).
  * 
  * @author Oscar Stigter
  */
@@ -155,10 +156,7 @@ public class Deck {
         return card;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

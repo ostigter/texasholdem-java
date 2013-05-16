@@ -22,9 +22,10 @@ import java.util.List;
 import org.ozsoft.texasholdem.actions.Action;
 
 /**
- * A Texas Hold'em player.
+ * A Texas Hold'em player. <br />
+ * <br />
  * 
- * The player's actions are delegated to a PlayerClient, which can be either
+ * The player's actions are delegated to a {@link Client}, which can be either
  * human-controlled or AI-controlled (bot).
  * 
  * @author Oscar Stigter
@@ -42,6 +43,9 @@ public class Player {
 
     /** Current amount of cash. */
     private int cash;
+    
+    /** Whether the player has hole cards. */
+    private boolean hasCards;
 
     /** Current bet. */
     private int bet;
@@ -82,6 +86,7 @@ public class Player {
      * Prepares the player for another hand.
      */
     public void resetHand() {
+        hasCards = false;
         hand.removeAllCards();
         resetBet();
     }
@@ -102,6 +107,7 @@ public class Player {
         if (cards != null) {
             if (cards.size() == 2) {
                 hand.addCards(cards);
+                hasCards = true;
                 System.out.format("[CHEAT] %s's cards:\t%s\n", name, hand);
             } else {
                 throw new IllegalArgumentException("Invalid number of cards");
@@ -115,7 +121,7 @@ public class Player {
      * @return True if the hole cards are dealt, otherwise false.
      */
     public boolean hasCards() {
-        return (hand.size() > 0);
+        return hasCards;
     }
 
     /**
@@ -246,16 +252,13 @@ public class Player {
      */
     public Player publicClone() {
         Player clone = new Player(name, cash, null);
+        clone.hasCards = hasCards;
         clone.bet = bet;
         clone.action = action;
         return clone;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return name;

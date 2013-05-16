@@ -115,6 +115,7 @@ public abstract class Action {
         return amount;
     }
     
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return name;

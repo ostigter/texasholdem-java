@@ -26,47 +26,58 @@ import org.ozsoft.texasholdem.TableType;
 import org.ozsoft.texasholdem.actions.Action;
 
 /**
- * Dummy Texas Hold'em poker bot that always just checks or calls.
+ * Dummy Texas Hold'em poker bot that always just checks or calls. <br />
+ * <br />
+ * 
+ * This bot allowed for perfectly predictable behavior.
  * 
  * @author Oscar Stigter
  */
 public class DummyBot extends Bot {
 
+    /** {@inheritDoc} */
     @Override
     public void messageReceived(String message) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void joinedTable(TableType type, int bigBlind, List<Player> players) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void handStarted(Player dealer) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void actorRotated(Player actor) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void playerUpdated(Player player) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void boardUpdated(List<Card> cards, int bet, int pot) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void playerActed(Player player) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public Action act(int minBet, int currentBet, Set<Action> allowedActions) {
         if (allowedActions.contains(Action.CHECK)) {

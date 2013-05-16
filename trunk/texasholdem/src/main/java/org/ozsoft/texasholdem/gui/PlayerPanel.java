@@ -240,8 +240,12 @@ public class PlayerPanel extends JPanel {
      */
     private static class MyLabel extends JLabel {
 
-        private static final long serialVersionUID = 1L;
+        /** Serial version UID. */
+        private static final long serialVersionUID = 3607645928062082095L;
 
+        /**
+         * Constructor.
+         */
         public MyLabel() {
             setBorder(UIConstants.LABEL_BORDER);
             setForeground(UIConstants.TEXT_COLOR);

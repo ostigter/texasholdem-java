@@ -18,7 +18,7 @@
 package org.ozsoft.texasholdem.actions;
 
 /**
- * The action of betting.
+ * The action of placing a bet.
  * 
  * @author Oscar Stigter
  */
@@ -34,6 +34,7 @@ public class BetAction extends Action {
         super("Bet", "bets", amount);
     }
     
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return String.format("Bet(%d)", getAmount());

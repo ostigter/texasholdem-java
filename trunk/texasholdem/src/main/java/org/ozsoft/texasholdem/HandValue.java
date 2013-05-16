@@ -18,9 +18,11 @@
 package org.ozsoft.texasholdem;
 
 /**
- * Represents the value of a poker hand.
+ * Represents the value of a poker hand. <br />
+ * <br />
  * 
- * Implements the Comparable interface with <b>reversed</b> (descending sort) order.
+ * Implements the <code>Comparable</code> interface with <b>reversed</b>
+ * (descending sort) order.
  * 
  * @author Oscar Stigter
  */
@@ -84,19 +86,13 @@ public class HandValue implements Comparable<HandValue> {
 	return value;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#hashCode()
-     */
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
 	return value;
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object obj) {
 	if (obj instanceof HandValue) {
@@ -106,19 +102,7 @@ public class HandValue implements Comparable<HandValue> {
 	}
     }
     
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-	return String.format("%s (%d)", type.getDescription(), value);
-    }
-
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Comparable#compareTo(java.lang.Object)
-     */
+    /** {@inheritDoc} */
     @Override
     public int compareTo(HandValue handValue) {
 	if (value > handValue.getValue()) {
@@ -128,6 +112,12 @@ public class HandValue implements Comparable<HandValue> {
 	} else {
 	    return 0;
 	}
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return String.format("%s (%d)", type.getDescription(), value);
     }
 
 }

@@ -22,7 +22,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A pot to which one or more players have contributed with a fixed bet amount.
+ * A pot to which one or more players have contributed. <br />
+ * <br />
+ * 
+ * Each pot has an equal fixed amount for all contributing players. In case of a
+ * partial call, bet or raise, the pot must be {@link #split}.
  * 
  * @author Oscar Stigter
  */
@@ -123,11 +127,7 @@ public class Pot {
         contributors.clear();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#toString()
-     */
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

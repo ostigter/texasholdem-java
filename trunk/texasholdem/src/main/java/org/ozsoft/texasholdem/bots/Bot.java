@@ -20,7 +20,7 @@ package org.ozsoft.texasholdem.bots;
 import org.ozsoft.texasholdem.Client;
 
 /**
- * Abstract base class for all bot implementations.
+ * Base class for all Texas Hold'em poker bot implementations.
  *  
  * @author Oscar Stigter
  */
