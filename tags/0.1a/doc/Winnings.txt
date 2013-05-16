@@ -1,0 +1,105 @@
+Poker winnings (pot division)
+=============================
+
+
+Clear winner
+------------
+
+Player  Hand value  Pot share
+A       900         50
+B       500         50
+C       200         50
+
+900 = {A, 50}
+500 = {B, 50}
+200 = {C, 50}
+
+Winners:
+A: 50
+
+
+Clear tie
+---------
+
+Player  Hand value  Pot share
+A       900         50
+B       900         50
+C       200         50
+
+900 = {A, 50}, {B, 50}
+200 = {C, 50}
+
+Winners:
+A: 50 / 2 = 25
+B: 50 / 2 = 25
+
+
+All-in with overflow
+--------------------
+
+Player  Hand value  Pot share
+A       900         10
+B       500         50
+C       200         50
+
+900 = {A, 10}
+500 = {B, 50}
+200 = {C, 50}
+
+Winners:
+A: 10
+B: 50 - 10 = 40
+
+
+All-in with second tie
+----------------------
+
+Player  Hand value  Pot share
+A       900         10
+B       500         50
+C       500         50
+D       200         50
+
+900 = {A, 10}
+500 = {B, 50}, {C: 50}
+200 = {D, 50}
+
+Winners:
+A: 10
+B: (50 - 10) / 2 = 20
+C: (50 - 10) / 2 = 20
+
+
+Tie with second all-in
+----------------------
+
+Player  Hand value  Pot share
+A       900         50
+B       900         10
+C       200         50
+
+900 = {A, 50}, {B: 10}
+200 = {C, 50}
+
+Winners:
+B: 10
+A: 50 - 10 = 40
+
+
+Tie with 2 all-in and overflow
+------------------------------
+
+Player  Hand value  Pot share
+A       900         10
+B       900         20
+C       500         50
+D       200         50
+
+900 = {A, 10}, {B: 20}
+500 = {C, 50}
+200 = {D, 50}
+
+Winners:
+A: 10
+B: 20
+C: 50 - 10 - 20 = 20
