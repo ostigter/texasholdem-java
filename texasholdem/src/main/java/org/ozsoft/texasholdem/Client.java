@@ -24,7 +24,8 @@ import org.ozsoft.texasholdem.actions.Action;
 
 /**
  * A player client showing the table information and acting on behalf of the
- * player.
+ * player. <br />
+ * <br />
  * 
  * Must be implemented by any client representing a player, either human or bot.
  * 

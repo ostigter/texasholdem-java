@@ -18,7 +18,7 @@
 package org.ozsoft.texasholdem.actions;
 
 /**
- * The action of folding.
+ * The action of folding the current hand.
  * 
  * @author Oscar Stigter
  */

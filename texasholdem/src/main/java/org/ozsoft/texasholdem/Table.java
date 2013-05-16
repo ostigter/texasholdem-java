@@ -47,10 +47,10 @@ import org.ozsoft.texasholdem.actions.BetAction;
 import org.ozsoft.texasholdem.actions.RaiseAction;
 
 /**
- * Fixed Limit Texas Hold'em poker table. <br />
+ * Limit Texas Hold'em poker table. <br />
  * <br />
  * 
- * Controls the game flow for a single poker table.
+ * This class forms the heart of the poker engine. It controls the game flow for a single poker table.
  * 
  * @author Oscar Stigter
  */
@@ -727,6 +727,9 @@ public class Table {
      * 
      * A player's secret information is only sent its own client; other clients
      * see only a player's public information.
+     * 
+     * @param showdown
+     *            Whether we are at the showdown phase.
      */
     private void notifyPlayersUpdated(boolean showdown) {
         for (Player playerToNotify : players) {

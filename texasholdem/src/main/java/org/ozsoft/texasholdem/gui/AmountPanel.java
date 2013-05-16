@@ -138,6 +138,18 @@ public class AmountPanel extends JPanel implements ChangeListener, ActionListene
         add(cancelButton, gbc);
     }
     
+    /**
+     * Resets and shows the panel.
+     * 
+     * @param defaultAction
+     *            The default action.
+     * @param minBet
+     *            The minimum bet.
+     * @param maxBet
+     *            The maximum bet.
+     * 
+     * @return The selected action.
+     */
     public Action show(Action defaultAction, int minBet, int maxBet) {
         this.defaultAction = defaultAction;
         betRaiseButton.setText(defaultAction.getName());
@@ -169,11 +181,17 @@ public class AmountPanel extends JPanel implements ChangeListener, ActionListene
         return selectedAction;
     }
     
+    /**
+     * Returns the selected amount.
+     * 
+     * @return The selected amount.
+     */
     public int getAmount() {
         int index = amountSlider.getValue();
         return sliderAmounts.get(index);
     }
 
+    /** {@inheritDoc} */
     @Override
     public void stateChanged(ChangeEvent e) {
         int index = amountSlider.getValue();
@@ -181,6 +199,7 @@ public class AmountPanel extends JPanel implements ChangeListener, ActionListene
         amountLabel.setText(String.format("$ %d", amount));
     }
 
+    /** {@inheritDoc} */
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == betRaiseButton) {

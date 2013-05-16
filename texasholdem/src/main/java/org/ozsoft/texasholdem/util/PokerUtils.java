@@ -19,10 +19,18 @@ package org.ozsoft.texasholdem.util;
 
 import org.ozsoft.texasholdem.Card;
 
+/**
+ * Contains various utility methods.
+ * 
+ * @author Oscar Stigter
+ */
 public abstract class PokerUtils {
     
     /**
      * Returns the value of the hole cards based on the Chen formula.
+     * 
+     * @param cards
+     *            The hole cards.
      * 
      * @return The score based on the Chen formula.
      */

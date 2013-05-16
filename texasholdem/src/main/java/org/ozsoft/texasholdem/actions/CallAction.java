@@ -18,7 +18,7 @@
 package org.ozsoft.texasholdem.actions;
 
 /**
- * The action of calling.
+ * The action of calling a previous bet or raise.
  * 
  * @author Oscar Stigter
  */

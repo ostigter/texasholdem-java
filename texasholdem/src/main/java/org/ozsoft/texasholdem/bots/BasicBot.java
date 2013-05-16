@@ -32,13 +32,21 @@ import org.ozsoft.texasholdem.util.PokerUtils;
  * Basic Texas Hold'em poker bot. <br />
  * <br />
  * 
- * TODO: Enhance basic bot AI
- * - aggression (bet/raise amount)
- * - bluffing
- * - consider board cards
- * - consider current bet
- * - consider pot
- *
+ * The current implementation acts purely on the bot's hole cards, based on the
+ * Chen formula, combined with a configurable level of tightness (when to play
+ * or fold a hand ) and aggression (how much to bet or raise in case of good
+ * cards or when bluffing). <br />
+ * <br />
+ * 
+ * TODO:
+ * <ul>
+ * <li>Improve basic bot AI</li>
+ * <li>bluffing</li>
+ * <li>consider board cards</li>
+ * <li>consider current bet</li>
+ * <li>consider pot</li>
+ * </ul>
+ * 
  * @author Oscar Stigter
  */
 public class BasicBot extends Bot {
@@ -75,31 +83,37 @@ public class BasicBot extends Bot {
         this.aggression = aggression;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void joinedTable(TableType type, int bigBlind, List<Player> players) {
         this.tableType = type;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void messageReceived(String message) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void handStarted(Player dealer) {
         cards = null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public void actorRotated(Player actor) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void boardUpdated(List<Card> cards, int bet, int pot) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public void playerUpdated(Player player) {
         if (player.getCards().length == NO_OF_HOLE_CARDS) {
@@ -107,11 +121,13 @@ public class BasicBot extends Bot {
         }
     }
 
+    /** {@inheritDoc} */
     @Override
     public void playerActed(Player player) {
         // Not implemented.
     }
 
+    /** {@inheritDoc} */
     @Override
     public Action act(int minBet, int currentBet, Set<Action> allowedActions) {
         Action action = null;

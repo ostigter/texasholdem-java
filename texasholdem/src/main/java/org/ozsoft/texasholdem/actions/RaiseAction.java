@@ -18,7 +18,7 @@
 package org.ozsoft.texasholdem.actions;
 
 /**
- * The action of raising.
+ * The action of raising a previous bet.
  * 
  * @author Oscar Stigter
  */
@@ -27,12 +27,14 @@ public class RaiseAction extends Action {
     /**
      * Constructor.
      * 
-     * @param amount The amount to raise.
+     * @param amount
+     *            The amount to raise with.
      */
     public RaiseAction(int amount) {
         super("Raise", "raises", amount);
     }
     
+    /** {@inheritDoc} */
     @Override
     public String toString() {
         return String.format("Raise(%d)", getAmount());

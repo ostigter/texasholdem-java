@@ -18,9 +18,10 @@
 package org.ozsoft.texasholdem;
 
 /**
- * Evaluator for calculating the value of a poker hand.
+ * Evaluator for calculating the value of a poker hand. <br />
+ * <br />
  *
- * NOTE: This class is implemented with the focus on performance (instead of clean design).
+ * <b>NOTE:</b> This class is implemented with the focus on performance (instead of clean design).
  * 
  * @author Oscar Stigter
  */
