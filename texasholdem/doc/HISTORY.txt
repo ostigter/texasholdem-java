@@ -4,6 +4,8 @@ HISTORY
 Release     Date            Description
 ---------------------------------------------------------------------------------------------------
 
+0.6a        ?               ?
+
 0.5a        16-May-2013     - Added No-Limit game engine
                             - Updated GUI with No-Limit game engine
                             - Implemented basic bot AI
