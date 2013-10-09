@@ -192,24 +192,35 @@ public class Table {
         if (activePlayers.size() > 1) {
             bet = 0;
             dealCommunityCards("Flop", 3);
+            minBet = bigBlind;
             doBettingRound();
 
             // Turn.
             if (activePlayers.size() > 1) {
                 bet = 0;
                 dealCommunityCards("Turn", 1);
-                minBet = 2 * bigBlind;
+                if (tableType == TableType.FIXED_LIMIT) {
+                    minBet = 2 * bigBlind;
+                } else {
+                    minBet = bigBlind;
+                }
                 doBettingRound();
 
                 // River.
                 if (activePlayers.size() > 1) {
                     bet = 0;
                     dealCommunityCards("River", 1);
+                    if (tableType == TableType.FIXED_LIMIT) {
+                        minBet = 2 * bigBlind;
+                    } else {
+                        minBet = bigBlind;
+                    }
                     doBettingRound();
 
                     // Showdown.
                     if (activePlayers.size() > 1) {
                         bet = 0;
+                        minBet = bigBlind;
                         doShowdown();
                     }
                 }
@@ -335,10 +346,10 @@ public class Table {
             bet = 0;
         }
         
-        if (playersToAct == 2) {
+        /*if (playersToAct == 2) {  //removed, fix by IW
             // Heads Up mode; player who is not the dealer starts.
             actorPosition = dealerPosition;
-        }
+        }*/
         
         lastBettor = null;
         raises = 0;
@@ -357,10 +368,8 @@ public class Table {
                 action = actor.getClient().act(minBet, bet, allowedActions);
                 // Verify chosen action to guard against broken clients (accidental or on purpose).
                 if (!allowedActions.contains(action)) {
-                    if (action instanceof BetAction && !allowedActions.contains(Action.BET)) {
-                        throw new IllegalStateException(String.format("Player '%s' acted with illegal Bet action", actor));
-                    } else if (action instanceof RaiseAction && !allowedActions.contains(Action.RAISE)) {
-                        throw new IllegalStateException(String.format("Player '%s' acted with illegal Raise action", actor));
+                    if (!(action instanceof BetAction && allowedActions.contains(Action.BET)) && !(action instanceof RaiseAction && allowedActions.contains(Action.RAISE))) {
+                        throw new IllegalStateException(String.format("Player '%s' acted with illegal %s action", actor, action));
                     }
                 }
                 playersToAct--;
@@ -379,17 +388,27 @@ public class Table {
                     if (amount < minBet && amount < actor.getCash()) {
                         throw new IllegalStateException("Illegal client action: bet less than minimum bet!");
                     }
-                    actor.setBet(amount);
-                    actor.payCash(amount);
-                    contributePot(amount);
+                    if (amount > actor.getCash() && actor.getCash() >= minBet) {
+                        throw new IllegalStateException("Illegal client action: bet more cash than you own!");
+                    }
                     bet = amount;
                     minBet = amount;
+                    int betIncrement = bet - actor.getBet();
+                    if (betIncrement > actor.getCash()) {
+                        betIncrement = actor.getCash();
+                    }
+                    actor.setBet(bet);
+                    actor.payCash(betIncrement);
+                    contributePot(betIncrement);
                     lastBettor = actor;
-                    playersToAct = activePlayers.size();
+                    playersToAct = (tableType == TableType.FIXED_LIMIT) ? activePlayers.size() : (activePlayers.size() - 1);
                 } else if (action instanceof RaiseAction) {
                     int amount = (tableType == TableType.FIXED_LIMIT) ? minBet : action.getAmount();
                     if (amount < minBet && amount < actor.getCash()) {
                         throw new IllegalStateException("Illegal client action: raise less than minimum bet!");
+                    }
+                    if (amount > actor.getCash() && actor.getCash() >= minBet) {
+                        throw new IllegalStateException("Illegal client action: raise more cash than you own!");
                     }
                     bet += amount;
                     minBet = amount;
@@ -402,7 +421,7 @@ public class Table {
                     contributePot(betIncrement);
                     lastBettor = actor;
                     raises++;
-                    if (tableType == TableType.NO_LIMIT || raises < MAX_RAISES || activePlayers.size() == 2) { 
+                    if (tableType == TableType.FIXED_LIMIT && (raises < MAX_RAISES || activePlayers.size() == 2)) {
                         // All players get another turn.
                         playersToAct = activePlayers.size();
                     } else {
@@ -430,7 +449,7 @@ public class Table {
                 }
             }
             actor.setAction(action);
-            if (playersToAct > 0) {
+            if (activePlayers.size() > 1) {
                 notifyBoardUpdated();
                 notifyPlayerActed();
             }
