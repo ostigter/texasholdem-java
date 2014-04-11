@@ -17,8 +17,7 @@
 
 package org.ozsoft.texasholdem.util;
 
-import junit.framework.Assert;
-
+import org.junit.Assert;
 import org.junit.Test;
 import org.ozsoft.texasholdem.Card;
 
@@ -28,6 +27,8 @@ import org.ozsoft.texasholdem.Card;
  * @author Oscar Stigter
  */
 public class PokerUtilsTest {
+    
+    private static final double DELTA = 1e-08;
     
     /**
      * Tests the implementation of the Chen formula calculator.
@@ -39,27 +40,27 @@ public class PokerUtilsTest {
         
         card1 = new Card(Card.ACE, Card.SPADES);
         card2 = new Card(Card.ACE, Card.HEARTS);
-        Assert.assertEquals(20.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(20.0, PokerUtils.getChenScore(new Card[] {card1, card2}), DELTA);
 
         card1 = new Card(Card.ACE, Card.SPADES);
         card2 = new Card(Card.KING, Card.SPADES);
-        Assert.assertEquals(12.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(12.0, PokerUtils.getChenScore(new Card[] {card1, card2}), DELTA);
 
         card1 = new Card(Card.KING, Card.SPADES);
         card2 = new Card(Card.KING, Card.HEARTS);
-        Assert.assertEquals(16.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(16.0, PokerUtils.getChenScore(new Card[] {card1, card2}), DELTA);
 
         card1 = new Card(Card.TEN, Card.CLUBS);
         card2 = new Card(Card.TEN, Card.DIAMONDS);
-        Assert.assertEquals(10.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(10.0, PokerUtils.getChenScore(new Card[] {card1, card2}), DELTA);
 
         card1 = new Card(Card.FIVE, Card.CLUBS);
         card2 = new Card(Card.SEVEN, Card.CLUBS);
-        Assert.assertEquals(6.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(6.0, PokerUtils.getChenScore(new Card[] {card1, card2}), DELTA);
 
         card1 = new Card(Card.DEUCE, Card.CLUBS);
         card2 = new Card(Card.SEVEN, Card.DIAMONDS);
-        Assert.assertEquals(0.0, PokerUtils.getChenScore(new Card[] {card1, card2}));
+        Assert.assertEquals(0.0, PokerUtils.getChenScore(new Card[] {card1, card2}), DELTA);
     }
     
 }
