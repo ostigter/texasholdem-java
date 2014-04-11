@@ -5,6 +5,7 @@ Release     Date            Description
 ---------------------------------------------------------------------------------------------------
 
 0.6a        ?               - Bugfixes by Ivo Wijnker
+                            - Updated to Java 7
 
 0.5a        16-May-2013     - Added No-Limit game engine
                             - Updated GUI with No-Limit game engine
