@@ -1,0 +1,1 @@
+Welcome to the wiki of the **texasholdem-java** project, an open source Texas Hold'em poker game written in Java!
